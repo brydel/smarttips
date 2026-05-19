@@ -335,6 +335,7 @@ model RefreshToken {
   @@index([tenantId, userId])
   @@index([userId])
   @@index([userId, revokedAt])
+  @@index([userId, expiresAt])
   @@index([expiresAt])
   @@map("refresh_tokens")
 }
