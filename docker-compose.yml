@@ -1,0 +1,175 @@
+# ============================================================================
+# SmartTips - Docker Compose for local development
+# ============================================================================
+# Services:
+#   - postgres: PostgreSQL 16 (port 5432) - main database
+#   - redis:    Redis 7 (port 6379) - cache + BullMQ queue
+#   - adminer:  Web UI for DB inspection (port 8080) - dev only
+#
+# Usage:
+#   docker compose up -d              # Start all services
+#   docker compose ps                 # Check status
+#   docker compose logs -f postgres   # Tail logs
+#   docker compose down               # Stop (keeps data)
+#   docker compose down -v            # Stop + delete volumes (data loss!)
+#
+# Security:
+#   - Services run on a private network (smarttips_internal)
+#   - Only postgres and redis ports are exposed to host (localhost only)
+#   - Default credentials are dev-only; never use in production
+#   - Volumes are named (not anonymous) for backup/restore
+#
+# ============================================================================
+
+name: smarttips
+
+services:
+  # --------------------------------------------------------------------------
+  # PostgreSQL 16 - Main relational database
+  # --------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: smarttips-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: smarttips
+      POSTGRES_PASSWORD: smarttips_dev_password
+      POSTGRES_DB: smarttips_dev
+      # Tune for dev workloads
+      POSTGRES_INITDB_ARGS: '--encoding=UTF-8 --lc-collate=C --lc-ctype=C'
+
+    # Only bind to localhost - never expose Postgres to network in dev
+    ports:
+      - '127.0.0.1:5432:5432'
+
+    volumes:
+      # Named volume for persistence across container rebuilds
+      - postgres_data:/var/lib/postgresql/data
+      # Init scripts run once on first container creation
+      - ./scripts/postgres-init:/docker-entrypoint-initdb.d:ro
+
+    networks:
+      - smarttips_internal
+
+    # Healthcheck ensures dependent services wait for Postgres to be ready
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U smarttips -d smarttips_dev']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+    # Resource limits prevent runaway dev queries from eating all your RAM
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 256M
+
+    # Security: read-only root filesystem with specific writable paths
+    # (commented out: postgres needs more paths writable, this requires tuning)
+    # read_only: true
+    # tmpfs:
+    #   - /tmp
+
+    # Logging configuration to prevent disk fill
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  # --------------------------------------------------------------------------
+  # Redis 7 - Cache + BullMQ job queue
+  # --------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: smarttips-redis
+    restart: unless-stopped
+
+    # Persist data + require password (defense in depth even for local)
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass smarttips_dev_redis_password
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+
+    ports:
+      - '127.0.0.1:6379:6379'
+
+    volumes:
+      - redis_data:/data
+
+    networks:
+      - smarttips_internal
+
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-a', 'smarttips_dev_redis_password', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 128M
+
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  # --------------------------------------------------------------------------
+  # Adminer - Lightweight DB web UI (dev only, http://localhost:8080)
+  # --------------------------------------------------------------------------
+  # Alternative to Prisma Studio for quick SQL queries / data inspection.
+  # Comment out this whole service if you don't need it.
+  # --------------------------------------------------------------------------
+  adminer:
+    image: adminer:4-standalone
+    container_name: smarttips-adminer
+    restart: unless-stopped
+
+    ports:
+      - '127.0.0.1:8080:8080'
+
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: pepa-linha-dark
+
+    networks:
+      - smarttips_internal
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    logging:
+      driver: json-file
+      options:
+        max-size: '5m'
+        max-file: '2'
+
+# ============================================================================
+# Volumes - named for clear identification and backup
+# ============================================================================
+volumes:
+  postgres_data:
+    name: smarttips_postgres_data
+  redis_data:
+    name: smarttips_redis_data
+
+# ============================================================================
+# Network - isolated bridge network for inter-service communication
+# ============================================================================
+networks:
+  smarttips_internal:
+    name: smarttips_internal
+    driver: bridge
