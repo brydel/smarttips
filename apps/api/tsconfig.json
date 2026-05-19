@@ -4,7 +4,7 @@
     "module": "CommonJS",
     "moduleResolution": "Node",
     "strict": true,
-    "noEmit": true,
+    "outDir": "./dist",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
