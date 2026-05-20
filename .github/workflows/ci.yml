@@ -21,6 +21,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @smarttips/api prisma:generate
+        env:
+          DATABASE_URL: postgresql://fake:fake@localhost:5432/fake
       - run: pnpm lint
       - run: pnpm typecheck
 
@@ -53,7 +55,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/smarttips_test
+          DATABASE_URL: postgresql://fake:fake@localhost:5432/fake
 
   test-ml-service:
     runs-on: ubuntu-latest
