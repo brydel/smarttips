@@ -11,14 +11,12 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'crypto';
 import { promisify } from 'util';
 
 const randomBytesAsync = promisify(randomBytes);
-
-type TransactionClient = Parameters<Parameters<PrismaClient['$transaction']>[0]>[0];
 
 interface TokenPayload {
   accessToken: string;
@@ -52,7 +50,8 @@ export class AuthService {
     const slug = await this.generateUniqueSlug(dto.restaurantName);
 
     try {
-      const user = await this.prisma.$transaction(async (tx: TransactionClient) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const user = await this.prisma.$transaction(async (tx: any) => {
         const tenant = await tx.tenant.create({
           data: {
             name: dto.restaurantName,
