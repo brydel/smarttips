@@ -24,6 +24,7 @@ jobs:
 
   deploy-preview-web:
     needs: [lint-check]
+    if: false # TODO BIS-10: activer quand Railway et Vercel sont configurés
     runs-on: ubuntu-latest
     environment: preview
     steps:
@@ -50,6 +51,7 @@ jobs:
 
   deploy-preview-api:
     needs: [lint-check]
+    if: false # TODO BIS-10: activer quand Railway et Vercel sont configurés
     runs-on: ubuntu-latest
     environment: preview
     steps:
