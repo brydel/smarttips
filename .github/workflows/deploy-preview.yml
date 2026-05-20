@@ -11,8 +11,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - uses: actions/setup-node@v4
         with:
@@ -20,19 +18,19 @@ jobs:
           cache: 'pnpm'
 
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @smarttips/api prisma:generate
       - run: pnpm lint
       - run: pnpm typecheck
 
   deploy-preview-web:
     needs: [lint-check]
+    if: false # TODO BIS-10: activer quand Railway et Vercel sont configurés
     runs-on: ubuntu-latest
     environment: preview
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - uses: actions/setup-node@v4
         with:
@@ -53,6 +51,7 @@ jobs:
 
   deploy-preview-api:
     needs: [lint-check]
+    if: false # TODO BIS-10: activer quand Railway et Vercel sont configurés
     runs-on: ubuntu-latest
     environment: preview
     steps:

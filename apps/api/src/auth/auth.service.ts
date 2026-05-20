@@ -36,7 +36,6 @@ export class AuthService {
   ) {}
 
   async signup(dto: SignupDto): Promise<TokenPayload> {
-    // findFirst car email n'est pas @unique seul dans le schema (unique composé tenantId+email)
     const existingUser = await this.prisma.user.findFirst({
       where: { email: dto.email },
       select: { id: true },
@@ -51,7 +50,8 @@ export class AuthService {
     const slug = await this.generateUniqueSlug(dto.restaurantName);
 
     try {
-      const user = await this.prisma.$transaction(async (tx) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const user = await this.prisma.$transaction(async (tx: any) => {
         const tenant = await tx.tenant.create({
           data: {
             name: dto.restaurantName,
@@ -72,7 +72,7 @@ export class AuthService {
       });
 
       return await this.generateTokens(user.id, user.tenantId, user.role);
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
         throw new ConflictException('error.auth.signup_failed.conflict');
       }
@@ -82,12 +82,10 @@ export class AuthService {
   }
 
   async login(dto: LoginDto): Promise<TokenPayload> {
-    // findFirst car email n'est pas @unique seul dans le schema
     const user = await this.prisma.user.findFirst({
       where: { email: dto.email },
     });
 
-    // Protection temporelle : on compare même si l'utilisateur n'existe pas
     const isPasswordValid = await bcrypt.compare(
       dto.password,
       user ? user.hashedPassword : this.DUMMY_HASH,
@@ -112,7 +110,9 @@ export class AuthService {
       if (stored) {
         this.prisma.refreshToken
           .delete({ where: { id: stored.id } })
-          .catch((err) => this.logger.error(`Failed to delete expired token: ${err.message}`));
+          .catch((err: Error) =>
+            this.logger.error(`Failed to delete expired token: ${err.message}`),
+          );
       }
       throw new UnauthorizedException('error.auth.refresh_token.invalid');
     }
@@ -125,7 +125,7 @@ export class AuthService {
 
     try {
       await this.prisma.refreshToken.delete({ where: { tokenHash } });
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.warn(`Logout token deletion skipped or failed: ${(error as Error).message}`);
     }
   }
