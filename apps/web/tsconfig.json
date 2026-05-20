@@ -12,8 +12,13 @@
     "incremental": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
-    "allowJs": true
+    "allowJs": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules", ".next", "dist"]
 }

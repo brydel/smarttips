@@ -165,6 +165,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.62.0
         version: 5.100.10(react@19.2.6)
+      axios:
+        specifier: ^1.7.0
+        version: 1.16.1
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -187,7 +190,7 @@ importers:
         specifier: ^19.0.0
         version: 19.2.6(react@19.2.6)
       react-hook-form:
-        specifier: ^7.54.0
+        specifier: ^7.76.0
         version: 7.76.0(react@19.2.6)
       recharts:
         specifier: ^2.15.0
@@ -196,7 +199,7 @@ importers:
         specifier: ^2.6.0
         version: 2.6.1
       zod:
-        specifier: ^3.24.0
+        specifier: ^3.25.76
         version: 3.25.76
     devDependencies:
       '@types/node':

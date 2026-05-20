@@ -1,0 +1,227 @@
+/* SmartTips — Design Tokens
+   60% bg · 30% structure · 10% accents (Indigo/Emerald/Gold)
+   Dark-first, light parity. WCAG AAA on neutrals. */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* === Fonts (wired to next/font CSS variables) === */
+  --st-font-display: var(--font-instrument-serif), 'Iowan Old Style', Georgia, serif;
+  --st-font-ui: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --st-font-mono: var(--font-jetbrains-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* === BG (60%) === */
+  --st-bg-deep: #0A0E1A;
+  --st-bg-ivory: #FAF7F2;
+
+  /* === Structure neutrals — DARK (30%) === */
+  --st-d-0: #0A0E1A;
+  --st-d-1: #0F1422;
+  --st-d-2: #141A2B;
+  --st-d-3: #1B2236;
+  --st-d-4: #252D45;
+  --st-d-5: #3A4366;
+  --st-d-6: #5A6485;
+  --st-d-7: #8892B0;
+  --st-d-8: #C5CCE0;
+  --st-d-9: #F4F6FB;
+
+  /* === Structure neutrals — LIGHT === */
+  --st-l-0: #FAF7F2;
+  --st-l-1: #F4EFE6;
+  --st-l-2: #ECE5D6;
+  --st-l-3: #DDD3BD;
+  --st-l-4: #BCB19A;
+  --st-l-5: #8B7F66;
+  --st-l-6: #5E5443;
+  --st-l-7: #3B342A;
+  --st-l-8: #1E1A14;
+  --st-l-9: #0A0805;
+
+  /* === Accents (10% — isolated) === */
+  --st-indigo: #6366F1;
+  --st-indigo-dim: #4F46E5;
+  --st-indigo-glow: #818CF8;
+  --st-emerald: #10B981;
+  --st-emerald-dim: #059669;
+  --st-emerald-glow: #34D399;
+  --st-gold: #D4A574;
+  --st-gold-dim: #B8884F;
+  --st-gold-glow: #E8C49A;
+
+  --st-danger: #EF4444;
+  --st-warn: #F59E0B;
+
+  /* Modular scale 1.250 */
+  --st-fs-xs: 11px;
+  --st-fs-sm: 12.5px;
+  --st-fs-base: 14px;
+  --st-fs-md: 16px;
+  --st-fs-lg: 20px;
+  --st-fs-xl: 26px;
+  --st-fs-2xl: 32px;
+  --st-fs-3xl: 44px;
+  --st-fs-4xl: 60px;
+  --st-fs-5xl: 84px;
+
+  /* === Radii === */
+  --st-r-xs: 4px;
+  --st-r-sm: 6px;
+  --st-r-md: 10px;
+  --st-r-lg: 14px;
+  --st-r-xl: 20px;
+  --st-r-pill: 999px;
+
+  /* === Shadows === */
+  --st-shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+  --st-shadow-md: 0 8px 24px -8px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.3);
+  --st-shadow-lg: 0 24px 60px -20px rgba(0,0,0,.6), 0 8px 20px -10px rgba(0,0,0,.4);
+  --st-shadow-glow-indigo: 0 0 0 1px rgba(99,102,241,.3), 0 8px 24px -8px rgba(99,102,241,.4);
+  --st-shadow-glow-emerald: 0 0 0 1px rgba(16,185,129,.3), 0 8px 24px -8px rgba(16,185,129,.35);
+  --st-shadow-glow-gold: 0 0 0 1px rgba(212,165,116,.3), 0 8px 24px -8px rgba(212,165,116,.35);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--st-font-ui);
+  background: var(--st-d-0);
+  color: var(--st-d-8);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'cv11','ss01','ss03';
+  letter-spacing: -0.005em;
+}
+
+/* ── Type primitives ── */
+.st-display {
+  font-family: var(--st-font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.0;
+}
+
+.st-mono {
+  font-family: var(--st-font-mono);
+  font-feature-settings: 'tnum','ss02';
+  letter-spacing: -0.01em;
+}
+
+.st-money {
+  font-family: var(--st-font-mono);
+  font-feature-settings: 'tnum';
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.st-eyebrow {
+  font-family: var(--st-font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 10.5px;
+  font-weight: 500;
+}
+
+/* ── Photo placeholder ── */
+.st-photo {
+  background-image: linear-gradient(135deg, rgba(255,255,255,.04) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.04) 50%, rgba(255,255,255,.04) 75%, transparent 75%, transparent);
+  background-size: 14px 14px;
+  background-color: var(--st-d-2);
+  position: relative;
+  overflow: hidden;
+}
+
+.st-photo-brief {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 10px 14px;
+  font-family: var(--st-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: rgba(255,255,255,.62);
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,.55));
+}
+
+/* ── Focus ring ── */
+.st-focus:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--st-d-0), 0 0 0 4px var(--st-indigo);
+  border-color: var(--st-indigo) !important;
+}
+
+/* ── Buttons ── */
+.st-btn {
+  font-family: var(--st-font-ui);
+  font-weight: 500;
+  font-size: 13.5px;
+  letter-spacing: -0.005em;
+  padding: 11px 18px;
+  border-radius: var(--st-r-md);
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all .15s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.st-btn-primary {
+  background: var(--st-indigo);
+  color: white;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 1px 2px rgba(0,0,0,.3);
+}
+.st-btn-primary:hover:not(:disabled) {
+  background: var(--st-indigo-dim);
+}
+.st-btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.st-btn-ghost-dark {
+  background: transparent;
+  color: var(--st-d-9);
+  border-color: var(--st-d-4);
+}
+.st-btn-ghost-dark:hover {
+  background: var(--st-d-2);
+}
+
+/* ── Chip / badge ── */
+.st-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: var(--st-r-pill);
+  font-size: 11.5px;
+  font-weight: 500;
+  border: 1px solid var(--st-d-4);
+  color: var(--st-d-7);
+}
+
+.st-chip-gold {
+  color: var(--st-gold-glow);
+  border-color: rgba(212,165,116,.32);
+  background: rgba(212,165,116,.07);
+}
+
+.st-chip-emerald {
+  color: var(--st-emerald-glow);
+  border-color: rgba(16,185,129,.3);
+  background: rgba(16,185,129,.07);
+}
+
+/* ── Card ── */
+.st-card {
+  background: var(--st-d-1);
+  border: 1px solid var(--st-d-3);
+  border-radius: var(--st-r-lg);
+}
