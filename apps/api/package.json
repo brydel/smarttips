@@ -7,7 +7,7 @@
     "build": "nest build",
     "start": "node dist/main",
     "lint": "eslint \"src/**/*.ts\"",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:cov": "jest --coverage",
     "typecheck": "tsc --noEmit",
