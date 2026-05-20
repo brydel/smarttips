@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   push:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   lint-and-typecheck:
@@ -27,6 +27,20 @@ jobs:
 
   test-api-web:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: smarttips_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
@@ -42,7 +56,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/smarttips_test
 
   test-ml-service:
     runs-on: ubuntu-latest
@@ -52,9 +66,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
 
-      - working-directory: apps/ml-service
+      - name: Install dependencies & run tests
+        working-directory: apps/ml-service
         run: |
-          pip install -e ".[dev]"
-          pytest --cov=app
+          pip install poetry
+          poetry install
+          poetry run pytest --cov=app

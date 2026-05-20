@@ -1,0 +1,107 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - 'apps/api/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Crucial pour la prod : On ne tue JAMAIS un déploiement en cours pour éviter un état instable
+  cancel-in-progress: false
+
+jobs:
+  lint-check:
+    runs-on: ubuntu-latest
+    outputs:
+      web_changed: ${{ steps.filter.outputs.web }}
+      api_changed: ${{ steps.filter.outputs.api }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            web: ['apps/web/**', 'packages/**']
+            api: ['apps/api/**', 'packages/**']
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+
+  deploy-prod-api:
+    needs: [lint-check]
+    if: needs.lint-check.outputs.api_changed == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      # On installe uniquement pour avoir accès à la CLI localement
+      - run: pnpm install --frozen-lockfile
+
+      # L'API est déployée en premier. Le script attend la fin du déploiement (pas de --detach)
+      # pour s'assurer que le backend est fonctionnel avant de passer au frontend.
+      - name: Deploy to Railway (production)
+        run: pnpm railway up --service api --environment production
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-prod-web:
+    # Sécurité : Le job attend le succès du lint ET le succès du déploiement de l'API
+    needs: [lint-check, deploy-prod-api]
+    # S'exécute si le web a changé, ou si l'API a changé (permet de forcer le redeploy si nécessaire),
+    # ou si le job api a été ignoré (always() combiné avec la vérification du statut)
+    if: |
+      always() && 
+      needs.lint-check.result == 'success' && 
+      (needs.deploy-prod-api.result == 'success' || needs.deploy-prod-api.result == 'skipped') &&
+      needs.lint-check.outputs.web_changed == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Deploy to Vercel (production)
+        run: |
+          pnpm vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
