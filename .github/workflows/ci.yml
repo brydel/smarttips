@@ -70,5 +70,5 @@ jobs:
         working-directory: apps/ml-service
         run: |
           pip install poetry
-          poetry install
+          poetry install --no-root
           poetry run pytest --cov=app
