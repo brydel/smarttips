@@ -45,7 +45,7 @@ export class AuthService {
       throw new ConflictException('error.auth.email.already_exists');
     }
 
-    const saltRounds = this.config.get<number>('BCRYPT_SALT_ROUNDS', 12);
+    const saltRounds = parseInt(this.config.get<string>('BCRYPT_SALT_ROUNDS', '12'), 10);
     const hashedPassword = await bcrypt.hash(dto.password, saltRounds);
     const slug = await this.generateUniqueSlug(dto.restaurantName);
 
