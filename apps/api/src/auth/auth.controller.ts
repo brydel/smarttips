@@ -87,7 +87,7 @@ export class AuthController {
     res.cookie('refresh_token', token, {
       httpOnly: true,
       secure: this.isProd,
-      sameSite: this.isProd ? 'strict' : 'lax',
+      sameSite: this.isProd ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: this.isProd ? '/auth' : '/',
     });
@@ -97,7 +97,7 @@ export class AuthController {
     res.clearCookie('refresh_token', {
       httpOnly: true,
       secure: this.isProd,
-      sameSite: this.isProd ? 'strict' : 'lax',
+      sameSite: this.isProd ? 'none' : 'lax',
       path: '/auth',
     });
   }
