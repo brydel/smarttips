@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -66,7 +67,16 @@ export class EmployeesService {
   }
 
   async update(tenantId: string, id: string, dto: UpdateEmployeeDto) {
+    const hasFields = Object.keys(dto).some(
+      (k) => (dto as Record<string, unknown>)[k] !== undefined,
+    );
+
+    if (!hasFields) {
+      throw new BadRequestException('error.employee.update.emptyPayload');
+    }
+
     await this.findOne(tenantId, id);
+
     try {
       return await this.prisma.employee.update({
         where: { id },
