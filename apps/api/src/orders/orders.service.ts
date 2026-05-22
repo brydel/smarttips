@@ -102,7 +102,7 @@ export class OrdersService {
   }
 
   async create(tenantId: string, dto: CreateOrderDto) {
-    return this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx: PrismaTx) => {
       this.assertNoDuplicateMenuItems(dto.items.map((item) => item.menuItemId));
 
       const tenant = await tx.tenant.findFirst({
@@ -264,7 +264,7 @@ export class OrdersService {
   }
 
   async update(tenantId: string, id: string, dto: UpdateOrderDto) {
-    return this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx: PrismaTx) => {
       const order = await tx.order.findFirst({
         where: {
           id,
@@ -319,7 +319,7 @@ export class OrdersService {
   }
 
   async payOrder(tenantId: string, id: string) {
-    return this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx: PrismaTx) => {
       const order = await tx.order.findFirst({
         where: {
           id,

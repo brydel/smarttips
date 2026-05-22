@@ -6,6 +6,8 @@ import { AuthModule } from './auth/auth.module';
 import { EmployeesModule } from './employees/employees.module';
 import { MenuItemsModule } from './menu-items/menu-items.module';
 import { ShiftsModule } from './shifts/shifts.module';
+import { OrdersModule } from './orders/orders.module';
+import { TipPoolsModule } from './tip-pools/tip-pools.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { ShiftsModule } from './shifts/shifts.module';
     EmployeesModule,
     MenuItemsModule,
     ShiftsModule,
+    OrdersModule,
+    TipPoolsModule,
   ],
 })
 export class AppModule {}
