@@ -548,6 +548,7 @@ model Shift {
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, date])
+  @@index([tenantId, status, date])
   @@index([tenantId, deletedAt])
   @@map("shifts")
 }
@@ -566,15 +567,18 @@ model ShiftAssignment {
   status          AssignmentStatus @default(ASSIGNED)
   createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime?        @map("deleted_at") @db.Timestamptz(6)
 
   tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   shift    Shift    @relation(fields: [shiftId], references: [id], onDelete: Cascade)
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
 
-  @@unique([shiftId, employeeId], name: "unique_employee_per_shift")
   @@index([tenantId])
   @@index([tenantId, shiftId])
   @@index([tenantId, employeeId])
+  @@index([tenantId, shiftId, employeeId])
+  @@index([tenantId, status])
+  @@index([tenantId, deletedAt])
   @@index([shiftId])
   @@index([employeeId])
   @@map("shift_assignments")
