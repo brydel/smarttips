@@ -5,7 +5,10 @@ nixPkgs = ["nodejs_20"]
 cmds = ["npx pnpm@9.15.0 install --no-frozen-lockfile --prod false"]
 
 [phases.build]
-cmds = ["npx pnpm@9.15.0 run build"]
+cmds = [
+  "npx pnpm@9.15.0 --filter api run prisma:generate",
+  "npx pnpm@9.15.0 run build"
+]
 
 [start]
-cmd = "node dist/main"
+cmd = "npx pnpm@9.15.0 --filter api run prisma:migrate:prod && node dist/main"
