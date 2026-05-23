@@ -1,13 +1,16 @@
-import { IsOptional, IsEnum, IsBoolean } from 'class-validator';
+import { IsOptional, IsUUID, IsBoolean } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { MenuItemCategory } from './create-menu-item.dto';
 
 export class FilterMenuItemsDto {
-  @ApiPropertyOptional({ enum: MenuItemCategory })
+  /**
+   * UUID de la catégorie (PK de MenuCategory).
+   * Le champ était validé par enum — corrigé : le filtre Prisma utilise l'UUID FK.
+   */
+  @ApiPropertyOptional({ format: 'uuid', description: 'Filtrer par catégorie (UUID)' })
   @IsOptional()
-  @IsEnum(MenuItemCategory, { message: 'error.validation.category.invalid' })
-  categoryId?: MenuItemCategory;
+  @IsUUID('4', { message: 'error.validation.categoryId.invalid' })
+  categoryId?: string;
 
   @ApiPropertyOptional({ type: Boolean })
   @IsOptional()

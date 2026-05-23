@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Instrument_Serif, Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import { Providers } from './providers';
 
 const instrumentSerif = Instrument_Serif({
   weight: ['400'],
@@ -34,7 +35,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="fr"
       className={`${instrumentSerif.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

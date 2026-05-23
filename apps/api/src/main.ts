@@ -48,11 +48,18 @@ async function bootstrap() {
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void,
     ) => {
+      const isPrivateLanOrigin =
+        nodeEnv !== 'production' &&
+        !!origin &&
+        /^https?:\/\/(localhost|127\.0\.0\.1|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})(:\d+)?$/.test(
+          origin,
+        );
+
       if (
         !origin ||
         allowedOrigins.includes(origin) ||
         origin.match(/^https:\/\/smarttips.*\.vercel\.app$/) !== null ||
-        (nodeEnv !== 'production' && origin.startsWith('http://localhost:'))
+        isPrivateLanOrigin
       ) {
         callback(null, true);
       } else {

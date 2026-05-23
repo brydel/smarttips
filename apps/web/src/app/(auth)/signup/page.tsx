@@ -7,15 +7,19 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowRight, Shield, Sparkles } from 'lucide-react';
+import { cn } from '../../../lib/cn';
 import { useAuth } from '../../../hooks/use-auth';
+import { extractErrorMessage } from '../../../lib/errors';
 import { LogoMark, AuthPhotoPane, Field, Divider, Checkbox, AuthFooter } from '../_auth-components';
 
+// ── Constants ─────────────────────────────────────────────────────────────────
 const LOCATION_OPTIONS = ['1', '2-5', '6-20', '20+'] as const;
 type LocationRange = (typeof LOCATION_OPTIONS)[number];
 
+// ── Schema ────────────────────────────────────────────────────────────────────
 const signupSchema = z.object({
   name: z.string().min(2, 'Veuillez entrer votre nom complet'),
-  email: z.string().email('Adresse email invalide'),
+  email: z.string().email('Adresse e-mail invalide'),
   restaurantName: z.string().min(2, 'Veuillez entrer le nom de votre établissement'),
   password: z
     .string()
@@ -27,6 +31,7 @@ const signupSchema = z.object({
 
 type SignupForm = z.infer<typeof signupSchema>;
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function getPasswordStrength(pwd: string): number {
   if (!pwd) return 0;
   let score = 0;
@@ -37,6 +42,7 @@ function getPasswordStrength(pwd: string): number {
   return score;
 }
 
+// ── Page ──────────────────────────────────────────────────────────────────────
 export default function SignupPage() {
   const { signup, isSubmitting } = useAuth();
   const router = useRouter();
@@ -68,173 +74,102 @@ export default function SignupPage() {
         restaurantName: data.restaurantName,
       });
       router.push('/dashboard');
-    } catch {
-      setServerError("Une erreur est survenue lors de l'inscription. Veuillez réessayer.");
+    } catch (err) {
+      setServerError(
+        extractErrorMessage(
+          err,
+          "Une erreur est survenue lors de l'inscription. Veuillez réessayer.",
+        ),
+      );
     }
   };
 
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        width: '100%',
-        height: '100vh',
-        overflow: 'hidden',
-      }}
-    >
+    <div className="grid md:grid-cols-2 w-full min-h-screen overflow-hidden">
+      {/* ── Photo pane ────────────────────────────────────────────────────── */}
       <AuthPhotoPane />
 
-      <div
-        style={{
-          padding: '36px 56px',
-          display: 'flex',
-          flexDirection: 'column',
-          background: 'var(--st-d-0)',
-          overflow: 'auto',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexShrink: 0,
-          }}
-        >
+      {/* ── Form pane ─────────────────────────────────────────────────────── */}
+      <div className="px-9 py-9 md:px-14 flex flex-col bg-st-bg overflow-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between shrink-0">
           <LogoMark />
-          <div
-            style={{
-              display: 'flex',
-              gap: 14,
-              alignItems: 'center',
-              fontSize: 13,
-              color: 'var(--st-d-7)',
-            }}
-          >
-            <a style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>Help</a>
-            <a style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
-              Contact sales
-            </a>
+          <div className="flex gap-[14px] items-center text-[13px] text-st-sec">
+            <a className="cursor-pointer hover:text-st-pri transition-colors">Aide</a>
+            <a className="cursor-pointer hover:text-st-pri transition-colors">Contact</a>
           </div>
         </div>
 
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-          <div style={{ width: '100%', maxWidth: 420 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
+        {/* Form content */}
+        <div className="flex-1 flex items-center py-10 md:py-0">
+          <div className="w-full max-w-[420px]">
+            {/* Chip */}
+            <div className="flex items-center gap-[6px] mb-[14px]">
               <span className="st-chip st-chip-gold">
                 <Sparkles size={11} />
-                14-day pilot · no card
+                14 jours d&apos;essai · sans carte
               </span>
             </div>
 
-            <h1
-              style={{
-                fontFamily: 'var(--st-font-display)',
-                fontSize: 40,
-                color: 'var(--st-d-9)',
-                margin: '0 0 10px',
-                lineHeight: 1,
-                fontWeight: 400,
-                letterSpacing: '-0.02em',
-              }}
-            >
-              Start your workspace.
+            {/* Headline */}
+            <h1 className="st-display text-[36px] md:text-[40px] text-st-hi mb-[10px] leading-none">
+              Créez votre espace.
               <br />
-              <em
-                style={{
-                  fontFamily: 'var(--st-font-display)',
-                  fontStyle: 'italic',
-                  color: 'var(--st-d-7)',
-                }}
-              >
-                Train your model.
-              </em>
+              <em className="text-st-sec">Entraînez votre modèle.</em>
             </h1>
-            <p
-              style={{ fontSize: 14, color: 'var(--st-d-7)', margin: '0 0 24px', lineHeight: 1.5 }}
-            >
-              From signup to first fair distribution:{' '}
-              <strong style={{ color: 'var(--st-d-9)' }}>under 9 minutes</strong>.
+            <p className="text-[14px] text-st-sec mb-6 leading-[1.5]">
+              De l&apos;inscription à la première distribution équitable :{' '}
+              <strong className="text-st-hi">moins de 9 minutes</strong>.
             </p>
 
+            {/* Server error */}
             {serverError && (
-              <div
-                style={{
-                  marginBottom: 16,
-                  padding: '10px 14px',
-                  background: 'rgba(239,68,68,.08)',
-                  border: '1px solid rgba(239,68,68,.2)',
-                  borderRadius: 'var(--st-r-md)',
-                  fontSize: 12.5,
-                  color: 'var(--st-danger)',
-                }}
-              >
+              <div className="mb-4 px-[14px] py-[10px] bg-[rgba(239,68,68,.08)] border border-[rgba(239,68,68,.2)] rounded-md text-[12.5px] text-st-danger">
                 {serverError}
               </div>
             )}
 
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
-            >
+            {/* Form */}
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
               <Field
-                label="Your name"
-                placeholder="First & last name"
+                label="Votre nom"
+                placeholder="Prénom et nom"
                 autoFocus
                 error={errors.name?.message}
                 {...register('name')}
               />
               <Field
-                label="Work email"
+                label="Adresse e-mail"
                 type="email"
-                placeholder="you@restaurant.com"
+                placeholder="vous@restaurant.com"
+                autoComplete="email"
                 error={errors.email?.message}
                 {...register('email')}
               />
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 10 }}>
+              {/* Restaurant + Locations row */}
+              <div className="grid grid-cols-[1.4fr_1fr] gap-[10px]">
                 <Field
-                  label="Restaurant or franchise"
-                  placeholder="e.g. Brasserie Nord"
+                  label="Restaurant ou franchise"
+                  placeholder="ex. Brasserie Nord"
                   error={errors.restaurantName?.message}
                   {...register('restaurantName')}
                 />
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                  <span style={{ fontSize: 12, color: 'var(--st-d-7)', fontWeight: 500 }}>
-                    Locations
-                  </span>
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: 4,
-                      padding: 3,
-                      background: 'var(--st-d-1)',
-                      border: '1px solid var(--st-d-3)',
-                      borderRadius: 'var(--st-r-md)',
-                      height: 42,
-                      alignItems: 'center',
-                    }}
-                  >
+                <div className="flex flex-col gap-[7px]">
+                  <span className="text-xs font-medium text-st-sec">Établissements</span>
+                  <div className="flex gap-1 p-[3px] bg-st-card border border-st-border rounded-md h-[42px] items-center">
                     {LOCATION_OPTIONS.map((o) => (
                       <button
                         key={o}
                         type="button"
                         onClick={() => setLocations(o)}
-                        style={{
-                          flex: 1,
-                          padding: '7px 0',
-                          borderRadius: 'var(--st-r-sm)',
-                          background: locations === o ? 'var(--st-d-3)' : 'transparent',
-                          color: locations === o ? 'var(--st-d-9)' : 'var(--st-d-7)',
-                          border: 0,
-                          fontFamily: 'var(--st-font-ui)',
-                          fontSize: 11.5,
-                          fontWeight: 500,
-                          cursor: 'pointer',
-                          transition: 'all .12s',
-                        }}
+                        className={cn(
+                          'flex-1 py-[7px] rounded-sm text-[11.5px] font-medium font-sans transition-all cursor-pointer border-0',
+                          locations === o
+                            ? 'bg-st-border text-st-hi'
+                            : 'bg-transparent text-st-sec hover:text-st-pri',
+                        )}
                       >
                         {o}
                       </button>
@@ -243,73 +178,54 @@ export default function SignupPage() {
                 </div>
               </div>
 
+              {/* Password */}
               <Field
-                label="Password"
+                label="Mot de passe"
                 type="password"
-                placeholder="At least 10 characters"
+                placeholder="Au moins 10 caractères"
+                autoComplete="new-password"
                 error={errors.password?.message}
                 rightSlot={
-                  <span
-                    style={{
-                      fontSize: 10.5,
-                      color: 'var(--st-d-6)',
-                      fontFamily: 'var(--st-font-mono)',
-                    }}
-                  >
-                    {password.length}/10
-                  </span>
+                  <span className="text-[10.5px] text-st-dim font-mono">{password.length}/10</span>
                 }
                 {...register('password')}
               />
 
-              <div style={{ display: 'flex', gap: 4, marginTop: -4 }}>
+              {/* Strength bar */}
+              <div className="flex gap-1 -mt-1">
                 {[0, 1, 2, 3].map((i) => (
                   <span
                     key={i}
+                    className="flex-1 h-[3px] rounded-[2px] transition-colors"
                     style={{
-                      flex: 1,
-                      height: 3,
-                      borderRadius: 2,
                       background:
                         i < strength
                           ? password.length >= 10 && !errors.password
                             ? 'var(--st-emerald)'
                             : 'var(--st-gold)'
                           : 'var(--st-d-3)',
-                      transition: 'background .2s',
                     }}
                   />
                 ))}
               </div>
 
+              {/* Terms checkbox */}
               <Controller
                 control={control}
                 name="accept"
                 render={({ field: { value, onChange } }) => (
-                  <label
-                    style={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      gap: 8,
-                      fontSize: 12,
-                      color: 'var(--st-d-7)',
-                      cursor: 'pointer',
-                      marginTop: 6,
-                      lineHeight: 1.5,
-                      userSelect: 'none',
-                    }}
-                  >
-                    <span style={{ marginTop: 1 }}>
+                  <label className="flex items-start gap-2 text-[12px] text-st-sec cursor-pointer mt-[6px] leading-[1.5] select-none">
+                    <span className="mt-[1px]">
                       <Checkbox checked={value} onChange={onChange} />
                     </span>
                     <span>
-                      I agree to the{' '}
-                      <a style={{ color: 'var(--st-indigo-glow)', textDecoration: 'none' }}>
-                        Terms
+                      J&apos;accepte les{' '}
+                      <a className="text-st-indigo-glow no-underline cursor-pointer hover:opacity-80">
+                        Conditions d&apos;utilisation
                       </a>{' '}
-                      and acknowledge the{' '}
-                      <a style={{ color: 'var(--st-indigo-glow)', textDecoration: 'none' }}>
-                        Fair Distribution Policy
+                      et la{' '}
+                      <a className="text-st-indigo-glow no-underline cursor-pointer hover:opacity-80">
+                        Politique de distribution équitable
                       </a>
                       .
                     </span>
@@ -317,56 +233,40 @@ export default function SignupPage() {
                 )}
               />
               {errors.accept && (
-                <span style={{ fontSize: 11.5, color: 'var(--st-danger)', marginTop: -4 }}>
-                  {errors.accept.message}
-                </span>
+                <span className="text-[11.5px] text-st-danger -mt-1">{errors.accept.message}</span>
               )}
 
+              {/* Submit */}
               <button
                 type="submit"
                 disabled={isSubmitting || !isValid}
-                className="st-btn st-btn-primary"
-                style={{
-                  marginTop: 8,
-                  justifyContent: 'center',
-                  padding: '13px 18px',
-                  width: '100%',
-                }}
+                className="st-btn st-btn-primary mt-2 justify-center w-full py-[13px]"
               >
                 {isSubmitting ? (
                   'Création en cours…'
                 ) : (
                   <>
-                    Create workspace · start pilot <ArrowRight size={14} />
+                    Créer mon espace · démarrer le pilote <ArrowRight size={14} />
                   </>
                 )}
               </button>
 
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 6,
-                  fontSize: 11.5,
-                  color: 'var(--st-d-6)',
-                  marginTop: 4,
-                }}
-              >
-                <Shield size={11} style={{ color: 'var(--st-emerald)' }} />
-                No credit card · cancel anytime · your data is yours
+              {/* Trust line */}
+              <div className="flex items-center justify-center gap-[6px] text-[11.5px] text-st-dim mt-1">
+                <Shield size={11} className="text-st-emerald" />
+                Sans carte bancaire · résiliez à tout moment · vos données vous appartiennent
               </div>
             </form>
 
-            <Divider>already with us</Divider>
+            <Divider>déjà avec nous</Divider>
 
-            <p style={{ fontSize: 13, color: 'var(--st-d-7)', margin: 0, textAlign: 'center' }}>
-              Have an account?{' '}
+            <p className="text-[13px] text-st-sec text-center">
+              Vous avez déjà un compte ?{' '}
               <Link
                 href="/login"
-                style={{ color: 'var(--st-indigo-glow)', fontWeight: 500, textDecoration: 'none' }}
+                className="text-st-indigo-glow font-medium no-underline hover:opacity-80"
               >
-                Sign in instead →
+                Se connecter →
               </Link>
             </p>
           </div>

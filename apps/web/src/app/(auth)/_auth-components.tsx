@@ -1,24 +1,14 @@
 'use client';
 
 import { forwardRef } from 'react';
-import type { InputHTMLAttributes, ReactNode } from 'react';
+import type { InputHTMLAttributes, KeyboardEvent, ReactNode } from 'react';
+import { cn } from '../../lib/cn';
 
 // ── Logo ─────────────────────────────────────────────────────────────────────
 export function LogoMark() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <div
-        style={{
-          width: 28,
-          height: 28,
-          borderRadius: 8,
-          background: 'linear-gradient(135deg, var(--st-indigo) 0%, #4338CA 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 2px 8px rgba(99,102,241,.4)',
-        }}
-      >
+    <div className="flex items-center gap-2">
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br from-st-indigo to-[#4338CA] shadow-[0_2px_8px_rgba(99,102,241,.4)]">
         <svg
           width="14"
           height="14"
@@ -32,15 +22,7 @@ export function LogoMark() {
           <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
         </svg>
       </div>
-      <span
-        style={{
-          fontFamily: 'var(--st-font-display)',
-          fontSize: 16,
-          color: 'var(--st-d-9)',
-          letterSpacing: '-0.02em',
-          fontWeight: 400,
-        }}
-      >
+      <span className="font-display text-base text-st-hi tracking-[-0.02em] font-normal">
         SmartTips
       </span>
     </div>
@@ -65,27 +47,19 @@ export function EmployeeAvatar({
   size?: number;
 }) {
   const bg = AVATAR_COLORS[role] ?? '#5A6485';
-  const initials = name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+  // ~34% of diameter for readable initials at any size
+  const initials =
+    name
+      .split(' ')
+      .map((n) => n[0] ?? '')
+      .filter(Boolean)
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() || '?';
   return (
     <div
-      style={{
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        background: bg,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: size * 0.34,
-        color: 'white',
-        fontWeight: 600,
-        fontFamily: 'var(--st-font-ui)',
-      }}
+      className="rounded-full flex items-center justify-center text-white font-semibold font-sans shrink-0"
+      style={{ width: size, height: size, fontSize: size * 0.34, background: bg }}
     >
       {initials}
     </div>
@@ -95,16 +69,9 @@ export function EmployeeAvatar({
 // ── Auth Photo Pane ───────────────────────────────────────────────────────────
 export function AuthPhotoPane() {
   return (
-    <div style={{ position: 'relative', overflow: 'hidden' }}>
-      <div className="st-photo" style={{ height: '100%', width: '100%' }}>
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background:
-              'linear-gradient(135deg, rgba(10,14,26,.55) 0%, rgba(10,14,26,.35) 50%, rgba(10,14,26,.75) 100%)',
-          }}
-        />
+    <div className="relative overflow-hidden hidden md:block">
+      <div className="st-photo h-full w-full">
+        <div className="absolute inset-0 bg-gradient-to-br from-[rgba(10,14,26,.55)] via-[rgba(10,14,26,.35)] to-[rgba(10,14,26,.75)]" />
         <div
           className="st-photo-brief"
           style={{ background: 'linear-gradient(180deg, transparent, rgba(0,0,0,.7))' }}
@@ -116,21 +83,13 @@ export function AuthPhotoPane() {
 
       {/* Floating proof card */}
       <div
+        className="absolute left-10 bottom-14 w-80 p-[22px] border border-white/[0.08] rounded-lg backdrop-blur-[20px] backdrop-saturate-[140%]"
         style={{
-          position: 'absolute',
-          left: 40,
-          bottom: 56,
-          width: 320,
-          padding: 22,
           background: 'rgba(15,20,34,.75)',
-          backdropFilter: 'blur(20px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(140%)',
-          border: '1px solid rgba(255,255,255,.08)',
-          borderRadius: 'var(--st-r-lg)',
           boxShadow: '0 32px 80px -20px rgba(0,0,0,.6)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+        <div className="flex items-center gap-[6px] mb-3">
           <svg
             width="12"
             height="12"
@@ -143,29 +102,18 @@ export function AuthPhotoPane() {
           >
             <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8" />
           </svg>
-          <span className="st-eyebrow" style={{ color: 'var(--st-gold)' }}>
-            This month, on SmartTips
-          </span>
+          <span className="st-eyebrow text-st-gold">This month, on SmartTips</span>
         </div>
-        <div className="st-money" style={{ fontSize: 38, color: 'var(--st-gold)', lineHeight: 1 }}>
-          <span style={{ fontSize: 22, opacity: 0.55, marginRight: 2 }}>$</span>
-          <span style={{ fontWeight: 500 }}>2,347,291</span>
-          <span style={{ fontSize: 20, opacity: 0.55 }}>.00</span>
+        <div className="st-money text-[38px] leading-none" style={{ color: 'var(--st-gold)' }}>
+          <span className="text-[22px] opacity-55 mr-0.5">$</span>
+          <span className="font-medium">2,347,291</span>
+          <span className="text-[20px] opacity-55">.00</span>
         </div>
-        <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.7)', marginTop: 6 }}>
-          distributed fairly across <strong style={{ color: 'white' }}>240 locations</strong>
+        <div className="text-[12.5px] text-white/70 mt-[6px]">
+          distributed fairly across <strong className="text-white">240 locations</strong>
         </div>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            marginTop: 16,
-            paddingTop: 14,
-            borderTop: '1px solid rgba(255,255,255,.1)',
-          }}
-        >
-          <div style={{ display: 'flex' }}>
+        <div className="flex items-center gap-2 mt-4 pt-[14px] border-t border-white/10">
+          <div className="flex">
             {[
               { n: 'Léa Khalfi', r: 'bar' },
               { n: 'Marco Aslan', r: 'server' },
@@ -173,20 +121,15 @@ export function AuthPhotoPane() {
               { n: 'Nora Caillet', r: 'kitchen' },
             ].map((p, i) => (
               <div
-                key={i}
-                style={{
-                  marginLeft: i === 0 ? 0 : -8,
-                  borderRadius: '50%',
-                  boxShadow: '0 0 0 2px rgba(15,20,34,.85)',
-                }}
+                key={p.n}
+                className="rounded-full"
+                style={{ marginLeft: i === 0 ? 0 : -8, boxShadow: '0 0 0 2px rgba(15,20,34,.85)' }}
               >
                 <EmployeeAvatar name={p.n} role={p.r} size={26} />
               </div>
             ))}
           </div>
-          <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.6)' }}>
-            + 12,847 servers earning fairly
-          </span>
+          <span className="text-[11.5px] text-white/60">+ 12,847 servers earning fairly</span>
         </div>
       </div>
     </div>
@@ -201,44 +144,25 @@ interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
-  { label, error, rightSlot, style, ...rest },
+  { label, error, rightSlot, className, ...rest },
   ref,
 ) {
   return (
-    <label style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-      <span
-        style={{
-          fontSize: 12,
-          color: 'var(--st-d-7)',
-          fontWeight: 500,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
+    <label className="flex flex-col gap-[7px]">
+      <span className="text-xs font-medium text-st-sec flex justify-between items-center">
         <span>{label}</span>
         {rightSlot}
       </span>
       <input
         ref={ref}
-        className="st-focus"
-        style={{
-          padding: '11px 14px',
-          background: 'var(--st-d-1)',
-          border: `1px solid ${error ? 'var(--st-danger)' : 'var(--st-d-3)'}`,
-          borderRadius: 'var(--st-r-md)',
-          color: 'var(--st-d-9)',
-          fontFamily: 'var(--st-font-ui)',
-          fontSize: 14,
-          outline: 'none',
-          transition: 'border .15s',
-          width: '100%',
-          boxSizing: 'border-box',
-          ...style,
-        }}
+        className={cn(
+          'st-focus px-[14px] py-[11px] bg-st-card border rounded-md text-st-hi font-sans text-sm outline-none transition-[border-color] w-full',
+          error ? 'border-st-danger' : 'border-st-border',
+          className,
+        )}
         {...rest}
       />
-      {error && <span style={{ fontSize: 11.5, color: 'var(--st-danger)' }}>{error}</span>}
+      {error && <span className="text-[11.5px] text-st-danger">{error}</span>}
     </label>
   );
 });
@@ -246,12 +170,10 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
 // ── Divider ───────────────────────────────────────────────────────────────────
 export function Divider({ children }: { children: ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '22px 0' }}>
-      <span style={{ flex: 1, height: 1, background: 'var(--st-d-3)' }} />
-      <span className="st-eyebrow" style={{ color: 'var(--st-d-6)', fontSize: 10 }}>
-        {children}
-      </span>
-      <span style={{ flex: 1, height: 1, background: 'var(--st-d-3)' }} />
+    <div className="flex items-center gap-3 my-[22px]">
+      <span className="flex-1 h-px bg-st-border" />
+      <span className="st-eyebrow text-st-dim text-[10px]">{children}</span>
+      <span className="flex-1 h-px bg-st-border" />
     </div>
   );
 }
@@ -267,11 +189,7 @@ export function OAuthBtn({
   type?: 'button' | 'submit' | 'reset';
 }) {
   return (
-    <button
-      type={type}
-      className="st-btn st-btn-ghost-dark"
-      style={{ flex: 1, justifyContent: 'center', padding: '10px 12px' }}
-    >
+    <button type={type} className="st-btn st-btn-ghost-dark flex-1 justify-center px-3 py-[10px]">
       {icon}
       <span>{label}</span>
     </button>
@@ -286,21 +204,24 @@ export function Checkbox({
   checked: boolean;
   onChange?: (checked: boolean) => void;
 }) {
+  const toggle = () => onChange?.(!checked);
+  const onKey = (e: KeyboardEvent<HTMLSpanElement>) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      toggle();
+    }
+  };
   return (
     <span
-      onClick={() => onChange?.(!checked)}
-      style={{
-        width: 16,
-        height: 16,
-        borderRadius: 4,
-        flexShrink: 0,
-        background: checked ? 'var(--st-indigo)' : 'var(--st-d-2)',
-        border: `1px solid ${checked ? 'var(--st-indigo)' : 'var(--st-d-4)'}`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'all .15s',
-      }}
+      role="checkbox"
+      aria-checked={checked}
+      tabIndex={0}
+      onClick={toggle}
+      onKeyDown={onKey}
+      className={cn(
+        'w-4 h-4 rounded-[4px] shrink-0 flex items-center justify-center transition-all cursor-pointer select-none',
+        checked ? 'bg-st-indigo border border-st-indigo' : 'bg-st-raised border border-st-stroke',
+      )}
     >
       {checked && (
         <svg
@@ -323,20 +244,10 @@ export function Checkbox({
 // ── Auth Footer ───────────────────────────────────────────────────────────────
 export function AuthFooter() {
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        fontSize: 11.5,
-        color: 'var(--st-d-6)',
-        marginTop: 32,
-        flexShrink: 0,
-      }}
-    >
+    <div className="flex items-center justify-between text-[11.5px] text-st-dim mt-8 shrink-0 flex-wrap gap-3">
       <span>© 2026 SmartTips Labs · Brooklyn</span>
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+      <div className="flex gap-3 items-center">
+        <span className="inline-flex items-center gap-1">
           <svg
             width="11"
             height="11"
