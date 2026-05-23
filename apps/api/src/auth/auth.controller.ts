@@ -89,7 +89,8 @@ export class AuthController {
       secure: this.isProd,
       sameSite: this.isProd ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: this.isProd ? '/auth' : '/',
+      path: '/', // '/' garantit que le navigateur envoie le cookie sur toutes les routes
+      // (middleware /dashboard, proxy /api/v1/auth/refresh, etc.)
     });
   }
 
@@ -98,7 +99,7 @@ export class AuthController {
       httpOnly: true,
       secure: this.isProd,
       sameSite: this.isProd ? 'none' : 'lax',
-      path: '/auth',
+      path: '/', // doit être identique à setRefreshCookie — sinon clearCookie ne supprime rien
     });
   }
 }
