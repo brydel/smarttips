@@ -18,6 +18,15 @@ import { promisify } from 'util';
 
 const randomBytesAsync = promisify(randomBytes);
 
+/** Catégories par défaut créées automatiquement à l'inscription de chaque tenant. */
+const DEFAULT_MENU_CATEGORIES = [
+  { name: 'ENTREE', displayOrder: 1 },
+  { name: 'MAIN', displayOrder: 2 },
+  { name: 'DESSERT', displayOrder: 3 },
+  { name: 'DRINK', displayOrder: 4 },
+  { name: 'SIDE', displayOrder: 5 },
+] as const;
+
 interface TokenPayload {
   accessToken: string;
   refreshToken: string;
@@ -58,6 +67,14 @@ export class AuthService {
             slug: slug,
             email: dto.email,
           },
+        });
+
+        // Seed des catégories de menu par défaut pour ce tenant
+        await tx.menuCategory.createMany({
+          data: DEFAULT_MENU_CATEGORIES.map((cat) => ({
+            ...cat,
+            tenantId: tenant.id,
+          })),
         });
 
         return tx.user.create({

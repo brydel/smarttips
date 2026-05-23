@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsOptional,
   IsBoolean,
+  IsUrl,
   MaxLength,
   MinLength,
   Min,
@@ -61,4 +62,10 @@ export class CreateMenuItemDto {
   })
   @IsBoolean({ message: 'error.validation.active.invalid' })
   active?: boolean;
+
+  @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsUrl({ require_tld: true }, { message: 'error.validation.imageUrl.invalid' })
+  @MaxLength(500, { message: 'error.validation.imageUrl.tooLong' })
+  imageUrl?: string;
 }

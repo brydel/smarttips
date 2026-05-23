@@ -22,7 +22,8 @@ export function middleware(request: NextRequest): NextResponse {
 
   if (isProtectedRoute && !hasSession) {
     const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('callbackUrl', encodeURIComponent(pathname));
+    // searchParams.set() already URL-encodes the value — do NOT wrap with encodeURIComponent
+    loginUrl.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
