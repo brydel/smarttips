@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { Plus, Pencil, Trash2, TrendingUp, ImageOff } from 'lucide-react';
 import { DataTable, type Column } from '../../../../components/ui/data-table';
 import { Button } from '../../../../components/ui/button';
-import { Badge, type BadgeTone } from '../../../../components/ui/badge';
+import { Badge } from '../../../../components/ui/badge';
 import { Select } from '../../../../components/ui/select';
 import { ConfirmDialog } from '../../../../components/ui/confirm-dialog';
 import { MenuItemForm } from '../../../../components/dashboard/menu/menu-item-form';
@@ -17,27 +17,7 @@ import {
 } from '../../../../hooks/use-menu-items';
 import type { MenuItem, CreateMenuItemPayload } from '../../../../types/menu-item';
 import type { MenuItemFormProps } from '../../../../components/dashboard/menu/menu-item-form';
-
-// ── Category display helpers ──────────────────────────────────────────────────
-/**
- * Maps known category names (as stored in DB) to display labels.
- * Falls back to the raw name if not in the map.
- */
-const CAT_LABEL: Record<string, string> = {
-  ENTREE: 'Entrée',
-  MAIN: 'Plat',
-  DESSERT: 'Dessert',
-  DRINK: 'Boisson',
-  SIDE: 'Accomp.',
-};
-
-const CAT_TONE: Record<string, BadgeTone> = {
-  ENTREE: 'indigo',
-  MAIN: 'emerald',
-  DESSERT: 'gold',
-  DRINK: 'neutral',
-  SIDE: 'neutral',
-};
+import { CAT_LABEL, CAT_TONE } from '../../../../lib/category-labels';
 
 const STATUS_FILTER_OPTIONS = [
   { value: 'all', label: 'Tous les statuts' },

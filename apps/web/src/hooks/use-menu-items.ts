@@ -7,6 +7,7 @@ import {
   fetchMenuItems,
   updateMenuItem,
 } from '../services/menu.service';
+import { MANAGED_CATEGORIES_KEY, MENU_CATEGORIES_KEY, MENU_ITEMS_KEY } from '../lib/query-keys';
 import { extractErrorMessage } from '../lib/errors';
 import type {
   CreateMenuItemPayload,
@@ -16,8 +17,8 @@ import type {
   UpdateMenuItemPayload,
 } from '../types/menu-item';
 
-export const MENU_ITEMS_KEY = 'menu-items';
-export const MENU_CATEGORIES_KEY = 'menu-categories';
+// Re-export so existing callers that import keys from this file keep working.
+export { MENU_ITEMS_KEY, MENU_CATEGORIES_KEY };
 
 export function useMenuItems(filters: MenuItemFilters = {}) {
   return useQuery({
@@ -47,6 +48,8 @@ export function useCreateMenuItem() {
     },
     onSettled: () => {
       void qc.invalidateQueries({ queryKey: [MENU_ITEMS_KEY] });
+      // Item count on categories changes → keep managed-categories in sync.
+      void qc.invalidateQueries({ queryKey: [MANAGED_CATEGORIES_KEY] });
     },
   });
 }
@@ -110,6 +113,8 @@ export function useDeleteMenuItem() {
     },
     onSettled: () => {
       void qc.invalidateQueries({ queryKey: [MENU_ITEMS_KEY] });
+      // Item count on categories changes → keep managed-categories in sync.
+      void qc.invalidateQueries({ queryKey: [MANAGED_CATEGORIES_KEY] });
     },
   });
 }

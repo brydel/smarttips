@@ -8,6 +8,7 @@ import { MenuItemsModule } from './menu-items/menu-items.module';
 import { ShiftsModule } from './shifts/shifts.module';
 import { OrdersModule } from './orders/orders.module';
 import { TipPoolsModule } from './tip-pools/tip-pools.module';
+import { MenuCategoriesModule } from './menu-categories/menu-categories.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { TipPoolsModule } from './tip-pools/tip-pools.module';
     ShiftsModule,
     OrdersModule,
     TipPoolsModule,
+    MenuCategoriesModule,
   ],
 })
 export class AppModule {}
