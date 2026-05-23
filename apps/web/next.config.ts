@@ -21,9 +21,9 @@ function buildCSP(): string | null {
     `default-src 'self'`,
     `script-src 'self' 'unsafe-inline'`,
     `style-src 'self' 'unsafe-inline'`,
-    `img-src 'self' data: blob:`,
-    `font-src 'self'`,
-    `connect-src 'self'`, // API is same-origin via the /api/v1 rewrite
+    `img-src 'self' data: blob: https:`, // https: autorise les images externes (items du menu)
+    `font-src 'self' https://fonts.gstatic.com`,
+    `connect-src 'self'`, // API est same-origin via le rewrite /api/v1
     `frame-ancestors 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,
