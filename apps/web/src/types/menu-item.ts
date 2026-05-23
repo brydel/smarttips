@@ -1,14 +1,6 @@
-// ── Category ──────────────────────────────────────────────────────────────────
-/** Full MenuCategory entity as returned by the API (include: { category: true }). */
-export interface MenuCategoryEntity {
-  id: string;
-  tenantId: string;
-  name: string;
-  displayOrder: number;
-  active: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+// ── Category (canonical definition lives in menu-category.ts) ─────────────────
+import type { MenuCategoryEntity } from './menu-category';
+export type { MenuCategoryEntity };
 
 // ── Menu item ─────────────────────────────────────────────────────────────────
 /** MenuItem as returned by the API with the joined category relation. */

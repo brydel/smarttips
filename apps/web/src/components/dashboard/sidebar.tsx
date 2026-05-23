@@ -9,6 +9,7 @@ import {
   Users,
   Sparkles,
   UtensilsCrossed,
+  Tag,
   Shield,
   Zap,
   Settings,
@@ -53,6 +54,7 @@ const NAV: NavGroup[] = [
         badgeTone: 'gold',
       },
       { href: '/dashboard/menu', label: 'Menu', icon: <UtensilsCrossed size={15} /> },
+      { href: '/dashboard/categories', label: 'Catégories', icon: <Tag size={15} /> },
     ],
   },
   {
