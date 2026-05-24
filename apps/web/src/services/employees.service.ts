@@ -21,11 +21,6 @@ export async function fetchEmployees(
   return data;
 }
 
-export async function fetchEmployee(id: string): Promise<Employee> {
-  const { data } = await apiClient.get<Employee>(`${BASE}/${id}`);
-  return data;
-}
-
 export async function createEmployee(payload: CreateEmployeePayload): Promise<Employee> {
   const { data } = await apiClient.post<Employee>(BASE, payload);
   return data;

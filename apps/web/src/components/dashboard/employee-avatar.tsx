@@ -13,7 +13,7 @@ interface EmployeeAvatarProps {
   firstName: string;
   lastName: string;
   role: EmployeeRole;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
 
@@ -21,6 +21,7 @@ const sizes = {
   sm: { container: 'w-7 h-7 text-[10px]', ring: 'ring-1' },
   md: { container: 'w-9 h-9 text-xs', ring: 'ring-2' },
   lg: { container: 'w-11 h-11 text-sm', ring: 'ring-2' },
+  xl: { container: 'w-14 h-14 text-base', ring: 'ring-2' },
 };
 
 export function EmployeeAvatar({

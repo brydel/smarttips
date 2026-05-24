@@ -38,6 +38,9 @@ export const apiClient: AxiosInstance = axios.create({
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
+    // Defence-in-depth against CSRF (SEC-H1): distinguishes XHR from browser form/navigation requests.
+    // The backend should also validate this header on mutating endpoints.
+    'X-Requested-With': 'XMLHttpRequest',
   },
 });
 

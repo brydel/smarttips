@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Split,
+  Calendar,
   Users,
   Sparkles,
   UtensilsCrossed,
@@ -16,6 +17,7 @@ import {
   LogOut,
   ChevronRight,
   Brain,
+  X,
 } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { useAuth } from '../../hooks/use-auth';
@@ -33,6 +35,10 @@ interface NavGroup {
   items: NavItem[];
 }
 
+interface SidebarProps {
+  onClose?: () => void;
+}
+
 const NAV: NavGroup[] = [
   {
     label: 'Workspace',
@@ -45,6 +51,7 @@ const NAV: NavGroup[] = [
         badge: '2',
         badgeTone: 'neutral',
       },
+      { href: '/dashboard/shifts', label: 'Shifts', icon: <Calendar size={15} /> },
       { href: '/dashboard/employees', label: 'Équipe', icon: <Users size={15} /> },
       {
         href: '/dashboard/ai-insights',
@@ -103,11 +110,22 @@ function NavLink({ href, label, icon, badge, badgeTone }: NavItem) {
   );
 }
 
-export function Sidebar() {
+export function Sidebar({ onClose }: SidebarProps = {}) {
   const { user, logout } = useAuth();
 
   return (
-    <aside className="flex h-full w-64 flex-col border-r border-st-border bg-st-bg">
+    <aside className="relative flex h-full w-64 flex-col border-r border-st-border bg-st-bg">
+      {/* Mobile close button */}
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="absolute right-3 top-3 p-1.5 rounded-md text-st-dim hover:text-st-hi hover:bg-st-raised md:hidden"
+          aria-label="Fermer le menu"
+        >
+          <X size={16} />
+        </button>
+      )}
+
       {/* Logo */}
       <div className="flex items-center gap-2 px-4 py-5">
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-st-indigo to-[#4338CA] shadow-indigo">
@@ -116,7 +134,7 @@ export function Sidebar() {
         <span className="font-display text-base tracking-tight text-st-hi">SmartTips</span>
       </div>
 
-      {/* Tenant switcher */}
+      {/* Connected user / tenant switcher */}
       {user && (
         <button
           className={cn(
@@ -125,16 +143,24 @@ export function Sidebar() {
             'text-left transition-colors hover:bg-st-raised',
           )}
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-st-indigo/20 text-[11px] font-bold text-st-indigo-glow font-mono">
-            {user.name.slice(0, 2).toUpperCase()}
+          {/* Avatar with online indicator */}
+          <div className="relative shrink-0">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-gradient-to-br from-st-indigo to-[#4338CA] text-[12px] font-bold text-white font-mono shadow-sm">
+              {(user.name.trim().slice(0, 2) || '?').toUpperCase()}
+            </div>
+            {/* Online green dot */}
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-st-emerald border-2 border-st-card" />
           </div>
+
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-st-hi truncate font-sans">{user.name}</p>
-            <p className="text-[10.5px] text-st-sec capitalize font-sans">
+            <p className="text-[10px] text-st-sec truncate font-sans">{user.email}</p>
+            <p className="text-[9.5px] text-st-dim capitalize font-mono mt-0.5">
               {user.role.toLowerCase()}
             </p>
           </div>
-          <ChevronRight size={12} className="text-st-dim" />
+
+          <ChevronRight size={12} className="text-st-dim shrink-0" />
         </button>
       )}
 

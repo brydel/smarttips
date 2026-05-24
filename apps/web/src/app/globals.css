@@ -258,6 +258,214 @@ body {
   background: rgba(99,102,241,.07);
 }
 
+/* ── Shifts page — animations & primitives ── */
+
+@keyframes shifts-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,.55); }
+  50%      { box-shadow: 0 0 0 7px rgba(99,102,241,0); }
+}
+.shifts-pulse {
+  animation: shifts-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes shifts-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.shifts-fade-up { animation: shifts-fade-up .28s cubic-bezier(.2,.7,.3,1); }
+
+/* Restaurant ticket perforations */
+.shifts-ticket {
+  position: relative;
+  background: #0F1422;
+  border: 1px solid #1B2236;
+  border-radius: 10px;
+}
+.shifts-ticket::before,
+.shifts-ticket::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 12px; height: 12px;
+  background: #0A0E1A;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+.shifts-ticket::before { left: -7px; border-right: 1px solid #1B2236; }
+.shifts-ticket::after  { right: -7px; border-left: 1px solid #1B2236; }
+
+/* Scrub-style number input */
+.shifts-scrub {
+  font-family: var(--st-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13.5px;
+  color: #F4F6FB;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 5px 8px;
+  width: 72px;
+  text-align: right;
+  outline: none;
+  transition: all .15s ease;
+  cursor: ew-resize;
+  -moz-appearance: textfield;
+}
+.shifts-scrub::-webkit-inner-spin-button,
+.shifts-scrub::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.shifts-scrub:hover { background: #141A2B; border-color: #1B2236; }
+.shifts-scrub:focus { background: #141A2B; border-color: #6366F1; cursor: text; box-shadow: 0 0 0 3px rgba(99,102,241,.18); }
+.shifts-scrub.dirty { color: #34D399; }
+.shifts-scrub:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Service type color tokens */
+.shifts-type-BREAKFAST { --type-c: #C7A65A; --type-g: rgba(199,166,90,.10); }
+.shifts-type-LUNCH     { --type-c: #C7A65A; --type-g: rgba(199,166,90,.10); }
+.shifts-type-DINNER    { --type-c: #818CF8; --type-g: rgba(99,102,241,.10); }
+.shifts-type-LATE_NIGHT { --type-c: #A78BFA; --type-g: rgba(167,139,250,.10); }
+
+/* Subtle top-of-page gradient for shifts */
+.shifts-grain::before {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle at 50% 0%, rgba(99,102,241,0.05), transparent 60%);
+  z-index: 0;
+}
+
+/* Step rail dots for close-shift dialog */
+.shifts-step-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #252D45;
+  transition: all .2s ease;
+  flex-shrink: 0;
+  display: inline-block;
+}
+.shifts-step-dot.active { background: #818CF8; width: 24px; border-radius: 3px; }
+.shifts-step-dot.done   { background: #10B981; }
+
+/* ── Team page ─────────────────────────────────────────────── */
+
+@keyframes team-drawer-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes team-drawer-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.team-drawer { animation: team-drawer-in .28s cubic-bezier(.22,.65,.3,1); }
+.team-drawer-overlay { animation: team-drawer-overlay-in .2s ease-out; }
+
+/* Role-tinted card border on hover */
+.team-card {
+  position: relative;
+  transition: background .18s ease, transform .18s ease;
+}
+.team-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid transparent;
+  pointer-events: none;
+  transition: border-color .18s ease, box-shadow .18s ease;
+  z-index: 0;
+}
+.team-card:hover::before {
+  border-color: var(--role-c, #252D45);
+  box-shadow: 0 12px 36px -16px color-mix(in oklch, var(--role-c, #252D45) 30%, transparent);
+}
+.team-card.selected { background: #141A2B !important; }
+.team-card.selected::before { border-color: #818CF8 !important; box-shadow: 0 0 0 1px #818CF8 !important; }
+
+/* Role color helpers */
+.team-role-server  { --role-c: #818CF8; --role-g: rgba(99,102,241,.10); }
+.team-role-bar     { --role-c: #E8C49A; --role-g: rgba(212,165,116,.12); }
+.team-role-host    { --role-c: #34D399; --role-g: rgba(16,185,129,.10); }
+.team-role-kitchen { --role-c: #BCB19A; --role-g: rgba(188,177,154,.10); }
+.team-role-runner  { --role-c: #8892B0; --role-g: rgba(136,146,176,.10); }
+
+/* QR code visual */
+.team-qr-grid {
+  display: grid;
+  grid-template-columns: repeat(21, 1fr);
+  grid-template-rows: repeat(21, 1fr);
+  gap: 2px;
+  width: 210px;
+  height: 210px;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+}
+.team-qr-grid > span { background: #0A0E1A; border-radius: 1px; }
+
+/* Pulse on undo countdown SVG ring */
+@keyframes team-countdown {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: 88; }
+}
+.team-undo-ring { animation: team-countdown 6s linear forwards; }
+
+/* Role tab pills */
+.team-tab {
+  padding: 7px 14px;
+  border-radius: 9999px;
+  background: transparent;
+  border: 1px solid #252D45;
+  color: #8892B0;
+  font-size: 12px;
+  font-family: var(--st-font-ui, Inter, sans-serif);
+  cursor: pointer;
+  transition: all .15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  line-height: 1;
+}
+.team-tab:hover { color: #F4F6FB; background: #141A2B; border-color: #3A4366; }
+.team-tab.active {
+  background: #141A2B;
+  color: #F4F6FB;
+  border-color: #3A4366;
+  font-weight: 500;
+}
+.team-tab .count {
+  font-family: var(--st-font-mono, 'JetBrains Mono', monospace);
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background: #1B2236;
+  color: #8892B0;
+  line-height: 18px;
+}
+.team-tab.active .count { background: #252D45; color: #F4F6FB; }
+
+/* Inline editable inputs in drawer */
+.team-editable {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-family: inherit;
+  color: #F4F6FB;
+  outline: none;
+  width: 100%;
+  transition: all .15s ease;
+  font-size: 14px;
+}
+.team-editable:hover { background: #141A2B; }
+.team-editable:focus { background: #141A2B; border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,.18); }
+
+/* On-duty pulse dot */
+@keyframes team-duty-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,.55); }
+  50%       { box-shadow: 0 0 0 5px rgba(52,211,153,0); }
+}
+.team-duty-pulse { animation: team-duty-pulse 1.6s ease-in-out infinite; }
+
 /* ── Light photo placeholder ── */
 .st-photo-light {
   background-image: linear-gradient(135deg, rgba(0,0,0,.05) 25%, transparent 25%, transparent 50%, rgba(0,0,0,.05) 50%, rgba(0,0,0,.05) 75%, transparent 75%, transparent);
@@ -269,4 +477,114 @@ body {
 .st-photo-light .st-photo-brief {
   color: rgba(0,0,0,.55);
   background: linear-gradient(180deg, transparent, rgba(0,0,0,.06));
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE — Mobile-first overrides for SmartTips
+   Primary breakpoints: 420px (small phone), 640px (phone), 768px (tablet), 900px (large tablet)
+   App is primarily used on phone/tablet (RESP-C* = Critical, RESP-H* = High)
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* RESP-H6: Pagination buttons — min 44×44px touch target on mobile */
+.pagination-btn {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* RESP-C3: Employees grid — responsive columns */
+.employees-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 900px) {
+  .employees-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 420px) {
+  .employees-grid { grid-template-columns: 1fr; }
+}
+
+/* RESP-C4: Hide wage/coefficient columns on mobile list view */
+@media (max-width: 640px) {
+  .employees-col-wage,
+  .employees-col-coeff { display: none !important; }
+}
+
+/* RESP-H1: Scale page title on mobile */
+@media (max-width: 640px) {
+  .page-title-employees { font-size: 32px !important; }
+  .page-title-shifts    { font-size: 34px !important; }
+}
+
+/* RESP-H2: Reduce horizontal padding on mobile */
+@media (max-width: 640px) {
+  .page-container-employees {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+
+/* RESP-H3: Invite form — collapse triple grid on small screens */
+.invite-form-triple  { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.invite-form-double  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 480px) {
+  .invite-form-triple { grid-template-columns: 1fr; }
+  .invite-form-double { grid-template-columns: 1fr; }
+}
+
+/* RESP-C1: Team drawer — full-screen bottom sheet on mobile */
+@media (max-width: 640px) {
+  .team-drawer {
+    width: 100% !important;
+    max-width: 100% !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* RESP-H4: Service timeline — horizontal scroll on small screens */
+.service-timeline-wrapper { overflow-x: auto; }
+@media (max-width: 768px) {
+  .service-timeline-wrapper > div { min-width: 600px; }
+}
+
+/* RESP-C2: Shift detail split grid — single column on tablet/mobile */
+.shift-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .shift-detail-grid { grid-template-columns: 1fr; }
+}
+
+/* RESP-H5: Safe-area insets for overlays (notched phones, home indicator) */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bulk-bar-overlay {
+    bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+  }
+  .undo-toast-overlay {
+    bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+/* RESP-H7: Shift header card inner — stack vertically on small screens */
+@media (max-width: 640px) {
+  .shift-header-card-inner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+  }
+  .shift-header-card-inner > div:last-child {
+    flex-direction: row !important;
+    width: 100% !important;
+  }
 }
