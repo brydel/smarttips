@@ -13,9 +13,17 @@ export function extractErrorMessage(err: unknown, fallback: string): string {
       }
       return 'Connexion au serveur impossible. Vérifiez votre réseau.';
     }
-    // API error with message body
-    const msg = err.response.data?.message;
-    if (typeof msg === 'string' && msg.length > 0) return msg;
+    // API error with message body — sanitise before display (SEC-C2).
+    // Reject messages that look like internal stack traces or framework internals.
+    const raw = err.response.data?.message;
+    const msg = typeof raw === 'string' ? raw : Array.isArray(raw) ? raw[0] : null;
+    if (
+      typeof msg === 'string' &&
+      msg.length > 0 &&
+      msg.length < 300 &&
+      !/stack\s+trace|at\s+\w+\.ts|TypeError:|prisma\.|\.spec\.|node_modules/i.test(msg)
+    )
+      return msg;
     // HTTP status fallback
     if (err.response.status === 403) return "Vous n'avez pas les droits pour cette action.";
     if (err.response.status === 404) return 'Ressource introuvable.';
