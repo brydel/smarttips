@@ -10,6 +10,7 @@ import { OrdersModule } from './orders/orders.module';
 import { TipPoolsModule } from './tip-pools/tip-pools.module';
 import { MenuCategoriesModule } from './menu-categories/menu-categories.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { DistributionModule } from './distribution/distribution.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     TipPoolsModule,
     MenuCategoriesModule,
     DashboardModule,
+    DistributionModule,
   ],
 })
 export class AppModule {}
