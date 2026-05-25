@@ -25,3 +25,6 @@ export const DASHBOARD_STATS_KEY = 'dashboard-stats' as const;
 
 // ── Tenant config ─────────────────────────────────────────────────────────────
 export const DISTRIBUTION_CONFIG_KEY = 'distribution-config' as const;
+
+// ── Shift distribution ────────────────────────────────────────────────────────
+export const SHIFT_DISTRIBUTION_KEY = 'shift-distribution' as const;
