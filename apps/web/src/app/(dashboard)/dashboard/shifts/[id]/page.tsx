@@ -452,6 +452,56 @@ export default function ShiftDetailPage() {
                 </svg>
                 Nouvelle commande
               </button>
+
+              {/* Distribution link — only for CLOSED shifts */}
+              {shift.status === 'CLOSED' && (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/dashboard/shifts/${id}/distribution`)}
+                  style={{
+                    background: 'rgba(99,102,241,.1)',
+                    border: '1px solid rgba(99,102,241,.35)',
+                    borderRadius: 10,
+                    padding: '8px 16px',
+                    color: '#818CF8',
+                    fontSize: 12,
+                    fontFamily: 'var(--st-font-ui)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    whiteSpace: 'nowrap',
+                    transition: 'background .15s ease, border-color .15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.background =
+                      'rgba(99,102,241,.18)';
+                    (e.currentTarget as HTMLButtonElement).style.borderColor =
+                      'rgba(99,102,241,.55)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.background = 'rgba(99,102,241,.1)';
+                    (e.currentTarget as HTMLButtonElement).style.borderColor =
+                      'rgba(99,102,241,.35)';
+                  }}
+                >
+                  {/* Pie/distribution icon */}
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+                    <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                  </svg>
+                  Voir la répartition
+                </button>
+              )}
             </div>
           </div>
         </div>
