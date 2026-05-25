@@ -11,6 +11,7 @@ import { TipPoolsModule } from './tip-pools/tip-pools.module';
 import { MenuCategoriesModule } from './menu-categories/menu-categories.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { DistributionModule } from './distribution/distribution.module';
+import { TenantConfigModule } from './tenant-config/tenant-config.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { DistributionModule } from './distribution/distribution.module';
     MenuCategoriesModule,
     DashboardModule,
     DistributionModule,
+    TenantConfigModule,
   ],
 })
 export class AppModule {}

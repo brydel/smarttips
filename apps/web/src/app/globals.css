@@ -566,6 +566,51 @@ body {
   .shift-detail-grid { grid-template-columns: 1fr; }
 }
 
+/* ── Distribution settings — slider & toggle primitives ─────────────────── */
+
+/* Range slider (salesBonusWeight) */
+.dist-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: #252D45; /* st-stroke */
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.dist-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #818CF8; /* st-indigo-glow */
+  border: 2px solid #0A0E1A; /* st-bg */
+  border-radius: 50%;
+  cursor: grab;
+  box-shadow: 0 0 0 1px #6366F1, 0 2px 8px rgba(99,102,241,.4);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.dist-slider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.15);
+  box-shadow: 0 0 0 1px #6366F1, 0 4px 12px rgba(99,102,241,.5);
+}
+.dist-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #818CF8;
+  border: 2px solid #0A0E1A;
+  border-radius: 50%;
+  cursor: grab;
+  box-shadow: 0 0 0 1px #6366F1;
+}
+.dist-slider:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.dist-slider:disabled::-webkit-slider-thumb { cursor: not-allowed; }
+
 /* RESP-H5: Safe-area insets for overlays (notched phones, home indicator) */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .bulk-bar-overlay {

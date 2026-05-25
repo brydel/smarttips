@@ -67,7 +67,11 @@ const NAV: NavGroup[] = [
   {
     label: 'Configurer',
     items: [
-      { href: '/dashboard/tip-policy', label: 'Politique tips', icon: <Shield size={15} /> },
+      {
+        href: '/dashboard/settings/distribution',
+        label: 'Distribution',
+        icon: <Shield size={15} />,
+      },
       { href: '/dashboard/integrations', label: 'Intégrations', icon: <Zap size={15} /> },
       { href: '/dashboard/settings', label: 'Paramètres', icon: <Settings size={15} /> },
     ],

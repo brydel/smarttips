@@ -22,3 +22,6 @@ export const EMPLOYEES_KEY = 'employees' as const;
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export const DASHBOARD_STATS_KEY = 'dashboard-stats' as const;
+
+// ── Tenant config ─────────────────────────────────────────────────────────────
+export const DISTRIBUTION_CONFIG_KEY = 'distribution-config' as const;
