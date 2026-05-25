@@ -62,10 +62,15 @@ function LoginForm() {
   const onSubmit = async (data: LoginForm) => {
     setServerError(null);
     try {
-      await login({ email: data.email, password: data.password });
+      const loggedInUser = await login({ email: data.email, password: data.password });
 
       const callbackUrl = searchParams.get('callbackUrl');
-      let targetUrl = '/dashboard';
+
+      // Role-based default redirect: EMPLOYEE → /employee/dashboard,
+      // OWNER/MANAGER → /dashboard.
+      const defaultUrl = loggedInUser.role === 'EMPLOYEE' ? '/employee/dashboard' : '/dashboard';
+
+      let targetUrl = defaultUrl;
 
       if (callbackUrl) {
         try {
@@ -76,7 +81,7 @@ function LoginForm() {
             targetUrl = decoded;
           }
         } catch {
-          // malformed URL — fall back to /dashboard
+          // malformed URL — fall back to role default
         }
       }
 
@@ -185,7 +190,7 @@ function LoginForm() {
                   'Connexion…'
                 ) : (
                   <>
-                    Accéder au tableau de bord <ArrowRight size={14} />
+                    Se connecter <ArrowRight size={14} />
                   </>
                 )}
               </button>

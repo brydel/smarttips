@@ -28,3 +28,8 @@ export const DISTRIBUTION_CONFIG_KEY = 'distribution-config' as const;
 
 // ── Shift distribution ────────────────────────────────────────────────────────
 export const SHIFT_DISTRIBUTION_KEY = 'shift-distribution' as const;
+
+// ── Employee personal space (BIS-23) ──────────────────────────────────────────
+export const EMPLOYEE_DASHBOARD_KEY = 'employee-dashboard' as const;
+export const EMPLOYEE_DISTRIBUTIONS_KEY = 'employee-distributions' as const;
+export const EMPLOYEE_PROFILE_KEY = 'employee-profile' as const;
