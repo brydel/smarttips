@@ -126,15 +126,24 @@ export function Sidebar({ onClose }: SidebarProps = {}) {
         </button>
       )}
 
-      {/* Logo */}
-      <div className="flex items-center gap-2 px-4 py-5">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-st-indigo to-[#4338CA] shadow-indigo">
+      {/* Logo + Restaurant name */}
+      <div className="flex items-center gap-2.5 px-4 py-4">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-st-indigo to-[#4338CA] shadow-indigo">
           <Brain size={14} className="text-white" />
         </div>
-        <span className="font-display text-base tracking-tight text-st-hi">SmartTips</span>
+        <div className="min-w-0">
+          <span className="font-display text-sm tracking-tight text-st-hi leading-none block">
+            SmartTips
+          </span>
+          {user?.tenantName && (
+            <span className="font-mono text-[9.5px] text-st-dim truncate block mt-0.5 leading-none">
+              {user.tenantName}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Connected user / tenant switcher */}
+      {/* Connected user card */}
       {user && (
         <button
           className={cn(
@@ -154,9 +163,11 @@ export function Sidebar({ onClose }: SidebarProps = {}) {
 
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-st-hi truncate font-sans">{user.name}</p>
-            <p className="text-[10px] text-st-sec truncate font-sans">{user.email}</p>
-            <p className="text-[9.5px] text-st-dim capitalize font-mono mt-0.5">
-              {user.role.toLowerCase()}
+            <p className="text-[10px] text-st-dim truncate font-mono mt-0.5">
+              <span className="capitalize">{user.role.toLowerCase()}</span>
+              {user.tenantName ? (
+                <span style={{ color: 'var(--st-d-5)' }}> · {user.tenantName}</span>
+              ) : null}
             </p>
           </div>
 

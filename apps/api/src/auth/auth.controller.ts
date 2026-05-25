@@ -33,19 +33,17 @@ export class AuthController {
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
   async signup(@Body() dto: SignupDto, @Res({ passthrough: true }) res: Response) {
-    const tokens = await this.authService.signup(dto);
-    this.setRefreshCookie(res, tokens.refreshToken);
-
-    return { accessToken: tokens.accessToken };
+    const { accessToken, refreshToken, user } = await this.authService.signup(dto);
+    this.setRefreshCookie(res, refreshToken);
+    return { accessToken, user };
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
-    const tokens = await this.authService.login(dto);
-    this.setRefreshCookie(res, tokens.refreshToken);
-
-    return { accessToken: tokens.accessToken };
+    const { accessToken, refreshToken, user } = await this.authService.login(dto);
+    this.setRefreshCookie(res, refreshToken);
+    return { accessToken, user };
   }
 
   @Post('refresh')
@@ -57,10 +55,13 @@ export class AuthController {
       throw new UnauthorizedException('error.auth.refresh_token.missing');
     }
 
-    const tokens = await this.authService.refresh(refreshToken);
-    this.setRefreshCookie(res, tokens.refreshToken);
-
-    return { accessToken: tokens.accessToken };
+    const {
+      accessToken,
+      refreshToken: newRefreshToken,
+      user,
+    } = await this.authService.refresh(refreshToken);
+    this.setRefreshCookie(res, newRefreshToken);
+    return { accessToken, user };
   }
 
   @Post('logout')
