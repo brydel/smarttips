@@ -32,7 +32,9 @@ export interface AuthContextValue {
   isLoading: boolean;
   isSubmitting: boolean;
   isAuthenticated: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
+  /** Logs in and returns the authenticated user — use the returned value for
+   *  role-based redirect logic since React state updates are async. */
+  login: (credentials: LoginCredentials) => Promise<AuthUser>;
   signup: (payload: SignupPayload) => Promise<void>;
   logout: (forced?: boolean) => Promise<void>;
 }
@@ -101,7 +103,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
     hydrate();
   }, []);
 
-  const login = useCallback(async (credentials: LoginCredentials): Promise<void> => {
+  const login = useCallback(async (credentials: LoginCredentials): Promise<AuthUser> => {
     setIsSubmitting(true);
     try {
       const { data } = await apiClient.post<{
@@ -111,6 +113,9 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
 
       setAccessToken(data.accessToken);
       setUser(data.user);
+      // Return the user synchronously so callers can make role-based decisions
+      // before React re-renders (state updates are async).
+      return data.user;
     } finally {
       setIsSubmitting(false);
     }
