@@ -548,6 +548,7 @@ model Shift {
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, date])
+  @@index([tenantId, date, id]) // covering index for date-range lookups joining on id
   @@index([tenantId, status, date])
   @@index([tenantId, deletedAt])
   @@map("shifts")
@@ -638,6 +639,7 @@ model Order {
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, deletedAt])
+  @@index([tenantId, status, closedAt, deletedAt]) // dashboard: PAID orders in a time range
   @@index([shiftId])
   @@index([shiftId, serverId])
   @@index([serverId])
@@ -694,6 +696,7 @@ model TipPool {
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, deletedAt])
+  @@index([tenantId, status, deletedAt]) // dashboard: fetchTipPools filter
   @@map("tip_pools")
 }
 
@@ -734,6 +737,8 @@ model TipDistribution {
   @@index([employeeId])
   @@index([employeeId, createdAt])
   @@index([mlModelId])
+  @@index([tenantId, createdAt, deletedAt]) // dashboard: time-range queries on tip distributions
+  @@index([tenantId, employeeId, createdAt]) // dashboard: fetchTopServers + fetchRoleTips groupBy
   @@map("tip_distributions")
 }
 

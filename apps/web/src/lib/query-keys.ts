@@ -19,3 +19,6 @@ export const TIP_POOLS_KEY = 'tip-pools' as const;
 
 // ── Employees ─────────────────────────────────────────────────────────────────
 export const EMPLOYEES_KEY = 'employees' as const;
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+export const DASHBOARD_STATS_KEY = 'dashboard-stats' as const;

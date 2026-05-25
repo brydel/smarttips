@@ -12,6 +12,7 @@ export interface AuthUser {
   name: string;
   role: UserRole;
   tenantId: string;
+  tenantName: string;
 }
 
 export interface LoginCredentials {

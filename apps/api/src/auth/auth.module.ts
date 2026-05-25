@@ -24,15 +24,16 @@ import { PrismaModule } from '../prisma/prisma.module';
         // Récupération sécurisée : on dit à NestJS que la valeur attendue respecte le type requis
         const expiresIn = config.get<string>('JWT_ACCESS_EXPIRES_IN', '15m');
 
-        // Sécurité critique : Crash immédiat au démarrage si la clé est absente en production
-        if (!secret && config.get<string>('NODE_ENV') === 'production') {
+        // Sécurité critique : Crash immédiat au démarrage quelle que soit l'env
+        // NEVER use a fallback — a missing secret is always a fatal misconfiguration.
+        if (!secret) {
           throw new Error(
-            'FATAL CONFIG ERROR: JWT_SECRET is not defined in environment variables.',
+            'FATAL: JWT_SECRET is not defined. The application cannot start without it.',
           );
         }
 
         return {
-          secret: secret ?? 'super-fallback-secret-key-only-for-local-dev',
+          secret,
           signOptions: {
             // On utilise un petit cast "unknown" vers le type attendu pour satisfaire le compilateur
             expiresIn: expiresIn as unknown as number,

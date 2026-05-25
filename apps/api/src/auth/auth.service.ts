@@ -32,6 +32,19 @@ interface TokenPayload {
   refreshToken: string;
 }
 
+export interface UserResponse {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  tenantId: string;
+  tenantName: string;
+}
+
+interface AuthResponse extends TokenPayload {
+  user: UserResponse;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -44,7 +57,7 @@ export class AuthService {
     private readonly config: ConfigService,
   ) {}
 
-  async signup(dto: SignupDto): Promise<TokenPayload> {
+  async signup(dto: SignupDto): Promise<AuthResponse> {
     const existingUser = await this.prisma.user.findFirst({
       where: { email: dto.email },
       select: { id: true },
@@ -88,7 +101,9 @@ export class AuthService {
         });
       });
 
-      return await this.generateTokens(user.id, user.tenantId, user.role);
+      const tokens = await this.generateTokens(user.id, user.tenantId, user.role);
+      const userData = await this.fetchUserForResponse(user.id);
+      return { ...tokens, user: userData };
     } catch (error: unknown) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
         throw new ConflictException('error.auth.signup_failed.conflict');
@@ -98,9 +113,10 @@ export class AuthService {
     }
   }
 
-  async login(dto: LoginDto): Promise<TokenPayload> {
+  async login(dto: LoginDto): Promise<AuthResponse> {
     const user = await this.prisma.user.findFirst({
       where: { email: dto.email },
+      select: { id: true, tenantId: true, role: true, hashedPassword: true },
     });
 
     const isPasswordValid = await bcrypt.compare(
@@ -112,15 +128,21 @@ export class AuthService {
       throw new UnauthorizedException('error.auth.invalid_credentials');
     }
 
-    return this.generateTokens(user.id, user.tenantId, user.role);
+    const tokens = await this.generateTokens(user.id, user.tenantId, user.role);
+    const userData = await this.fetchUserForResponse(user.id);
+    return { ...tokens, user: userData };
   }
 
-  async refresh(refreshToken: string): Promise<TokenPayload> {
+  async refresh(refreshToken: string): Promise<AuthResponse> {
     const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
 
     const stored = await this.prisma.refreshToken.findUnique({
       where: { tokenHash },
-      include: { user: true },
+      select: {
+        id: true,
+        expiresAt: true,
+        user: { select: { id: true, tenantId: true, role: true } },
+      },
     });
 
     if (!stored || stored.expiresAt < new Date()) {
@@ -134,7 +156,13 @@ export class AuthService {
       throw new UnauthorizedException('error.auth.refresh_token.invalid');
     }
 
-    return this.generateTokens(stored.user.id, stored.user.tenantId, stored.user.role);
+    const tokens = await this.generateTokens(
+      stored.user.id,
+      stored.user.tenantId,
+      stored.user.role,
+    );
+    const userData = await this.fetchUserForResponse(stored.user.id);
+    return { ...tokens, user: userData };
   }
 
   async logout(refreshToken: string): Promise<void> {
@@ -148,6 +176,11 @@ export class AuthService {
   }
 
   async me(userId: string) {
+    return this.fetchUserForResponse(userId);
+  }
+
+  /** Returns a serializable user object that includes the tenant name. */
+  private async fetchUserForResponse(userId: string): Promise<UserResponse> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -156,7 +189,7 @@ export class AuthService {
         name: true,
         role: true,
         tenantId: true,
-        createdAt: true,
+        tenant: { select: { name: true } },
       },
     });
 
@@ -164,7 +197,14 @@ export class AuthService {
       throw new NotFoundException('error.auth.user.not_found');
     }
 
-    return user;
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role as string,
+      tenantId: user.tenantId,
+      tenantName: user.tenant.name,
+    };
   }
 
   private async generateTokens(
