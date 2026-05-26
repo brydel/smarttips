@@ -33,3 +33,6 @@ export const SHIFT_DISTRIBUTION_KEY = 'shift-distribution' as const;
 export const EMPLOYEE_DASHBOARD_KEY = 'employee-dashboard' as const;
 export const EMPLOYEE_DISTRIBUTIONS_KEY = 'employee-distributions' as const;
 export const EMPLOYEE_PROFILE_KEY = 'employee-profile' as const;
+
+// ── Invitations (BIS-43) ──────────────────────────────────────────────────────
+export const INVITATIONS_KEY = 'invitations' as const;

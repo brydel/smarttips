@@ -14,6 +14,8 @@ export interface Employee {
   notes: string | null;
   active: boolean;
   tenantId: string;
+  /** null si l'employé n'a pas encore de compte utilisateur — éligible à une invitation */
+  userId: string | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -10,19 +10,17 @@ import { BulkBar } from '../../../../components/dashboard/employees/bulk-bar';
 import { UndoToast } from '../../../../components/dashboard/employees/undo-toast';
 import {
   useEmployees,
-  useCreateEmployee,
   useUpdateEmployee,
   useDeleteEmployee,
 } from '../../../../hooks/use-employees';
+import { useInvitations, useRevokeInvitation } from '../../../../hooks/use-invitations';
+import { useAuth } from '../../../../hooks/use-auth';
+import type { InvitationListItem } from '../../../../services/invitations.service';
 // QUAL-C1: role meta from shared config — eliminates per-page duplicate (ARCH-C1)
 import { ROLE_CONFIG, ROLE_ORDER } from '../../../../config/employee-roles';
 import { normalizeCoefficient } from '../../../../lib/sparkline';
-import type {
-  Employee,
-  EmployeeRole,
-  CreateEmployeePayload,
-  UpdateEmployeePayload,
-} from '../../../../types/employee';
+import type { Employee, EmployeeRole, UpdateEmployeePayload } from '../../../../types/employee';
+import type { ExistingEmployeeForInvite } from '../../../../components/dashboard/employees/invite-modal';
 
 type RoleFilter = EmployeeRole | 'all';
 type StatusFilter = 'ACTIVE' | 'INACTIVE' | 'all';
@@ -51,6 +49,8 @@ export default function EmployeesPage() {
 
   // ── Invite modal ──
   const [inviteOpen, setInviteOpen] = useState(false);
+  /** Employé existant à inviter (via TeamDrawer). null = créer + inviter. */
+  const [inviteEmployee, setInviteEmployee] = useState<ExistingEmployeeForInvite | null>(null);
 
   // ── Archive undo ──
   const [pendingArchive, setPendingArchive] = useState<Employee | null>(null);
@@ -62,9 +62,11 @@ export default function EmployeesPage() {
 
   // ── Data ──
   const { data: allEmployees = [], isLoading, isError } = useEmployees();
-  const createMutation = useCreateEmployee();
   const updateMutation = useUpdateEmployee();
   const deleteMutation = useDeleteEmployee();
+  const { data: invitations = [] } = useInvitations();
+  const revokeInvitationMutation = useRevokeInvitation();
+  const { user } = useAuth();
 
   // Reset page when filters change
   useEffect(() => {
@@ -230,12 +232,23 @@ export default function EmployeesPage() {
     [updateMutation],
   );
 
-  const handleInviteSubmit = useCallback(
-    (payload: CreateEmployeePayload) => {
-      createMutation.mutate(payload, { onSuccess: () => setInviteOpen(false) });
-    },
-    [createMutation],
-  );
+  /** Inviter un employé existant (depuis le drawer) */
+  const handleInviteExisting = useCallback((emp: Employee) => {
+    setInviteEmployee({
+      id: emp.id,
+      firstName: emp.firstName,
+      lastName: emp.lastName,
+      email: emp.email,
+    });
+    setDrawerId(null);
+    setInviteOpen(true);
+  }, []);
+
+  const handleInviteClose = useCallback(() => {
+    setInviteOpen(false);
+    // Reset après fermeture pour éviter de garder l'état employé en mémoire
+    setTimeout(() => setInviteEmployee(null), 300);
+  }, []);
 
   return (
     <div
@@ -788,6 +801,16 @@ export default function EmployeesPage() {
             </button>
           </div>
         )}
+
+        {/* ── Section Invitations ───────────────────────────────────── */}
+        {invitations.length > 0 && (
+          <InvitationsSection
+            invitations={invitations}
+            isOwner={user?.role === 'OWNER'}
+            revoking={revokeInvitationMutation.isPending}
+            onRevoke={(id) => revokeInvitationMutation.mutate(id)}
+          />
+        )}
       </div>
 
       {/* ── Overlays ───────────────────────────────────────────────── */}
@@ -799,14 +822,14 @@ export default function EmployeesPage() {
         onArchive={handleArchive}
         onSave={handleSave}
         saving={updateMutation.isPending}
+        onInvite={handleInviteExisting}
       />
 
       {/* Invite modal */}
       <InviteModal
         open={inviteOpen}
-        onClose={() => setInviteOpen(false)}
-        onSubmit={handleInviteSubmit}
-        loading={createMutation.isPending}
+        onClose={handleInviteClose}
+        existingEmployee={inviteEmployee}
       />
 
       {/* Bulk bar */}
@@ -959,6 +982,196 @@ function EmptyState({ search, onInvite }: { search: string; onInvite: () => void
           + Inviter le premier employé
         </button>
       )}
+    </div>
+  );
+}
+
+// ── InvitationsSection ──────────────────────────────────────────────────────
+
+const STATUS_LABELS: Record<InvitationListItem['status'], string> = {
+  PENDING: 'En attente',
+  ACCEPTED: 'Acceptée',
+  REVOKED: 'Révoquée',
+  EXPIRED: 'Expirée',
+};
+
+const STATUS_COLORS: Record<InvitationListItem['status'], string> = {
+  PENDING: '#EAB308',
+  ACCEPTED: '#34D399',
+  REVOKED: '#EF4444',
+  EXPIRED: '#5A6485',
+};
+
+function InvitationsSection({
+  invitations,
+  isOwner,
+  revoking,
+  onRevoke,
+}: {
+  invitations: InvitationListItem[];
+  isOwner: boolean;
+  revoking: boolean;
+  onRevoke: (id: string) => void;
+}) {
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+
+  return (
+    <div style={{ marginTop: 32 }}>
+      <h2
+        style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: '#5A6485',
+          textTransform: 'uppercase',
+          letterSpacing: '0.06em',
+          marginBottom: 12,
+          fontFamily: 'var(--st-font-mono, monospace)',
+        }}
+      >
+        Invitations
+      </h2>
+      <div
+        style={{
+          background: '#0F1422',
+          borderRadius: 12,
+          border: '1px solid #1B2236',
+          overflow: 'hidden',
+        }}
+      >
+        {invitations.map((inv, idx) => {
+          const color = STATUS_COLORS[inv.status];
+          const isLast = idx === invitations.length - 1;
+          return (
+            <div
+              key={inv.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 16px',
+                borderBottom: isLast ? 'none' : '1px solid #141A2B',
+                gap: 12,
+                flexWrap: 'wrap',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  flex: 1,
+                  minWidth: 0,
+                  flexWrap: 'wrap',
+                }}
+              >
+                {/* Employé */}
+                <div style={{ minWidth: 140 }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F6FB', margin: 0 }}>
+                    {inv.employee.firstName} {inv.employee.lastName}
+                  </p>
+                  <p style={{ fontSize: 11, color: '#5A6485', margin: 0 }}>{inv.email}</p>
+                </div>
+                {/* Status */}
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '2px 8px',
+                    borderRadius: 9999,
+                    background: `color-mix(in oklch, ${color} 12%, transparent)`,
+                    border: `1px solid color-mix(in oklch, ${color} 22%, transparent)`,
+                    fontSize: 11,
+                    color,
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {STATUS_LABELS[inv.status]}
+                </span>
+                {/* Dates */}
+                <p style={{ fontSize: 11, color: '#5A6485', margin: 0, whiteSpace: 'nowrap' }}>
+                  Expire {new Date(inv.expiresAt).toLocaleDateString('fr-CA')}
+                  {inv.acceptedAt &&
+                    ` · Acceptée ${new Date(inv.acceptedAt).toLocaleDateString('fr-CA')}`}
+                </p>
+                {/* Inviteur */}
+                <p style={{ fontSize: 11, color: '#5A6485', margin: 0, whiteSpace: 'nowrap' }}>
+                  par {inv.inviter.name}
+                </p>
+              </div>
+
+              {/* Action revoke (OWNER seulement, PENDING seulement) */}
+              {isOwner &&
+                inv.status === 'PENDING' &&
+                (confirmId === inv.id ? (
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button
+                      onClick={() => {
+                        onRevoke(inv.id);
+                        setConfirmId(null);
+                      }}
+                      disabled={revoking}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: 6,
+                        background: 'rgba(239,68,68,.12)',
+                        border: '1px solid rgba(239,68,68,.25)',
+                        color: '#EF4444',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      Confirmer
+                    </button>
+                    <button
+                      onClick={() => setConfirmId(null)}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: 6,
+                        background: 'transparent',
+                        border: '1px solid #252D45',
+                        color: '#5A6485',
+                        fontSize: 11,
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmId(inv.id)}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: 6,
+                      background: 'transparent',
+                      border: '1px solid #252D45',
+                      color: '#5A6485',
+                      fontSize: 11,
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                      transition: 'all .15s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.color = '#EF4444';
+                      (e.currentTarget as HTMLButtonElement).style.borderColor =
+                        'rgba(239,68,68,.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.color = '#5A6485';
+                      (e.currentTarget as HTMLButtonElement).style.borderColor = '#252D45';
+                    }}
+                  >
+                    Révoquer
+                  </button>
+                ))}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

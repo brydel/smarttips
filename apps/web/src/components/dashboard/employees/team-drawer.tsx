@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { X, Archive, Calendar, Save, XCircle } from 'lucide-react';
+import { X, Archive, Calendar, Save, XCircle, Mail } from 'lucide-react';
 import { format, isValid, differenceInMonths } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { EmployeeAvatar } from '../employee-avatar';
@@ -17,6 +17,8 @@ interface TeamDrawerProps {
   /** Called with (id, payload) — parent controls when to close the drawer. */
   onSave: (id: string, payload: UpdateEmployeePayload) => void;
   saving?: boolean;
+  /** Appelé quand l'utilisateur clique "Inviter" sur un employé sans compte. */
+  onInvite?: (emp: Employee) => void;
 }
 
 interface EditState {
@@ -34,6 +36,7 @@ export function TeamDrawer({
   onArchive,
   onSave,
   saving = false,
+  onInvite,
 }: TeamDrawerProps) {
   const [editMode, setEditMode] = useState(false);
   const [editState, setEditState] = useState<EditState | null>(null);
@@ -547,6 +550,16 @@ export function TeamDrawer({
                 <Archive size={13} /> Archiver
               </DangerButton>
               <div style={{ display: 'flex', gap: 8 }}>
+                {/* Bouton Inviter : visible seulement si l'employé n'a pas encore de compte */}
+                {!emp.userId && onInvite && (
+                  <GhostButton
+                    onClick={() => onInvite(emp)}
+                    aria-label="Envoyer une invitation par email"
+                    title="Envoyer un lien d'invitation"
+                  >
+                    <Mail size={13} /> Inviter
+                  </GhostButton>
+                )}
                 <GhostButton
                   onClick={() => {}}
                   aria-label="Planning (à venir)"
