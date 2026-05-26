@@ -4,6 +4,7 @@ import { useState, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { Toaster } from 'sonner';
+import { AuthProvider } from '../contexts/auth.context';
 
 function makeQueryClient(): QueryClient {
   return new QueryClient({
@@ -33,7 +34,7 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <AuthProvider>{children}</AuthProvider>
       <Toaster
         position="bottom-right"
         toastOptions={{
