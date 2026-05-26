@@ -3,7 +3,6 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
-import { AuthProvider } from '../../contexts/auth.context';
 import { useAuth } from '../../hooks/use-auth';
 import { EmployeeSidebar } from '../../features/employee/components/EmployeeSidebar';
 import { EmployeeBottomNav } from '../../features/employee/components/EmployeeBottomNav';
@@ -129,9 +128,5 @@ function EmployeeShell({ children }: { children: ReactNode }) {
 }
 
 export default function EmployeeLayout({ children }: { children: ReactNode }) {
-  return (
-    <AuthProvider>
-      <EmployeeShell>{children}</EmployeeShell>
-    </AuthProvider>
-  );
+  return <EmployeeShell>{children}</EmployeeShell>;
 }

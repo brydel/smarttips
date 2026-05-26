@@ -3,7 +3,7 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { Brain, Menu } from 'lucide-react';
-import { AuthProvider, type UserRole } from '../../contexts/auth.context';
+import type { UserRole } from '../../contexts/auth.context';
 import { useAuth } from '../../hooks/use-auth';
 import { Sidebar } from '../../components/dashboard/sidebar';
 
@@ -109,9 +109,5 @@ function DashboardShell({ children }: { children: ReactNode }) {
 }
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  return (
-    <AuthProvider>
-      <DashboardShell>{children}</DashboardShell>
-    </AuthProvider>
-  );
+  return <DashboardShell>{children}</DashboardShell>;
 }
