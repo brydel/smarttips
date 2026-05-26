@@ -12,6 +12,8 @@ import { MenuCategoriesModule } from './menu-categories/menu-categories.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { DistributionModule } from './distribution/distribution.module';
 import { TenantConfigModule } from './tenant-config/tenant-config.module';
+import { InvitationsModule } from './invitations/invitations.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { TenantConfigModule } from './tenant-config/tenant-config.module';
     DashboardModule,
     DistributionModule,
     TenantConfigModule,
+    InvitationsModule,
+    EmailModule,
   ],
 })
 export class AppModule {}
