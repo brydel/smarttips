@@ -37,6 +37,12 @@ export interface AuthContextValue {
   login: (credentials: LoginCredentials) => Promise<AuthUser>;
   signup: (payload: SignupPayload) => Promise<void>;
   logout: (forced?: boolean) => Promise<void>;
+  /**
+   * Hydrate la session depuis un accessToken externe (ex. acceptation d'invitation).
+   * Note : session non persistante au rafraîchissement (pas de refresh token cookie).
+   * L'employé devra se reconnecter normalement à sa prochaine visite.
+   */
+  loginWithSession: (accessToken: string, sessionUser: AuthUser) => void;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -136,6 +142,11 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
     }
   }, []);
 
+  const loginWithSession = useCallback((accessToken: string, sessionUser: AuthUser): void => {
+    setAccessToken(accessToken);
+    setUser(sessionUser);
+  }, []);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -145,8 +156,9 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
       login,
       signup,
       logout,
+      loginWithSession,
     }),
-    [user, isLoading, isSubmitting, login, signup, logout],
+    [user, isLoading, isSubmitting, login, signup, logout, loginWithSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
