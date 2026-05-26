@@ -40,8 +40,16 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api/v1');
 
-  const frontendUrlString = config.get<string>('FRONTEND_URL', 'http://localhost:3000');
-  const allowedOrigins = frontendUrlString.split(',').map((url) => url.trim());
+  // CORS_ORIGINS = liste multi-valeur pour le CORS (peut contenir plusieurs URLs séparées par virgule)
+  // FRONTEND_URL = URL UNIQUE utilisée uniquement pour générer les magic links (invitations)
+  const corsOriginsString = config.get<string>(
+    'CORS_ORIGINS',
+    config.get<string>('FRONTEND_URL', 'http://localhost:3000'),
+  );
+  const allowedOrigins = corsOriginsString
+    .split(',')
+    .map((url) => url.trim())
+    .filter(Boolean);
 
   app.enableCors({
     origin: (
