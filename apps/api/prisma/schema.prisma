@@ -191,6 +191,27 @@ enum AuditAction {
   RESTORE
   ARCHIVE
 
+  INVITATION_SENT
+  INVITATION_ACCEPTED
+  INVITATION_REVOKED
+
+  TIP_DISTRIBUTION_CREATED
+  TIP_DISTRIBUTION_ADJUSTED
+  TIP_DISTRIBUTION_MANUAL_ADJUSTED
+  TIP_DISTRIBUTION_APPROVED
+
+  DISTRIBUTION_CONFIG_UPDATED
+
+  EMPLOYEE_CREATED
+  EMPLOYEE_UPDATED
+  EMPLOYEE_DEACTIVATED
+
+  SHIFT_CLOSED
+  SHIFT_REOPENED
+
+  USER_LOGIN
+  USER_LOGOUT
+
   @@map("audit_action")
 }
 
@@ -922,20 +943,25 @@ model FairnessAudit {
 // AUDIT & COMPLIANCE
 // ============================================================================
 
-/// Immutable audit trail. NEVER DELETE.
-/// Use onDelete: Restrict to avoid contradiction with legal retention.
+/// Immutable log of all significant actions in the system.
+/// Records should be append-only: never updated, never deleted by application code.
 model AuditLog {
   id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   tenantId   String      @map("tenant_id") @db.Uuid
   userId     String?     @map("user_id") @db.Uuid
+
   action     AuditAction
   entityType String      @map("entity_type") @db.VarChar(100)
   entityId   String      @map("entity_id") @db.Uuid
+
   oldValues  Json?       @map("old_values")
   newValues  Json?       @map("new_values")
+  metadata   Json?
+
   ipAddress  String?     @map("ip_address") @db.Inet
   userAgent  String?     @map("user_agent") @db.Text
   requestId  String?     @map("request_id") @db.VarChar(100)
+
   createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
@@ -943,8 +969,11 @@ model AuditLog {
 
   @@index([tenantId])
   @@index([userId])
+  @@index([tenantId, action])
   @@index([tenantId, entityType, entityId])
   @@index([tenantId, createdAt])
+  @@index([tenantId, userId])
+  @@index([requestId])
   @@map("audit_logs")
 }
 

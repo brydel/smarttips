@@ -14,6 +14,7 @@ import { DistributionModule } from './distribution/distribution.module';
 import { TenantConfigModule } from './tenant-config/tenant-config.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { EmailModule } from './email/email.module';
+import { AuditModule } from './audit/audit.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { EmailModule } from './email/email.module';
     TenantConfigModule,
     InvitationsModule,
     EmailModule,
+    AuditModule,
   ],
 })
 export class AppModule {}

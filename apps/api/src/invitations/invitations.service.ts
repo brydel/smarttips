@@ -8,10 +8,11 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { EmployeeInvitationStatus, Prisma, UserRole } from '@prisma/client';
-import { createHash, randomBytes } from 'crypto';
+import { AuditAction, EmployeeInvitationStatus, Prisma, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { createHash, randomBytes } from 'crypto';
 
+import { AuditService } from '../audit/audit.service';
 import { EmailService } from '../email/email.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AcceptEmployeeInvitationDto } from './dto/accept-employee-invitation.dto';
@@ -49,6 +50,12 @@ type InvitationAcceptResponse = {
   };
 };
 
+type AuditRequestContext = {
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  requestId?: string | null;
+};
+
 @Injectable()
 export class InvitationsService {
   private readonly tokenBytes = 32;
@@ -58,12 +65,14 @@ export class InvitationsService {
     private readonly email: EmailService,
     private readonly config: ConfigService,
     private readonly jwt: JwtService,
+    private readonly audit: AuditService,
   ) {}
 
   async create(
     tenantId: string,
     invitedBy: string,
     dto: CreateEmployeeInvitationDto,
+    context?: AuditRequestContext,
   ): Promise<InvitationCreateResponse> {
     const rawToken = this.generateRawToken();
     const tokenHash = this.hashToken(rawToken);
@@ -135,13 +144,15 @@ export class InvitationsService {
         throw new ConflictException('error.invitation.emailAlreadyUsed');
       }
 
+      const now = new Date();
+
       await tx.employeeInvitation.updateMany({
         where: {
           tenantId,
           employeeId: dto.employeeId,
           status: EmployeeInvitationStatus.PENDING,
           expiresAt: {
-            lt: new Date(),
+            lt: now,
           },
         },
         data: {
@@ -155,7 +166,7 @@ export class InvitationsService {
           employeeId: dto.employeeId,
           status: EmployeeInvitationStatus.PENDING,
           expiresAt: {
-            gt: new Date(),
+            gt: now,
           },
         },
         select: {
@@ -214,8 +225,51 @@ export class InvitationsService {
         },
       });
 
+      await this.audit.log({
+        tenantId,
+        userId: invitedBy,
+        action: AuditAction.INVITATION_REVOKED,
+        entityType: 'EmployeeInvitation',
+        entityId: invitation.id,
+        oldValues: {
+          status: EmployeeInvitationStatus.PENDING,
+        },
+        newValues: {
+          status: EmployeeInvitationStatus.REVOKED,
+        },
+        metadata: {
+          reason: 'email_send_failed',
+          email: invitation.email,
+          delivery: 'email',
+        },
+        ipAddress: context?.ipAddress,
+        userAgent: context?.userAgent,
+        requestId: context?.requestId,
+      });
+
       throw new ServiceUnavailableException('error.email.sendFailed');
     }
+
+    await this.audit.log({
+      tenantId,
+      userId: invitedBy,
+      action: AuditAction.INVITATION_SENT,
+      entityType: 'EmployeeInvitation',
+      entityId: invitation.id,
+      oldValues: null,
+      newValues: {
+        status: EmployeeInvitationStatus.PENDING,
+        email: invitation.email,
+        employeeId: dto.employeeId,
+        expiresAt: invitation.expiresAt.toISOString(),
+      },
+      metadata: {
+        delivery: 'email',
+      },
+      ipAddress: context?.ipAddress,
+      userAgent: context?.userAgent,
+      requestId: context?.requestId,
+    });
 
     return {
       id: invitation.id,
@@ -295,11 +349,15 @@ export class InvitationsService {
     };
   }
 
-  async accept(token: string, dto: AcceptEmployeeInvitationDto): Promise<InvitationAcceptResponse> {
+  async accept(
+    token: string,
+    dto: AcceptEmployeeInvitationDto,
+    context?: AuditRequestContext,
+  ): Promise<InvitationAcceptResponse> {
     const tokenHash = this.hashIncomingToken(token);
     const now = new Date();
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const invitation = await tx.employeeInvitation.findUnique({
         where: {
           tokenHash,
@@ -403,9 +461,12 @@ export class InvitationsService {
         },
       });
 
-      await tx.employee.update({
+      const employeeUpdateResult = await tx.employee.updateMany({
         where: {
           id: invitation.employeeId,
+          userId: null,
+          active: true,
+          deletedAt: null,
         },
         data: {
           userId: user.id,
@@ -414,6 +475,10 @@ export class InvitationsService {
           email: invitation.email,
         },
       });
+
+      if (employeeUpdateResult.count !== 1) {
+        throw new ConflictException('error.invitation.employeeLinkConflict');
+      }
 
       await tx.employeeInvitation.update({
         where: {
@@ -429,8 +494,36 @@ export class InvitationsService {
       return {
         accessToken,
         user,
+        invitationId: invitation.id,
       };
     });
+
+    await this.audit.log({
+      tenantId: result.user.tenantId,
+      userId: result.user.id,
+      action: AuditAction.INVITATION_ACCEPTED,
+      entityType: 'EmployeeInvitation',
+      entityId: result.invitationId,
+      oldValues: {
+        status: EmployeeInvitationStatus.PENDING,
+      },
+      newValues: {
+        status: EmployeeInvitationStatus.ACCEPTED,
+        userId: result.user.id,
+        email: result.user.email,
+      },
+      metadata: {
+        source: 'magic_link',
+      },
+      ipAddress: context?.ipAddress,
+      userAgent: context?.userAgent,
+      requestId: context?.requestId,
+    });
+
+    return {
+      accessToken: result.accessToken,
+      user: result.user,
+    };
   }
 
   async findAll(tenantId: string) {
@@ -468,7 +561,12 @@ export class InvitationsService {
     });
   }
 
-  async revoke(tenantId: string, id: string): Promise<void> {
+  async revoke(
+    tenantId: string,
+    id: string,
+    revokedBy: string,
+    context?: AuditRequestContext,
+  ): Promise<void> {
     const invitation = await this.prisma.employeeInvitation.findFirst({
       where: {
         id,
@@ -476,6 +574,7 @@ export class InvitationsService {
       },
       select: {
         id: true,
+        email: true,
         status: true,
       },
     });
@@ -503,6 +602,27 @@ export class InvitationsService {
     if (updateResult.count !== 1) {
       throw new ConflictException('error.invitation.concurrentRevoke');
     }
+
+    await this.audit.log({
+      tenantId,
+      userId: revokedBy,
+      action: AuditAction.INVITATION_REVOKED,
+      entityType: 'EmployeeInvitation',
+      entityId: id,
+      oldValues: {
+        status: EmployeeInvitationStatus.PENDING,
+      },
+      newValues: {
+        status: EmployeeInvitationStatus.REVOKED,
+      },
+      metadata: {
+        reason: 'manual_revoke',
+        email: invitation.email,
+      },
+      ipAddress: context?.ipAddress,
+      userAgent: context?.userAgent,
+      requestId: context?.requestId,
+    });
   }
 
   private async signAccessToken(user: {
