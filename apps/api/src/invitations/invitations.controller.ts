@@ -202,9 +202,12 @@ export class InvitationsController {
     @CurrentUser('tenantId', new ParseUUIDPipe({ version: '4' }))
     tenantId: string,
 
+    @CurrentUser('id', new ParseUUIDPipe({ version: '4' }))
+    revokedBy: string,
+
     @Param('id', new ParseUUIDPipe({ version: '4' }))
     id: string,
   ): Promise<void> {
-    await this.invitationsService.revoke(tenantId, id);
+    await this.invitationsService.revoke(tenantId, id, revokedBy);
   }
 }
