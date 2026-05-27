@@ -15,6 +15,7 @@ import { TenantConfigModule } from './tenant-config/tenant-config.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { EmailModule } from './email/email.module';
 import { AuditModule } from './audit/audit.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { AuditModule } from './audit/audit.module';
     InvitationsModule,
     EmailModule,
     AuditModule,
+    ReportsModule,
   ],
 })
 export class AppModule {}
