@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AssignmentStatus, Prisma } from '@prisma/client';
 import { stringify } from 'csv-stringify/sync';
-import * as PdfMakePrinterModule from 'pdfmake';
 import type { Content, TableCell, TDocumentDefinitions } from 'pdfmake/interfaces';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -57,9 +56,8 @@ type PdfPrinterInstance = {
   createPdfKitDocument: (docDefinition: TDocumentDefinitions) => PdfKitDocument;
 };
 
-type PdfPrinterConstructor = new (fonts: typeof PDF_FONTS) => PdfPrinterInstance;
+const PdfPrinter = require('pdfmake') as new (fonts: typeof PDF_FONTS) => PdfPrinterInstance;
 
-const PdfPrinter = PdfMakePrinterModule as unknown as PdfPrinterConstructor;
 @Injectable()
 export class ReportsService {
   private readonly pdfPrinter = new PdfPrinter(PDF_FONTS);
@@ -406,7 +404,7 @@ export class ReportsService {
 
   private buildPdfBuffer(docDefinition: TDocumentDefinitions): Promise<Buffer> {
     return new Promise((resolve, reject) => {
-      const pdfDocument = this.pdfPrinter.createPdfKitDocument(docDefinition);
+      const pdfDocument = this.pdfPrinter.createPdfKitDocument(docDefinition) as PdfKitDocument;
       const chunks: Buffer[] = [];
 
       pdfDocument.on('data', (chunk: Buffer) => {
