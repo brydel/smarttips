@@ -40,49 +40,49 @@ jobs:
       - run: pnpm typecheck
 
   test-api-web:
-  name: Test API and web
-  runs-on: ubuntu-latest
-  timeout-minutes: 20
+    name: Test API and web
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
 
-  services:
-    postgres:
-      image: postgres:15-alpine
-      env:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_DB: smarttips_test
-      ports:
-        - 5432:5432
-      options: >-
-        --health-cmd "pg_isready -U postgres -d smarttips_test"
-        --health-interval 10s
-        --health-timeout 5s
-        --health-retries 5
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: smarttips_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d smarttips_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
-  env:
-    DATABASE_URL: postgresql://postgres:postgres@localhost:5432/smarttips_test
-    NODE_ENV: test
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/smarttips_test
+      NODE_ENV: test
 
-  steps:
-    - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-    - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
 
-    - uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'pnpm'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
 
-    - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
-    - name: Generate Prisma client
-      run: pnpm --filter @smarttips/api prisma:generate
+      - name: Generate Prisma client
+        run: pnpm --filter @smarttips/api prisma:generate
 
-    - name: Run database migrations
-      run: pnpm --filter @smarttips/api prisma:migrate:prod
+      - name: Run database migrations
+        run: pnpm --filter @smarttips/api prisma:migrate:prod
 
-    - name: Run tests
-      run: pnpm test
+      - name: Run tests
+        run: pnpm test
   test-ml-service:
     name: Test ML service
     runs-on: ubuntu-latest
