@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AssignmentStatus, Prisma } from '@prisma/client';
 import { stringify } from 'csv-stringify/sync';
+import pdfmake = require('pdfmake');
 import type { Content, TableCell, TDocumentDefinitions } from 'pdfmake/interfaces';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -36,10 +37,28 @@ type AuditCsvRow = {
   created_at: string;
 };
 
+type PdfFontDefinition = {
+  normal: string;
+  bold: string;
+  italics: string;
+  bolditalics: string;
+};
+
+type PdfMakeDocument = {
+  getBuffer: () => Promise<Buffer | Uint8Array | ArrayBuffer>;
+};
+
+type PdfMakeModule = {
+  addFonts: (fonts: Record<string, PdfFontDefinition>) => void;
+  createPdf: (docDefinition: TDocumentDefinitions) => PdfMakeDocument;
+  setUrlAccessPolicy?: (policy: (url: string) => boolean | Promise<boolean>) => void;
+  setLocalAccessPolicy?: (policy: (filePath: string) => boolean | Promise<boolean>) => void;
+};
+
 const CSV_FORMULA_PREFIX_PATTERN = /^[=+\-@\t\r\n]/;
 const NULL_BYTE = String.fromCharCode(0);
 
-const PDF_FONTS = {
+const PDF_FONTS: Record<string, PdfFontDefinition> = {
   Helvetica: {
     normal: 'Helvetica',
     bold: 'Helvetica-Bold',
@@ -48,20 +67,22 @@ const PDF_FONTS = {
   },
 };
 
-type PdfKitDocument = NodeJS.ReadableStream & {
-  end: () => void;
-};
+const PDF_ALLOWED_LOCAL_FONT_PATHS = new Set<string>(
+  Object.values(PDF_FONTS).flatMap((fontDefinition) => [
+    fontDefinition.normal,
+    fontDefinition.bold,
+    fontDefinition.italics,
+    fontDefinition.bolditalics,
+  ]),
+);
 
-type PdfPrinterInstance = {
-  createPdfKitDocument: (docDefinition: TDocumentDefinitions) => PdfKitDocument;
-};
-
-const PdfPrinter = require('pdfmake') as new (fonts: typeof PDF_FONTS) => PdfPrinterInstance;
+const pdfMake = pdfmake as unknown as PdfMakeModule;
+pdfMake.addFonts(PDF_FONTS);
+pdfMake.setUrlAccessPolicy?.(() => false);
+pdfMake.setLocalAccessPolicy?.((filePath) => PDF_ALLOWED_LOCAL_FONT_PATHS.has(filePath));
 
 @Injectable()
 export class ReportsService {
-  private readonly pdfPrinter = new PdfPrinter(PDF_FONTS);
-
   constructor(private readonly prisma: PrismaService) {}
 
   async generatePayrollCsv(tenantId: string, dto: PayrollQueryDto): Promise<Buffer> {
@@ -402,25 +423,18 @@ export class ReportsService {
     return Buffer.from(csv, 'utf8');
   }
 
-  private buildPdfBuffer(docDefinition: TDocumentDefinitions): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-      const pdfDocument = this.pdfPrinter.createPdfKitDocument(docDefinition) as PdfKitDocument;
-      const chunks: Buffer[] = [];
+  private async buildPdfBuffer(docDefinition: TDocumentDefinitions): Promise<Buffer> {
+    const pdfBuffer = await pdfMake.createPdf(docDefinition).getBuffer();
 
-      pdfDocument.on('data', (chunk: Buffer) => {
-        chunks.push(chunk);
-      });
+    if (Buffer.isBuffer(pdfBuffer)) {
+      return pdfBuffer;
+    }
 
-      pdfDocument.on('end', () => {
-        resolve(Buffer.concat(chunks));
-      });
+    if (pdfBuffer instanceof ArrayBuffer) {
+      return Buffer.from(new Uint8Array(pdfBuffer));
+    }
 
-      pdfDocument.on('error', (error: Error) => {
-        reject(error);
-      });
-
-      pdfDocument.end();
-    });
+    return Buffer.from(pdfBuffer);
   }
 
   private toDateOnlyRange(fromRaw: string, toRaw: string): { from: Date; to: Date } {
