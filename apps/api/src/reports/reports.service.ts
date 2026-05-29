@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AssignmentStatus, Prisma } from '@prisma/client';
 import { stringify } from 'csv-stringify/sync';
+import * as pdfmakeModule from 'pdfmake';
 import type { Content, TableCell, TDocumentDefinitions } from 'pdfmake/interfaces';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -75,7 +76,7 @@ const PDF_ALLOWED_LOCAL_FONT_PATHS = new Set<string>(
   ]),
 );
 
-const pdfmake = require('pdfmake') as PdfMakeModule;
+const pdfmake = pdfmakeModule as unknown as PdfMakeModule;
 pdfmake.addFonts(PDF_FONTS);
 pdfmake.setUrlAccessPolicy?.(() => false);
 pdfmake.setLocalAccessPolicy?.((filePath) => PDF_ALLOWED_LOCAL_FONT_PATHS.has(filePath));
