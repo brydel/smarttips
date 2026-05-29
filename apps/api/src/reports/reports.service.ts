@@ -427,7 +427,15 @@ export class ReportsService {
     const pdf = pdfmake.createPdf(docDefinition);
     const pdfBuffer = await pdf.getBuffer();
 
-    return Buffer.isBuffer(pdfBuffer) ? pdfBuffer : Buffer.from(pdfBuffer);
+    if (Buffer.isBuffer(pdfBuffer)) {
+      return pdfBuffer;
+    }
+
+    if (pdfBuffer instanceof ArrayBuffer) {
+      return Buffer.from(new Uint8Array(pdfBuffer));
+    }
+
+    return Buffer.from(pdfBuffer);
   }
 
   private toDateOnlyRange(fromRaw: string, toRaw: string): { from: Date; to: Date } {
