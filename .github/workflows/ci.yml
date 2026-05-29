@@ -6,9 +6,19 @@ on:
   push:
     branches: [main, develop]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint-and-typecheck:
+    name: Lint and typecheck monorepo
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     steps:
       - uses: actions/checkout@v4
 
@@ -20,55 +30,104 @@ jobs:
           cache: 'pnpm'
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @smarttips/api prisma:generate
+
+      - name: Generate Prisma client
+        run: pnpm --filter @smarttips/api prisma:generate
         env:
-          DATABASE_URL: postgresql://fake:fake@localhost:5432/fake
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/smarttips_test
+
       - run: pnpm lint
       - run: pnpm typecheck
 
   test-api-web:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: smarttips_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@v4
+  name: Test API and web
+  runs-on: ubuntu-latest
+  timeout-minutes: 20
 
-      - uses: pnpm/action-setup@v4
+  services:
+    postgres:
+      image: postgres:15-alpine
+      env:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: smarttips_test
+      ports:
+        - 5432:5432
+      options: >-
+        --health-cmd "pg_isready -U postgres -d smarttips_test"
+        --health-interval 10s
+        --health-timeout 5s
+        --health-retries 5
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
+  env:
+    DATABASE_URL: postgresql://postgres:postgres@localhost:5432/smarttips_test
+    NODE_ENV: test
 
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm test
-        env:
-          DATABASE_URL: postgresql://fake:fake@localhost:5432/fake
+  steps:
+    - uses: actions/checkout@v4
 
+    - uses: pnpm/action-setup@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'pnpm'
+
+    - run: pnpm install --frozen-lockfile
+
+    - name: Generate Prisma client
+      run: pnpm --filter @smarttips/api prisma:generate
+
+    - name: Run database migrations
+      run: pnpm --filter @smarttips/api prisma:migrate:prod
+
+    - name: Run tests
+      run: pnpm test
   test-ml-service:
+    name: Test ML service
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    defaults:
+      run:
+        working-directory: apps/ml-service
+
+    env:
+      APP_ENV: test
+      INTERNAL_TOKEN: ci-internal-token-with-at-least-32-chars
+      MODEL_ARTIFACT_SECRET: ci-model-artifact-secret-at-least-32-chars
+      STORAGE_BACKEND: local
+      LOCAL_MODEL_DIR: ./data/models
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Poetry
+        run: pipx install poetry==1.8.3
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'poetry'
+          cache-dependency-path: apps/ml-service/poetry.lock
 
-      - name: Install dependencies & run tests
-        working-directory: apps/ml-service
-        run: |
-          pip install poetry
-          poetry install --no-root --extras dev
-          poetry run pytest --cov=app || true
+      - name: Install dependencies
+        run: poetry install --no-root --sync
+
+      - name: Ruff
+        run: poetry run ruff check .
+
+      - name: Mypy
+        run: poetry run mypy app tests
+
+      - name: Pytest
+        run: poetry run pytest
+
+      - name: Bandit
+        run: poetry run bandit -c pyproject.toml -r app
+
+      - name: Pip audit
+        run: poetry run pip-audit
+
+      - name: Build Docker image
+        run: docker build -t smarttips-ml-service .
