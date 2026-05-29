@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AssignmentStatus, Prisma } from '@prisma/client';
 import { stringify } from 'csv-stringify/sync';
+import * as pdfmakeModule from 'pdfmake';
 import type { Content, TableCell, TDocumentDefinitions } from 'pdfmake/interfaces';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -75,7 +76,7 @@ const PDF_ALLOWED_LOCAL_FONT_PATHS = new Set<string>(
   ]),
 );
 
-const pdfmake = require('pdfmake') as PdfMakeModule;
+const pdfmake = pdfmakeModule as unknown as PdfMakeModule;
 pdfmake.addFonts(PDF_FONTS);
 pdfmake.setUrlAccessPolicy?.(() => false);
 pdfmake.setLocalAccessPolicy?.((filePath) => PDF_ALLOWED_LOCAL_FONT_PATHS.has(filePath));
@@ -426,7 +427,15 @@ export class ReportsService {
     const pdf = pdfmake.createPdf(docDefinition);
     const pdfBuffer = await pdf.getBuffer();
 
-    return Buffer.isBuffer(pdfBuffer) ? pdfBuffer : Buffer.from(pdfBuffer);
+    if (Buffer.isBuffer(pdfBuffer)) {
+      return pdfBuffer;
+    }
+
+    if (pdfBuffer instanceof ArrayBuffer) {
+      return Buffer.from(new Uint8Array(pdfBuffer));
+    }
+
+    return Buffer.from(pdfBuffer);
   }
 
   private toDateOnlyRange(fromRaw: string, toRaw: string): { from: Date; to: Date } {
