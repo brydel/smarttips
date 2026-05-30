@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import base64
 import hashlib
@@ -5,7 +7,7 @@ import hmac
 import io
 import json
 import re
-from typing import Any, Final, cast
+from typing import Any, Final, Generic, TypeVar, cast
 from uuid import UUID
 
 import boto3
@@ -15,7 +17,7 @@ from botocore.exceptions import ClientError
 
 from app.core.config import get_settings
 from app.core.security import sign_artifact, verify_artifact
-from app.models.tip_model import MODEL_NAME, TipModelMetadata, TipModelWrapper
+from app.models.tip_model import TipModelMetadata
 from app.storage.base import (
     ArtifactIntegrityError,
     ArtifactNotFoundError,
@@ -24,18 +26,15 @@ from app.storage.base import (
     ModelStoreError,
     TenantId,
 )
+from app.storage.model_store import (
+    ModelArtifactConfig,
+    PersistableModel,
+    tip_model_artifact_config,
+)
 
-LATEST_KEY_SUFFIX: Final[str] = "latest.json"
-IDEMPOTENCY_KEY_SUFFIX: Final[str] = "idempotency.json"
-ARTIFACT_PREFIX: Final[str] = "tip-model-v"
 ARTIFACT_SUFFIX: Final[str] = ".pkl"
 UTF8: Final[str] = "utf-8"
 JSON_INDENT: Final[int] = 2
-
-ARTIFACT_KEY_PATTERN: Final[re.Pattern[str]] = re.compile(
-    rf"^models/([0-9a-f]{{8}}-[0-9a-f]{{4}}-[0-9a-f]{{4}}-[0-9a-f]{{4}}-[0-9a-f]{{12}})/"
-    rf"{ARTIFACT_PREFIX}([1-9][0-9]*){re.escape(ARTIFACT_SUFFIX)}$"
-)
 
 S3_NOT_FOUND_CODES: Final[frozenset[str]] = frozenset(
     {
@@ -45,9 +44,15 @@ S3_NOT_FOUND_CODES: Final[frozenset[str]] = frozenset(
     }
 )
 
+StoredModelT = TypeVar("StoredModelT", bound=PersistableModel)
 
-class R2ModelStore:
-    def __init__(self) -> None:
+
+class R2ModelStore(Generic[StoredModelT]):
+    def __init__(
+        self,
+        *,
+        artifact_config: ModelArtifactConfig | None = None,
+    ) -> None:
         self._settings = get_settings()
 
         if self._settings.r2_bucket is None:
@@ -63,6 +68,18 @@ class R2ModelStore:
             raise ModelStoreError("r2_secret_key is not configured")
 
         self._bucket = self._settings.r2_bucket
+        config = artifact_config or tip_model_artifact_config()
+        self._model_name = config.model_name
+        self._artifact_prefix = config.artifact_prefix
+        self._latest_key_suffix = config.latest_filename
+        self._idempotency_key_suffix = config.idempotency_filename
+        self._wrapper_factory = config.wrapper_factory
+        self._artifact_key_pattern = re.compile(
+            rf"^models/([0-9a-f]{{8}}-[0-9a-f]{{4}}-[0-9a-f]{{4}}-"
+            rf"[0-9a-f]{{4}}-[0-9a-f]{{12}})/"
+            rf"{re.escape(self._artifact_prefix)}([1-9][0-9]*)"
+            rf"{re.escape(ARTIFACT_SUFFIX)}$"
+        )
 
         self._client = boto3.client(
             "s3",
@@ -100,18 +117,18 @@ class R2ModelStore:
         if version < 1:
             raise ValueError("artifact version must be greater than or equal to 1")
 
-        return f"{self._tenant_prefix(tenant_id)}/{ARTIFACT_PREFIX}{version}{ARTIFACT_SUFFIX}"
+        return f"{self._tenant_prefix(tenant_id)}/{self._artifact_prefix}{version}{ARTIFACT_SUFFIX}"
 
     def _latest_key(self, tenant_id: TenantId) -> str:
-        return f"{self._tenant_prefix(tenant_id)}/{LATEST_KEY_SUFFIX}"
+        return f"{self._tenant_prefix(tenant_id)}/{self._latest_key_suffix}"
 
     def _idempotency_key(self, tenant_id: TenantId) -> str:
-        return f"{self._tenant_prefix(tenant_id)}/{IDEMPOTENCY_KEY_SUFFIX}"
+        return f"{self._tenant_prefix(tenant_id)}/{self._idempotency_key_suffix}"
 
     def _is_not_found(self, error: ClientError) -> bool:
         return error.response.get("Error", {}).get("Code") in S3_NOT_FOUND_CODES
 
-    async def load(self, tenant_id: TenantId) -> TipModelWrapper | None:
+    async def load(self, tenant_id: TenantId) -> StoredModelT | None:
         lock = await self._get_tenant_lock(tenant_id)
 
         async with lock:
@@ -145,13 +162,16 @@ class R2ModelStore:
 
             model_object = await asyncio.to_thread(joblib.load, io.BytesIO(data))
 
-            return TipModelWrapper(
-                model=model_object,
-                version=metadata.model_version,
-                trained_count=metadata.trained_count,
+            return cast(
+                StoredModelT,
+                self._wrapper_factory(
+                    model_object,
+                    metadata.model_version,
+                    metadata.trained_count,
+                ),
             )
 
-    async def save(self, tenant_id: TenantId, model: TipModelWrapper) -> TipModelMetadata:
+    async def save(self, tenant_id: TenantId, model: StoredModelT) -> TipModelMetadata:
         lock = await self._get_tenant_lock(tenant_id)
 
         async with lock:
@@ -173,7 +193,7 @@ class R2ModelStore:
             signature = sign_artifact(
                 data,
                 tenant_id=str(tenant_id),
-                model_name=MODEL_NAME,
+                model_name=self._model_name,
                 model_version=model.version,
             )
 
@@ -186,7 +206,7 @@ class R2ModelStore:
             )
 
             manifest = {
-                "model_name": MODEL_NAME,
+                "model_name": self._model_name,
                 "model_version": model.version,
                 "trained_count": model.trained_count,
                 "sha256": sha256,
@@ -460,7 +480,7 @@ class R2ModelStore:
         versions: list[int] = []
 
         for key in keys:
-            match = ARTIFACT_KEY_PATTERN.fullmatch(key)
+            match = self._artifact_key_pattern.fullmatch(key)
 
             if match is None:
                 continue
@@ -513,7 +533,7 @@ class R2ModelStore:
     def _metadata_from_manifest(self, manifest: dict[str, Any]) -> TipModelMetadata:
         model_name = self._get_required_str(manifest, "model_name")
 
-        if model_name != MODEL_NAME:
+        if model_name != self._model_name:
             raise ArtifactIntegrityError("unexpected model name")
 
         model_version = self._get_required_positive_int(manifest, "model_version")
@@ -557,7 +577,7 @@ class R2ModelStore:
         return value
 
     def _parse_artifact_key(self, key: str) -> tuple[TenantId, int]:
-        match = ARTIFACT_KEY_PATTERN.fullmatch(key)
+        match = self._artifact_key_pattern.fullmatch(key)
 
         if match is None:
             raise ArtifactIntegrityError("invalid artifact key")
