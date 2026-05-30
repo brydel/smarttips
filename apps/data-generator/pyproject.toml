@@ -1,0 +1,52 @@
+[tool.poetry]
+name = "data-generator"
+version = "0.1.0"
+description = "SmartTips synthetic data generator for ML training and demo seeds"
+authors = ["Brydel Fosso Saounde"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+numpy = ">=2.0.0,<3.0.0"
+scipy = ">=1.13.0,<2.0.0"
+pydantic = ">=2.7.0,<3.0.0"
+pydantic-settings = ">=2.13.0,<2.15.0"
+faker = ">=25.0.0,<40.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.4.2,<10.0.0"
+hypothesis = ">=6.140.0,<7.0.0"
+ruff = ">=0.14.0,<0.15.0"
+mypy = ">=1.18.0,<2.0.0"
+
+[tool.poetry.scripts]
+generate = "generator.cli:main"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = ["--strict-markers", "--strict-config", "-ra"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["generator", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "C4", "N", "S", "RUF"]
+ignore = [
+  "S101", # pytest assert
+  "S311", # numpy/faker pseudo-randomness accepted for synthetic data, not security
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_configs = true
+warn_unreachable = true
+disallow_untyped_defs = true
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
