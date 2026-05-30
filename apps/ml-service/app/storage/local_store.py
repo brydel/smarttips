@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import hashlib
 import hmac
@@ -6,14 +8,14 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, Generic, TypeVar, cast
 from uuid import UUID
 
 import joblib
 
 from app.core.config import get_settings
 from app.core.security import sign_artifact, verify_artifact
-from app.models.tip_model import MODEL_NAME, TipModelMetadata, TipModelWrapper
+from app.models.tip_model import TipModelMetadata
 from app.storage.base import (
     ArtifactIntegrityError,
     ArtifactNotFoundError,
@@ -22,24 +24,38 @@ from app.storage.base import (
     ModelStoreError,
     TenantId,
 )
+from app.storage.model_store import (
+    ModelArtifactConfig,
+    PersistableModel,
+    tip_model_artifact_config,
+)
 
-LATEST_FILENAME: Final[str] = "latest.json"
-IDEMPOTENCY_FILENAME: Final[str] = "idempotency.json"
-ARTIFACT_PREFIX: Final[str] = "tip-model-v"
 ARTIFACT_SUFFIX: Final[str] = ".pkl"
 UTF8: Final[str] = "utf-8"
 JSON_INDENT: Final[int] = 2
 
-ARTIFACT_FILENAME_PATTERN: Final[re.Pattern[str]] = re.compile(
-    rf"^{ARTIFACT_PREFIX}([1-9][0-9]*){re.escape(ARTIFACT_SUFFIX)}$"
-)
+StoredModelT = TypeVar("StoredModelT", bound=PersistableModel)
 
 
-class LocalModelStore:
-    def __init__(self) -> None:
+class LocalModelStore(Generic[StoredModelT]):
+    def __init__(
+        self,
+        *,
+        artifact_config: ModelArtifactConfig | None = None,
+    ) -> None:
         self._settings = get_settings()
         self._root = self._settings.local_model_dir
         self._root.mkdir(parents=True, exist_ok=True)
+        config = artifact_config or tip_model_artifact_config()
+        self._model_name = config.model_name
+        self._artifact_prefix = config.artifact_prefix
+        self._latest_filename = config.latest_filename
+        self._idempotency_filename = config.idempotency_filename
+        self._wrapper_factory = config.wrapper_factory
+        self._artifact_filename_pattern = re.compile(
+            rf"^{re.escape(self._artifact_prefix)}([1-9][0-9]*)"
+            rf"{re.escape(ARTIFACT_SUFFIX)}$"
+        )
 
         self._tenant_locks: dict[UUID, asyncio.Lock] = {}
         self._locks_guard = asyncio.Lock()
@@ -61,15 +77,15 @@ class LocalModelStore:
         if version < 1:
             raise ValueError("artifact version must be greater than or equal to 1")
 
-        return self._tenant_dir(tenant_id) / f"{ARTIFACT_PREFIX}{version}{ARTIFACT_SUFFIX}"
+        return self._tenant_dir(tenant_id) / f"{self._artifact_prefix}{version}{ARTIFACT_SUFFIX}"
 
     def _latest_path(self, tenant_id: TenantId) -> Path:
-        return self._tenant_dir(tenant_id) / LATEST_FILENAME
+        return self._tenant_dir(tenant_id) / self._latest_filename
 
     def _idempotency_path(self, tenant_id: TenantId) -> Path:
-        return self._tenant_dir(tenant_id) / IDEMPOTENCY_FILENAME
+        return self._tenant_dir(tenant_id) / self._idempotency_filename
 
-    async def load(self, tenant_id: TenantId) -> TipModelWrapper | None:
+    async def load(self, tenant_id: TenantId) -> StoredModelT | None:
         lock = await self._get_tenant_lock(tenant_id)
 
         async with lock:
@@ -106,10 +122,13 @@ class LocalModelStore:
 
             model_object = await asyncio.to_thread(joblib.load, io.BytesIO(data))
 
-            return TipModelWrapper(
-                model=model_object,
-                version=metadata.model_version,
-                trained_count=metadata.trained_count,
+            return cast(
+                StoredModelT,
+                self._wrapper_factory(
+                    model_object,
+                    metadata.model_version,
+                    metadata.trained_count,
+                ),
             )
 
     async def load_metadata(self, tenant_id: TenantId) -> TipModelMetadata | None:
@@ -123,7 +142,7 @@ class LocalModelStore:
 
             return self._metadata_from_manifest(manifest)
 
-    async def save(self, tenant_id: TenantId, model: TipModelWrapper) -> TipModelMetadata:
+    async def save(self, tenant_id: TenantId, model: StoredModelT) -> TipModelMetadata:
         lock = await self._get_tenant_lock(tenant_id)
 
         async with lock:
@@ -152,12 +171,12 @@ class LocalModelStore:
             signature = sign_artifact(
                 data,
                 tenant_id=str(tenant_id),
-                model_name=MODEL_NAME,
+                model_name=self._model_name,
                 model_version=model.version,
             )
 
             latest = {
-                "model_name": MODEL_NAME,
+                "model_name": self._model_name,
                 "model_version": model.version,
                 "trained_count": model.trained_count,
                 "sha256": sha256,
@@ -400,7 +419,7 @@ class LocalModelStore:
             if not entry.is_file():
                 continue
 
-            match = ARTIFACT_FILENAME_PATTERN.fullmatch(entry.name)
+            match = self._artifact_filename_pattern.fullmatch(entry.name)
 
             if match is None:
                 continue
@@ -437,7 +456,7 @@ class LocalModelStore:
     def _metadata_from_manifest(self, manifest: dict[str, Any]) -> TipModelMetadata:
         model_name = self._get_required_str(manifest, "model_name")
 
-        if model_name != MODEL_NAME:
+        if model_name != self._model_name:
             raise ArtifactIntegrityError("unexpected model name")
 
         model_version = self._get_required_positive_int(manifest, "model_version")
@@ -483,7 +502,7 @@ class LocalModelStore:
         return value
 
     def _version_from_artifact_filename(self, filename: str) -> int:
-        match = ARTIFACT_FILENAME_PATTERN.fullmatch(filename)
+        match = self._artifact_filename_pattern.fullmatch(filename)
 
         if match is None:
             raise ArtifactIntegrityError("invalid artifact filename")

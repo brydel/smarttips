@@ -54,11 +54,11 @@ __pycache__/
 venv/
 .python-version
 
-# ML artifacts
+# ML artifacts (not source code)
 *.pkl
 *.joblib
 *.h5
-models/
+/apps/ml-service/data/models/
 mlruns/
 
 # Database

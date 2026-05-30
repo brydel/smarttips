@@ -1,13 +1,16 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Protocol, TypeAlias
+from typing import Protocol, TypeAlias, TypeVar
 from uuid import UUID
 
 from app.models.tip_model import TipModelMetadata, TipModelWrapper
 
 TenantId: TypeAlias = UUID
+ModelT = TypeVar("ModelT")
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True, slots=True, kw_only=True)
 class IdempotencyRecord:
     key: str
     metadata: TipModelMetadata
@@ -49,17 +52,17 @@ class IdempotencyStore(Protocol):
         ...
 
 
-class ModelStore(Protocol):
+class ModelStore(Protocol[ModelT]):
     """Persists tenant-isolated River models.
 
     Implementations must verify artifact integrity before deserialization.
     """
 
-    async def load(self, tenant_id: TenantId) -> TipModelWrapper | None:
+    async def load(self, tenant_id: TenantId) -> ModelT | None:
         """Load the latest verified model for a tenant."""
         ...
 
-    async def save(self, tenant_id: TenantId, model: TipModelWrapper) -> TipModelMetadata:
+    async def save(self, tenant_id: TenantId, model: ModelT) -> TipModelMetadata:
         """Persist the model atomically and return saved metadata."""
         ...
 
@@ -103,5 +106,5 @@ class ConcurrentWriteError(ModelStoreError):
     """Raised when a concurrent write conflict is detected."""
 
 
-class AppStorage(ModelStore, IdempotencyStore, Protocol):
+class AppStorage(ModelStore[TipModelWrapper], IdempotencyStore, Protocol):
     """Application storage backend combining model persistence and idempotency."""
