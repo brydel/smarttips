@@ -12,6 +12,8 @@ out/
 .turbo/
 *.tsbuildinfo
 .claude/
+.codex/
+.agents/
 
 # Testing
 coverage/
