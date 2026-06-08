@@ -2,7 +2,6 @@ import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
-  IsIn,
   IsInt,
   IsNumber,
   IsObject,
@@ -109,13 +108,10 @@ export class UpdateDistributionConfigDto {
   @ApiPropertyOptional({
     enum: DistributionMode,
     example: DistributionMode.RULES_ONLY,
-    description: 'Mode de calcul de la distribution. Pour le moment, seul RULES_ONLY est activé.',
+    description: 'Mode de calcul de la distribution.',
   })
   @IsOptional()
   @IsEnum(DistributionMode)
-  @IsIn([DistributionMode.RULES_ONLY], {
-    message: 'error.distributionConfig.modeNotAvailable',
-  })
   readonly mode?: DistributionMode;
 
   @ApiPropertyOptional({

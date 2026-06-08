@@ -40,6 +40,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @smarttips/api prisma:generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/smarttips_test
+          DIRECT_URL: postgresql://postgres:postgres@localhost:5432/smarttips_test
       - run: pnpm lint
       - run: pnpm typecheck
 

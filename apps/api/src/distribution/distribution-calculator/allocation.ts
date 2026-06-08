@@ -1,7 +1,8 @@
-import { BadRequestException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 import {
+  DISTRIBUTION_ENGINE_VERSION,
+  DISTRIBUTION_EXPLANATION_SCHEMA_VERSION,
   DistributionConfig,
   DistributionExplanation,
   DistributionResult,
@@ -19,33 +20,81 @@ import {
   toDecimal,
 } from './money';
 
+const MAX_EMPLOYEES_PER_DISTRIBUTION = 500;
+const MAX_POOL_CENTS = 100_000_000; // 1 000 000.00 $ per single distribution
+
+// Framework-agnostic errors: this engine is pure money logic and must not depend
+// on @nestjs/common HTTP semantics (it is reused by the ML orchestrator). The two
+// classes encode HTTP intent without importing HTTP: InputError = client-fixable
+// (-> 400), InvariantError = our bug, should be impossible (-> 500). The mapping
+// lives in DistributionExceptionFilter, which MUST be registered or these surface
+// as 500s. message is always an i18n key.
+export class DistributionInputError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'DistributionInputError';
+  }
+}
+
+export class DistributionInvariantError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'DistributionInvariantError';
+  }
+}
+
 interface ScoredEmployee {
-  input: EmployeeShiftInput;
-  roleCoefficient: Prisma.Decimal;
-  baseScore: Prisma.Decimal;
-  rawScore: Prisma.Decimal;
-  shiftAvgSales: Prisma.Decimal;
-  salesBonus: Prisma.Decimal;
+  readonly input: EmployeeShiftInput;
+  readonly roleCoefficient: Prisma.Decimal;
+  readonly baseScore: Prisma.Decimal;
+  readonly rawScore: Prisma.Decimal;
+  readonly shiftAvgSales: Prisma.Decimal;
+  readonly salesBonus: Prisma.Decimal;
+}
+
+// Source-agnostic bounded allocator contract (rules rawScore, ML weight, or blend).
+// Types are local for the duel; they relocate to distribution.types.ts later.
+export interface WeightedAllocand {
+  readonly employeeId: string;
+  readonly weight: Prisma.Decimal;
+  readonly minimumCents: number;
+}
+
+export interface BoundedAllocation {
+  readonly employeeId: string;
+  readonly finalCents: number;
+  readonly scoreShare: Prisma.Decimal;
+  readonly rawAmount: Prisma.Decimal;
+  readonly capApplied: boolean;
+  readonly minimumApplied: boolean;
+}
+
+export interface BoundedAllocationResult {
+  readonly poolTotalRounded: Prisma.Decimal;
+  readonly poolCents: number;
+  readonly capCents: number;
+  readonly totalWeight: Prisma.Decimal;
+  readonly allocations: readonly BoundedAllocation[];
 }
 
 interface AllocationRow {
-  scored: ScoredEmployee;
-  rawAmount: Prisma.Decimal;
-  floorCents: number;
-  fractionalRemainder: Prisma.Decimal;
+  readonly employeeId: string;
+  readonly weight: Prisma.Decimal;
+  readonly minimumCents: number;
+  readonly originalIndex: number;
+  readonly scoreShare: Prisma.Decimal;
+  readonly rawAmount: Prisma.Decimal;
+  readonly rawFloorCents: number;
   finalCents: number;
-  minimumCents: number;
   capApplied: boolean;
   minimumApplied: boolean;
 }
 
 export function computeScores(
-  employees: EmployeeShiftInput[],
+  employees: readonly EmployeeShiftInput[],
   config: DistributionConfig,
 ): ScoredEmployee[] {
-  if (employees.length === 0) {
-    throw new BadRequestException('error.distribution.noEmployees');
-  }
+  validateRoster(employees);
 
   const eligibleSales = employees
     .filter((employee) => SALES_ELIGIBLE_ROLES.has(employee.role))
@@ -56,21 +105,21 @@ export function computeScores(
 
   return employees.map((employee) => {
     if (employee.hoursWorked.lte(0)) {
-      throw new BadRequestException('error.distribution.invalidHoursWorked');
+      throw new DistributionInputError('error.distribution.invalidHoursWorked');
     }
 
     if (employee.salesGenerated.lt(0)) {
-      throw new BadRequestException('error.distribution.invalidSalesGenerated');
+      throw new DistributionInputError('error.distribution.invalidSalesGenerated');
     }
 
     if (employee.coefficient.lte(0)) {
-      throw new BadRequestException('error.distribution.invalidEmployeeCoefficient');
+      throw new DistributionInputError('error.distribution.invalidEmployeeCoefficient');
     }
 
     const roleCoefficient = config.roleCoefficients[employee.role];
 
     if (!roleCoefficient || roleCoefficient.lte(0)) {
-      throw new BadRequestException('error.distribution.invalidRoleCoefficient');
+      throw new DistributionInputError('error.distribution.invalidRoleCoefficient');
     }
 
     const isSalesEligible = SALES_ELIGIBLE_ROLES.has(employee.role);
@@ -85,7 +134,6 @@ export function computeScores(
     );
 
     const baseScore = employee.hoursWorked.mul(roleCoefficient).mul(employee.coefficient);
-
     const rawScore = baseScore.mul(salesBonus);
 
     return {
@@ -99,167 +147,240 @@ export function computeScores(
   });
 }
 
-export function allocateProportional(
-  scored: ScoredEmployee[],
+// THE ENGINE. Pure bounded Hamilton allocator over arbitrary weights.
+// Guarantees: minimumCents <= finalCents <= capCents, proportional to weight,
+// fractional cents by largest remainder with deterministic employeeId tiebreak,
+// and Sum(finalCents) === poolCents exactly. Assumes totalWeight > 0; callers
+// route the all-zero-weight case to their own fallback.
+export function allocateBounded(
+  allocands: readonly WeightedAllocand[],
   poolTotal: Prisma.Decimal,
   config: DistributionConfig,
-): DistributionResult[] {
+): BoundedAllocationResult {
+  validateAllocands(allocands);
+
   if (poolTotal.lte(0)) {
-    throw new BadRequestException('error.distribution.totalAmountMustBePositive');
+    throw new DistributionInputError('error.distribution.totalAmountMustBePositive');
   }
 
   const poolTotalRounded = roundMoney(poolTotal);
   const poolCents = toCents(poolTotalRounded);
-  const totalScore = sumDecimals(scored.map((row) => row.rawScore));
 
-  if (totalScore.lte(0)) {
-    return fallbackEqualByHours(
-      scored.map((row) => row.input),
-      poolTotalRounded,
-    );
+  if (!Number.isSafeInteger(poolCents) || poolCents <= 0 || poolCents > MAX_POOL_CENTS) {
+    throw new DistributionInputError('error.distribution.invalidPoolCents');
+  }
+
+  const totalWeight = sumDecimals(allocands.map((allocand) => allocand.weight));
+
+  if (totalWeight.lte(0)) {
+    throw new DistributionInputError('error.distribution.invalidWeights');
   }
 
   const capCents = calculateCapCents(poolCents, config.maxSharePercent);
 
   if (capCents <= 0) {
-    throw new BadRequestException('error.distribution.invalidCap');
+    throw new DistributionInputError('error.distribution.invalidCap');
   }
 
-  if (capCents * scored.length < poolCents) {
-    throw new BadRequestException('error.distribution.capPreventsFullAllocation');
+  if (capCents * allocands.length < poolCents) {
+    throw new DistributionInputError('error.distribution.capPreventsFullAllocation');
   }
 
-  const rows = scored.map((row): AllocationRow => {
-    const scoreShare = row.rawScore.div(totalScore);
-    const rawAmount = poolTotalRounded.mul(scoreShare);
-    const rawCents = rawAmount.mul(100);
-    const floorCents = Math.floor(rawCents.toNumber());
-    const minimumCents = toCents(config.minimumPerHour.mul(row.input.hoursWorked));
-
-    if (minimumCents > capCents) {
-      throw new BadRequestException('error.distribution.minimumExceedsCap');
+  const totalMinimumCents = allocands.reduce((sum, allocand) => {
+    if (allocand.minimumCents > capCents) {
+      throw new DistributionInputError('error.distribution.minimumExceedsCap');
     }
 
+    return sum + allocand.minimumCents;
+  }, 0);
+
+  if (totalMinimumCents > poolCents) {
+    throw new DistributionInputError('error.distribution.minimumPoolInsufficient');
+  }
+
+  const rows = allocands.map((allocand, index): AllocationRow => {
+    const scoreShare = allocand.weight.div(totalWeight);
+    const rawAmount = poolTotalRounded.mul(scoreShare);
+    const rawFloorCents = decimalFloorToSafeInteger(rawAmount.mul(100));
+
     return {
-      scored: row,
+      employeeId: allocand.employeeId,
+      weight: allocand.weight,
+      minimumCents: allocand.minimumCents,
+      originalIndex: index,
+      scoreShare,
       rawAmount,
-      floorCents,
-      fractionalRemainder: rawCents.sub(floorCents),
-      finalCents: minimumCents,
-      minimumCents,
+      rawFloorCents,
+      finalCents: allocand.minimumCents,
       capApplied: false,
-      minimumApplied: floorCents < minimumCents,
+      minimumApplied: rawFloorCents < allocand.minimumCents,
     };
   });
 
-  const totalMinimumCents = rows.reduce((sum, row) => sum + row.minimumCents, 0);
+  distributeRemainder(rows, poolCents, capCents);
 
-  if (totalMinimumCents > poolCents) {
-    throw new BadRequestException('error.distribution.minimumPoolInsufficient');
+  const allocatedCents = rows.reduce((sum, row) => sum + row.finalCents, 0);
+
+  // Hard invariant: integer cents must sum to the pool exactly. If violated, it is
+  // an engine bug, not bad client input -> InvariantError -> 500.
+  if (allocatedCents !== poolCents) {
+    throw new DistributionInvariantError('error.distribution.integrityViolation');
   }
 
-  allocateWithBounds(rows, poolCents, capCents);
+  return {
+    poolTotalRounded,
+    poolCents,
+    capCents,
+    totalWeight,
+    allocations: rows
+      .slice()
+      .sort((a, b) => a.originalIndex - b.originalIndex)
+      .map((row) => ({
+        employeeId: row.employeeId,
+        finalCents: row.finalCents,
+        scoreShare: row.scoreShare,
+        rawAmount: row.rawAmount,
+        capApplied: row.capApplied || row.finalCents >= capCents,
+        minimumApplied: row.minimumApplied,
+      })),
+  };
+}
 
-  const results = buildResults(rows, poolTotalRounded, totalScore, config, capCents);
+// RULES path. Thin wrapper: rawScore as weight -> engine -> rich rules explanation.
+// Behavior is identical to the pre-refactor allocateProportional (both branches).
+export function allocateProportional(
+  scored: readonly ScoredEmployee[],
+  poolTotal: Prisma.Decimal,
+  config: DistributionConfig,
+): DistributionResult[] {
+  if (scored.length === 0) {
+    throw new DistributionInputError('error.distribution.noEmployees');
+  }
 
-  const distributed = sumDecimals(results.map((result) => result.amount));
-  assertPoolIntegrity(distributed, poolTotalRounded);
+  if (poolTotal.lte(0)) {
+    throw new DistributionInputError('error.distribution.totalAmountMustBePositive');
+  }
+
+  const totalScore = sumDecimals(scored.map((row) => row.rawScore));
+
+  // Degenerate all-zero-score case keeps its original behavior (equal-by-hours, no
+  // min/cap). Applying min/cap here too is a worthwhile but separate change.
+  if (totalScore.lte(0)) {
+    return fallbackEqualByHours(
+      scored.map((row) => row.input),
+      roundMoney(poolTotal),
+      config.policyVersion,
+    );
+  }
+
+  const allocands = scored.map(
+    (row): WeightedAllocand => ({
+      employeeId: row.input.employeeId,
+      weight: row.rawScore,
+      minimumCents: toCents(config.minimumPerHour.mul(row.input.hoursWorked)),
+    }),
+  );
+
+  const result = allocateBounded(allocands, poolTotal, config);
+  const results = buildRulesResults(scored, result, config);
+
+  const distributed = sumDecimals(results.map((row) => row.amount));
+  assertPoolIntegrity(distributed, result.poolTotalRounded);
 
   return results;
 }
 
-function allocateWithBounds(rows: AllocationRow[], poolCents: number, capCents: number): void {
+function distributeRemainder(rows: AllocationRow[], poolCents: number, capCents: number): void {
   let remainingCents = poolCents - rows.reduce((sum, row) => sum + row.finalCents, 0);
 
+  if (remainingCents < 0) {
+    throw new DistributionInvariantError('error.distribution.negativeRemainder');
+  }
+
   while (remainingCents > 0) {
+    // ALL rows still under cap are eligible — including zero-weight ones, so a pool
+    // that is allocatable is never falsely rejected when positive-weight rows cap out.
     const activeRows = rows.filter((row) => row.finalCents < capCents);
 
     if (activeRows.length === 0) {
-      throw new BadRequestException('error.distribution.capPreventsFullAllocation');
+      throw new DistributionInputError('error.distribution.capPreventsFullAllocation');
     }
 
-    const totalActiveScore = sumDecimals(activeRows.map((row) => row.scored.rawScore));
+    const totalActiveWeight = sumDecimals(activeRows.map((row) => row.weight));
 
-    if (totalActiveScore.lte(0)) {
+    if (totalActiveWeight.lte(0)) {
+      // Only zero-weight rows remain under cap: distribute one cent at a time,
+      // deterministic by employeeId.
       distributeOneCentAtATime(activeRows, remainingCents, capCents);
       remainingCents = poolCents - rows.reduce((sum, row) => sum + row.finalCents, 0);
       continue;
     }
 
     const candidates = activeRows.map((row) => {
-      const target = new Prisma.Decimal(remainingCents)
-        .mul(row.scored.rawScore)
-        .div(totalActiveScore);
+      const idealAdditional = new Prisma.Decimal(remainingCents)
+        .mul(row.weight)
+        .div(totalActiveWeight);
 
-      const floorAdd = Math.floor(target.toNumber());
+      const floorAdditional = Math.max(0, decimalFloorToSafeInteger(idealAdditional));
       const capacity = capCents - row.finalCents;
-      const add = Math.min(floorAdd, capacity);
+      const additionalCents = Math.min(floorAdditional, capacity);
 
       return {
         row,
-        add,
-        fraction: target.sub(floorAdd),
+        additionalCents,
+        fractionalRemainder: idealAdditional.sub(floorAdditional),
       };
     });
 
-    let allocatedThisRound = 0;
+    let distributedThisPass = 0;
 
     for (const candidate of candidates) {
-      if (candidate.add > 0) {
-        candidate.row.finalCents += candidate.add;
-        allocatedThisRound += candidate.add;
-
-        if (candidate.row.finalCents >= capCents) {
-          candidate.row.capApplied = true;
-        }
-      }
-    }
-
-    remainingCents -= allocatedThisRound;
-
-    if (remainingCents <= 0) {
-      break;
-    }
-
-    const sortedByFraction = candidates
-      .filter((candidate) => candidate.row.finalCents < capCents)
-      .sort((a, b) => {
-        const fractionComparison = b.fraction.comparedTo(a.fraction);
-
-        if (fractionComparison !== 0) {
-          return fractionComparison;
-        }
-
-        return a.row.scored.input.employeeId.localeCompare(b.row.scored.input.employeeId);
-      });
-
-    if (sortedByFraction.length === 0) {
-      throw new BadRequestException('error.distribution.capPreventsFullAllocation');
-    }
-
-    let allocatedFractionalCent = false;
-
-    for (const candidate of sortedByFraction) {
-      if (remainingCents <= 0) {
-        break;
+      if (candidate.additionalCents <= 0) {
+        continue;
       }
 
-      candidate.row.finalCents += 1;
-      remainingCents -= 1;
-      allocatedFractionalCent = true;
+      candidate.row.finalCents += candidate.additionalCents;
+      distributedThisPass += candidate.additionalCents;
 
       if (candidate.row.finalCents >= capCents) {
         candidate.row.capApplied = true;
       }
     }
 
-    if (!allocatedFractionalCent) {
-      throw new BadRequestException('error.distribution.capPreventsFullAllocation');
-    }
-  }
+    remainingCents -= distributedThisPass;
 
-  for (const row of rows) {
-    row.capApplied = row.capApplied || row.finalCents >= capCents;
+    if (remainingCents <= 0) {
+      break;
+    }
+
+    const remainderCandidates = candidates
+      .filter((candidate) => candidate.row.finalCents < capCents)
+      .sort((a, b) => {
+        const fractionComparison = b.fractionalRemainder.comparedTo(a.fractionalRemainder);
+
+        if (fractionComparison !== 0) {
+          return fractionComparison;
+        }
+
+        return a.row.employeeId.localeCompare(b.row.employeeId);
+      });
+
+    if (remainderCandidates.length === 0) {
+      throw new DistributionInputError('error.distribution.capPreventsFullAllocation');
+    }
+
+    for (const candidate of remainderCandidates) {
+      if (remainingCents <= 0) {
+        break;
+      }
+
+      candidate.row.finalCents += 1;
+      remainingCents -= 1;
+
+      if (candidate.row.finalCents >= capCents) {
+        candidate.row.capApplied = true;
+      }
+    }
   }
 }
 
@@ -268,9 +389,7 @@ function distributeOneCentAtATime(
   remainingCents: number,
   capCents: number,
 ): void {
-  const sortedRows = [...rows].sort((a, b) =>
-    a.scored.input.employeeId.localeCompare(b.scored.input.employeeId),
-  );
+  const sortedRows = [...rows].sort((a, b) => a.employeeId.localeCompare(b.employeeId));
 
   let remaining = remainingCents;
 
@@ -296,69 +415,84 @@ function distributeOneCentAtATime(
     }
 
     if (!allocated) {
-      throw new BadRequestException('error.distribution.capPreventsFullAllocation');
+      throw new DistributionInputError('error.distribution.capPreventsFullAllocation');
     }
   }
 }
 
-function buildResults(
-  rows: AllocationRow[],
-  poolTotal: Prisma.Decimal,
-  totalScore: Prisma.Decimal,
+function buildRulesResults(
+  scored: readonly ScoredEmployee[],
+  result: BoundedAllocationResult,
   config: DistributionConfig,
-  capCents: number,
 ): DistributionResult[] {
-  return rows.map((row) => {
-    const finalAmount = centsToDecimal(row.finalCents);
-    const scoreShare = row.scored.rawScore.div(totalScore);
-    const rawAmount = roundMoney(row.rawAmount);
-    const minAmount = roundMoney(config.minimumPerHour.mul(row.scored.input.hoursWorked));
-    const capAmount = centsToDecimal(capCents);
+  const capAmount = centsToDecimal(result.capCents);
+
+  return scored.map((row, index): DistributionResult => {
+    const allocation = result.allocations[index];
+
+    if (!allocation || allocation.employeeId !== row.input.employeeId) {
+      throw new DistributionInvariantError('error.distribution.allocationOrderMismatch');
+    }
+
+    const finalAmount = centsToDecimal(allocation.finalCents);
+    const rawAmount = roundMoney(allocation.rawAmount);
+    const minAmount = roundMoney(config.minimumPerHour.mul(row.input.hoursWorked));
 
     const explanation: DistributionExplanation = {
-      roleCoefficient: decimalToJson(row.scored.roleCoefficient),
-      employeeCoefficient: decimalToJson(row.scored.input.coefficient),
-      hoursWorked: decimalToJson(row.scored.input.hoursWorked),
-      salesGenerated: moneyToJson(row.scored.input.salesGenerated),
-      shiftAvgSales: moneyToJson(row.scored.shiftAvgSales),
-      salesBonus: decimalToJson(row.scored.salesBonus),
-      baseScore: decimalToJson(row.scored.baseScore),
-      rawScore: decimalToJson(row.scored.rawScore),
-      scoreShare: decimalToJson(scoreShare),
+      source: 'RULES',
+      schemaVersion: DISTRIBUTION_EXPLANATION_SCHEMA_VERSION,
+      engineVersion: DISTRIBUTION_ENGINE_VERSION,
+      policyVersion: config.policyVersion,
+      roleCoefficient: decimalToJson(row.roleCoefficient),
+      employeeCoefficient: decimalToJson(row.input.coefficient),
+      hoursWorked: decimalToJson(row.input.hoursWorked),
+      salesGenerated: moneyToJson(row.input.salesGenerated),
+      shiftAvgSales: moneyToJson(row.shiftAvgSales),
+      salesBonus: decimalToJson(row.salesBonus),
+      baseScore: decimalToJson(row.baseScore),
+      rawScore: decimalToJson(row.rawScore),
+      scoreShare: decimalToJson(allocation.scoreShare),
       rawAmount: moneyToJson(rawAmount),
       capAmount: moneyToJson(capAmount),
       minAmount: moneyToJson(minAmount),
-      capApplied: row.capApplied,
-      minimumApplied: row.minimumApplied,
-      roundingAdjustmentCents: row.finalCents - toCents(rawAmount),
+      capApplied: allocation.capApplied,
+      minimumApplied: allocation.minimumApplied,
+      roundingAdjustmentCents: allocation.finalCents - toCents(rawAmount),
       finalAmount: moneyToJson(finalAmount),
     };
 
     return {
-      employeeId: row.scored.input.employeeId,
+      employeeId: row.input.employeeId,
       amount: finalAmount,
-      contributionScore: row.scored.rawScore.toDecimalPlaces(4),
+      contributionScore: row.rawScore.toDecimalPlaces(4),
       explanation,
     };
   });
 }
 
-function calculateCapCents(poolCents: number, maxSharePercent: Prisma.Decimal): number {
-  if (maxSharePercent.lte(0) || maxSharePercent.gt(100)) {
-    throw new BadRequestException('error.distribution.invalidMaxSharePercent');
+export function calculateCapCents(poolCents: number, maxSharePercent: Prisma.Decimal): number {
+  if (!Number.isSafeInteger(poolCents) || poolCents <= 0 || poolCents > MAX_POOL_CENTS) {
+    throw new DistributionInputError('error.distribution.invalidPoolCents');
   }
 
-  return Math.floor(new Prisma.Decimal(poolCents).mul(maxSharePercent).div(100).toNumber());
+  if (maxSharePercent.lte(0) || maxSharePercent.gt(100)) {
+    throw new DistributionInputError('error.distribution.invalidMaxSharePercent');
+  }
+
+  return decimalFloorToSafeInteger(new Prisma.Decimal(poolCents).mul(maxSharePercent).div(100));
 }
 
 export function fallbackEqualByHours(
-  employees: EmployeeShiftInput[],
+  employees: readonly EmployeeShiftInput[],
   poolTotal: Prisma.Decimal,
+  policyVersion: string,
 ): DistributionResult[] {
+  validateRoster(employees);
+
   const totalHours = sumDecimals(employees.map((employee) => employee.hoursWorked));
 
   if (totalHours.lte(0)) {
-    throw new BadRequestException('error.distribution.invalidTotalHours');
+    throw new DistributionInputError('error.distribution.invalidTotalHours');
   }
 
   const poolTotalRounded = roundMoney(poolTotal);
@@ -367,7 +501,7 @@ export function fallbackEqualByHours(
   const rows = employees.map((employee) => {
     const rawAmount = poolTotalRounded.mul(employee.hoursWorked.div(totalHours));
     const rawCents = rawAmount.mul(100);
-    const floorCents = Math.floor(rawCents.toNumber());
+    const floorCents = decimalFloorToSafeInteger(rawCents);
 
     return {
       employee,
@@ -399,6 +533,10 @@ export function fallbackEqualByHours(
     remainingCents -= 1;
   }
 
+  if (remainingCents !== 0) {
+    throw new DistributionInvariantError('error.distribution.integrityViolation');
+  }
+
   const results = rows.map((row): DistributionResult => {
     const finalAmount = centsToDecimal(row.finalCents);
 
@@ -407,6 +545,10 @@ export function fallbackEqualByHours(
       amount: finalAmount,
       contributionScore: toDecimal(0),
       explanation: {
+        source: 'RULES',
+        schemaVersion: DISTRIBUTION_EXPLANATION_SCHEMA_VERSION,
+        engineVersion: DISTRIBUTION_ENGINE_VERSION,
+        policyVersion,
         roleCoefficient: '0.0000',
         employeeCoefficient: decimalToJson(row.employee.coefficient),
         hoursWorked: decimalToJson(row.employee.hoursWorked),
@@ -431,4 +573,59 @@ export function fallbackEqualByHours(
   assertPoolIntegrity(distributed, poolTotalRounded);
 
   return results;
+}
+
+// UUID FORMAT is intentionally NOT validated here: it is a boundary concern handled
+// by ParseUUIDPipe at the controller. The engine only enforces uniqueness, which is
+// a real domain invariant (the same employee must not appear twice in one pool).
+function validateRoster(employees: readonly EmployeeShiftInput[]): void {
+  assertCardinality(employees.length);
+  assertNoDuplicateIds(employees.map((employee) => employee.employeeId));
+}
+
+function validateAllocands(allocands: readonly WeightedAllocand[]): void {
+  assertCardinality(allocands.length);
+  assertNoDuplicateIds(allocands.map((allocand) => allocand.employeeId));
+
+  for (const allocand of allocands) {
+    if (allocand.weight.lt(0)) {
+      throw new DistributionInputError('error.distribution.invalidWeights');
+    }
+
+    if (!Number.isSafeInteger(allocand.minimumCents) || allocand.minimumCents < 0) {
+      throw new DistributionInputError('error.distribution.invalidMinimum');
+    }
+  }
+}
+
+function assertCardinality(count: number): void {
+  if (count === 0) {
+    throw new DistributionInputError('error.distribution.noEmployees');
+  }
+
+  if (count > MAX_EMPLOYEES_PER_DISTRIBUTION) {
+    throw new DistributionInputError('error.distribution.tooManyEmployees');
+  }
+}
+
+function assertNoDuplicateIds(ids: readonly string[]): void {
+  const seen = new Set<string>();
+
+  for (const id of ids) {
+    if (seen.has(id)) {
+      throw new DistributionInputError('error.distribution.duplicateEmployeeId');
+    }
+
+    seen.add(id);
+  }
+}
+
+function decimalFloorToSafeInteger(value: Prisma.Decimal): number {
+  const integer = Number(value.floor().toFixed(0));
+
+  if (!Number.isSafeInteger(integer)) {
+    throw new DistributionInputError('error.distribution.numberOutOfSafeRange');
+  }
+
+  return integer;
 }

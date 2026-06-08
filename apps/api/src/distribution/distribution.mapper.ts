@@ -6,12 +6,14 @@ export function mapDistributionConfigFromPrisma(config: {
   minPerHour: Prisma.Decimal;
   maxSharePct: Prisma.Decimal;
   salesBonusWeight: Prisma.Decimal;
+  updatedAt: Date;
 }): DistributionConfig {
   return {
     roleCoefficients: parseRoleCoefficients(config.roleCoefficients),
     minimumPerHour: config.minPerHour,
     maxSharePercent: config.maxSharePct,
     salesBonusWeight: config.salesBonusWeight,
+    policyVersion: config.updatedAt.toISOString(),
   };
 }
 

@@ -63,10 +63,6 @@ export class TenantConfigService {
   ): Promise<DistributionConfigResponse> {
     this.assertNonEmptyUpdate(dto);
 
-    if (dto.mode && dto.mode !== DistributionMode.RULES_ONLY) {
-      throw new BadRequestException('error.distributionConfig.modeNotAvailable');
-    }
-
     return this.prisma.$transaction(async (tx) => {
       const tenantExists = await tx.tenant.findFirst({
         where: {

@@ -1,9 +1,11 @@
 import {
   Controller,
+  Body,
   Get,
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   ParseUUIDPipe,
   Post,
   UseGuards,
@@ -23,6 +25,7 @@ import {
 } from '@nestjs/swagger';
 
 import { DistributionService } from './distribution.service';
+import { AdjustDistributionDto } from './dto/adjust-distribution.dto';
 
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -103,5 +106,46 @@ export class DistributionController {
     tenantId: string,
   ) {
     return this.distributionService.getDistribution(tenantId, shiftId);
+  }
+
+  @Patch(':id/distribution')
+  @Roles(UserRole.OWNER, UserRole.MANAGER)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Ajuster manuellement la distribution d’un shift',
+    description:
+      'Persiste des montants corrigés par employé et déclenche le feedback ML si la distribution initiale provenait du ML.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'UUID v4 du shift.',
+    example: 'f15dfc77-72fb-4586-9f36-672cfb76f69b',
+  })
+  @ApiNoContentResponse({
+    description: 'Distribution ajustée avec succès.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Payload invalide, somme incohérente ou distribution non ajustable.',
+  })
+  @ApiConflictResponse({
+    description: 'Distribution modifiée concurremment.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Shift, tip pool ou distribution introuvable.',
+  })
+  async adjustDistribution(
+    @Param('id', new ParseUUIDPipe({ version: '4' }))
+    shiftId: string,
+
+    @CurrentUser('tenantId', new ParseUUIDPipe({ version: '4' }))
+    tenantId: string,
+
+    @CurrentUser('id', new ParseUUIDPipe({ version: '4' }))
+    userId: string,
+
+    @Body()
+    dto: AdjustDistributionDto,
+  ): Promise<void> {
+    await this.distributionService.adjustDistribution(tenantId, shiftId, userId, dto);
   }
 }
