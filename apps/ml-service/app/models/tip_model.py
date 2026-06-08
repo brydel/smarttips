@@ -1,14 +1,14 @@
 import math
 import numbers
 from dataclasses import dataclass
-from typing import Protocol, Self, TypeAlias, cast
+from typing import Final, Protocol, Self, TypeAlias, cast
 
 from river import compose, linear_model, preprocessing
 
 from app.models.features import RiverFeatureDict, RiverFeatureValue
 
-MODEL_NAME = "tip_regressor"
-MAX_REASONABLE_TIPS_PREDICTION = 1_000_000.0
+MODEL_NAME: Final[str] = "tip_regressor"
+MAX_REASONABLE_TIPS_PREDICTION_CENTS: Final[int] = 1_000_000
 
 
 class RiverRegressor(Protocol):
@@ -46,11 +46,15 @@ class TipModelWrapper:
         version: int = 0,
         trained_count: int = 0,
     ) -> None:
+        if isinstance(version, bool):
+            raise TypeError("error.tip.model.version.bool_unsupported")
         if version < 0:
-            raise ValueError("model version must be greater than or equal to 0")
+            raise ValueError("error.tip.model.version.negative")
 
+        if isinstance(trained_count, bool):
+            raise TypeError("error.tip.model.trained_count.bool_unsupported")
         if trained_count < 0:
-            raise ValueError("trained_count must be greater than or equal to 0")
+            raise ValueError("error.tip.model.trained_count.negative")
 
         self.model = model if model is not None else create_tip_model()
         self.version = version
@@ -64,39 +68,47 @@ class TipModelWrapper:
             trained_count=self.trained_count,
         )
 
-    def predict(self, features: RiverFeatureDict) -> float:
+    def predict(self, features: RiverFeatureDict) -> int:
         safe_features = self._validate_features(features)
-
         prediction = self.model.predict_one(safe_features)
 
         if prediction is None:
-            return 0.0
+            return 0
 
         prediction_as_float = float(prediction)
 
         if not math.isfinite(prediction_as_float):
-            return 0.0
+            return 0
 
-        return max(0.0, min(prediction_as_float, MAX_REASONABLE_TIPS_PREDICTION))
+        try:
+            prediction_cents = math.expm1(prediction_as_float)
+        except OverflowError:
+            return MAX_REASONABLE_TIPS_PREDICTION_CENTS
 
-    def learn(self, features: RiverFeatureDict, target: float) -> None:
+        if not math.isfinite(prediction_cents):
+            return 0
+
+        rounded_prediction = round(prediction_cents)
+        return max(0, min(rounded_prediction, MAX_REASONABLE_TIPS_PREDICTION_CENTS))
+
+    def learn(self, features: RiverFeatureDict, target_cents: int) -> None:
         safe_features = self._validate_features(features)
-        safe_target = self._validate_target(target)
+        safe_target = self._validate_target_cents(target_cents)
 
-        self.model.learn_one(safe_features, safe_target)
+        self.model.learn_one(safe_features, math.log1p(safe_target))
 
         self.trained_count += 1
         self.version += 1
 
     def _validate_features(self, features: RiverFeatureDict) -> RiverFeatureDict:
         if not features:
-            raise ValueError("features must not be empty")
+            raise ValueError("error.tip.model.features.empty")
 
         safe_features: RiverFeatureDict = {}
 
         for feature_name, value in features.items():
             if not isinstance(feature_name, str) or feature_name.strip() == "":
-                raise ValueError("feature names must be non-empty strings")
+                raise ValueError("error.tip.model.features.name_empty")
 
             safe_features[feature_name] = self._validate_feature_value(value)
 
@@ -104,14 +116,14 @@ class TipModelWrapper:
 
     def _validate_feature_value(self, value: RiverFeatureValue) -> RiverFeatureValue:
         if isinstance(value, bool):
-            raise TypeError("boolean feature values are not supported")
+            raise TypeError("error.tip.model.features.bool_unsupported")
 
         if isinstance(value, int):
             return value
 
         if isinstance(value, float):
             if not math.isfinite(value):
-                raise ValueError("float feature values must be finite")
+                raise ValueError("error.tip.model.features.float_not_finite")
 
             return value
 
@@ -119,30 +131,26 @@ class TipModelWrapper:
             normalized = value.strip()
 
             if normalized == "":
-                raise ValueError("string feature values must not be empty")
+                raise ValueError("error.tip.model.features.string_empty")
 
             if len(normalized) > 128:
-                raise ValueError("string feature values must not exceed 128 characters")
+                raise ValueError("error.tip.model.features.string_too_long")
 
             return normalized
 
-        raise TypeError(f"unsupported feature value type: {type(value).__name__}")
+        raise TypeError("error.tip.model.features.unsupported_type")
 
-    def _validate_target(self, target: float) -> float:
-        if isinstance(target, bool):
-            raise TypeError("target must not be a boolean")
+    def _validate_target_cents(self, target_cents: int) -> int:
+        if isinstance(target_cents, bool):
+            raise TypeError("error.tip.model.target.bool_unsupported")
 
-        target_as_float = float(target)
+        if not isinstance(target_cents, int):
+            raise TypeError("error.tip.model.target.not_int")
 
-        if not math.isfinite(target_as_float):
-            raise ValueError("target must be finite")
+        if target_cents < 0:
+            raise ValueError("error.tip.model.target.negative")
 
-        if target_as_float < 0.0:
-            raise ValueError("target must be greater than or equal to 0")
+        if target_cents > MAX_REASONABLE_TIPS_PREDICTION_CENTS:
+            raise ValueError("error.tip.model.target.too_large")
 
-        if target_as_float > MAX_REASONABLE_TIPS_PREDICTION:
-            raise ValueError(
-                f"target must be lower than or equal to {MAX_REASONABLE_TIPS_PREDICTION}"
-            )
-
-        return target_as_float
+        return target_cents

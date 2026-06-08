@@ -1,6 +1,6 @@
+import math
 from collections.abc import Mapping
 from enum import StrEnum
-from types import MappingProxyType
 from typing import Final, TypeAlias
 
 RiverFeatureValue: TypeAlias = int | float | str
@@ -12,88 +12,123 @@ class ShiftType(StrEnum):
     DINNER = "DINNER"
 
 
-COMMON_FEATURE_NAMES: Final[tuple[str, ...]] = (
+class EmployeeRole(StrEnum):
+    SERVER = "SERVER"
+    BARTENDER = "BARTENDER"
+    BUSSER = "BUSSER"
+    HOST = "HOST"
+    COOK = "COOK"
+    CHEF = "CHEF"
+
+
+POST_SHIFT_FEATURE_NAMES: Final[tuple[str, ...]] = (
+    "role",
+    "shift_type",
     "day_of_week",
     "hour_start",
     "hour_end",
-    "shift_type",
     "employee_count",
-)
-
-PREDICT_FEATURE_NAMES: Final[tuple[str, ...]] = (
-    *COMMON_FEATURE_NAMES,
-    "expected_sales",
-    "expected_orders",
-)
-
-TRAIN_FEATURE_NAMES: Final[tuple[str, ...]] = (
-    *COMMON_FEATURE_NAMES,
-    "sales_total",
+    "expected_sales_cents",
+    "sales_total_cents",
+    "assigned_sales_cents",
     "orders_count",
 )
 
-PREDICT_FEATURE_SET: Final[frozenset[str]] = frozenset(PREDICT_FEATURE_NAMES)
-TRAIN_FEATURE_SET: Final[frozenset[str]] = frozenset(TRAIN_FEATURE_NAMES)
+POST_SHIFT_FEATURE_SET: Final[frozenset[str]] = frozenset(POST_SHIFT_FEATURE_NAMES)
 
-FEATURE_ALIASES: Final[Mapping[str, str]] = MappingProxyType(
+FORBIDDEN_FEATURE_NAMES: Final[frozenset[str]] = frozenset(
     {
-        "expected_sales": "sales_signal",
-        "sales_total": "sales_signal",
-        "expected_orders": "orders_signal",
-        "orders_count": "orders_signal",
+        "tenant_id",
+        "talent_base",
+        "talent_cap",
+        "learning_rate",
+        "reliability",
+        "shifts_worked_before",
+        "employee_index",
     }
 )
 
+ALLOWED_ROLES: Final[frozenset[EmployeeRole]] = frozenset(EmployeeRole)
+ALLOWED_SHIFT_TYPES: Final[frozenset[ShiftType]] = frozenset(ShiftType)
+
+
+def to_post_shift_river_dict(features: Mapping[str, object]) -> RiverFeatureDict:
+    return _to_river_dict(features=features)
+
 
 def to_river_predict_dict(features: Mapping[str, object]) -> RiverFeatureDict:
-    return _to_river_dict(
-        features=features,
-        allowed_features=PREDICT_FEATURE_SET,
-    )
+    return to_post_shift_river_dict(features)
 
 
 def to_river_train_dict(features: Mapping[str, object]) -> RiverFeatureDict:
-    return _to_river_dict(
-        features=features,
-        allowed_features=TRAIN_FEATURE_SET,
-    )
+    return to_post_shift_river_dict(features)
 
 
-def _to_river_dict(
-    *,
-    features: Mapping[str, object],
-    allowed_features: frozenset[str],
-) -> RiverFeatureDict:
-    unknown_features = set(features) - allowed_features
+def _to_river_dict(*, features: Mapping[str, object]) -> RiverFeatureDict:
+    unknown_features = set(features) - POST_SHIFT_FEATURE_SET
 
     if unknown_features:
-        sorted_unknown = ", ".join(sorted(unknown_features))
-        raise ValueError(f"Unknown ML feature(s): {sorted_unknown}")
+        forbidden_features = unknown_features & FORBIDDEN_FEATURE_NAMES
 
-    missing_features = allowed_features - set(features)
+        if forbidden_features:
+            raise ValueError("error.tip.features.forbidden")
+
+        raise ValueError("error.tip.features.unknown")
+
+    missing_features = POST_SHIFT_FEATURE_SET - set(features)
 
     if missing_features:
-        sorted_missing = ", ".join(sorted(missing_features))
-        raise ValueError(f"Missing ML feature(s): {sorted_missing}")
+        raise ValueError("error.tip.features.missing")
 
-    river_features: RiverFeatureDict = {}
-
-    for feature_name in allowed_features:
-        raw_value = features[feature_name]
-        river_feature_name = FEATURE_ALIASES.get(feature_name, feature_name)
-        river_features[river_feature_name] = _normalize_feature_value(raw_value)
-
-    return river_features
+    return {
+        feature_name: _normalize_feature_value(feature_name, features[feature_name])
+        for feature_name in POST_SHIFT_FEATURE_NAMES
+    }
 
 
-def _normalize_feature_value(value: object) -> RiverFeatureValue:
+def _normalize_feature_value(feature_name: str, value: object) -> RiverFeatureValue:
+    if isinstance(value, EmployeeRole):
+        if value not in ALLOWED_ROLES:
+            raise ValueError("error.tip.features.role.unsupported")
+
+        return str(value)
+
+    if isinstance(value, ShiftType):
+        if value not in ALLOWED_SHIFT_TYPES:
+            raise ValueError("error.tip.features.shift_type.unsupported")
+
+        return str(value)
+
     if isinstance(value, StrEnum):
         return str(value)
 
     if isinstance(value, bool):
-        raise TypeError("Boolean values are not valid ML feature values")
+        raise TypeError("error.tip.features.bool_unsupported")
 
-    if isinstance(value, int | float | str):
+    if isinstance(value, int):
         return value
 
-    raise TypeError(f"Unsupported ML feature value type: {type(value).__name__}")
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("error.tip.features.float_not_finite")
+
+        return value
+
+    if isinstance(value, str):
+        normalized = value.strip()
+
+        if normalized == "":
+            raise ValueError("error.tip.features.string_empty")
+
+        if feature_name == "role" and normalized not in {role.value for role in ALLOWED_ROLES}:
+            raise ValueError("error.tip.features.role.unsupported")
+
+        if (
+            feature_name == "shift_type"
+            and normalized not in {shift_type.value for shift_type in ALLOWED_SHIFT_TYPES}
+        ):
+            raise ValueError("error.tip.features.shift_type.unsupported")
+
+        return normalized
+
+    raise TypeError("error.tip.features.unsupported_type")
