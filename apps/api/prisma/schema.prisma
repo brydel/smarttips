@@ -212,6 +212,12 @@ enum AuditAction {
   USER_LOGIN
   USER_LOGOUT
 
+  INTEGRATION_ACCOUNT_CREATED
+  INTEGRATION_ACCOUNT_STATUS_CHANGED
+  INTEGRATION_MAPPING_CREATED
+  INTEGRATION_SYNC_JOB_CREATED
+  INTEGRATION_HEALTH_EVENT_RECORDED
+
   @@map("audit_action")
 }
 
@@ -246,6 +252,167 @@ enum PhotoStatus {
   ARCHIVED
 
   @@map("photo_status")
+}
+
+enum IntegrationProvider {
+  SQUARE_POS
+  CLOVER_POS
+  TOAST_POS
+  LIGHTSPEED_POS
+  TOUCHBISTRO_POS
+  UNIVERSAL_POS_IMPORT
+  QUICKBOOKS_ONLINE
+  XERO
+  RESEND
+  TWILIO
+  STRIPE
+
+  @@map("integration_provider")
+}
+
+enum IntegrationCategory {
+  DIRECT_API
+  PARTNER_GATED
+  IMPORT_ASSISTANT
+  EXPORT
+  NOTIFICATION
+  BILLING
+
+  @@map("integration_category")
+}
+
+enum IntegrationEnvironment {
+  SANDBOX
+  PRODUCTION
+
+  @@map("integration_environment")
+}
+
+enum IntegrationAccountStatus {
+  PENDING
+  CONNECTED
+  NEEDS_REAUTH
+  PAUSED
+  DISCONNECTED
+  ERROR
+
+  @@map("integration_account_status")
+}
+
+enum IntegrationCredentialKind {
+  OAUTH_ACCESS_TOKEN
+  OAUTH_REFRESH_TOKEN
+  API_KEY
+  WEBHOOK_SECRET
+  CLIENT_SECRET_REFERENCE
+
+  @@map("integration_credential_kind")
+}
+
+enum IntegrationCredentialStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+  ROTATING
+
+  @@map("integration_credential_status")
+}
+
+enum IntegrationExternalType {
+  LOCATION
+  EMPLOYEE
+  SHIFT
+  ORDER
+  PAYMENT
+  TIP
+  TIME_ENTRY
+  ACCOUNTING_ACCOUNT
+
+  @@map("integration_external_type")
+}
+
+enum IntegrationInternalType {
+  TENANT
+  EMPLOYEE
+  SHIFT
+  ORDER
+  TIP_POOL
+  ASSIGNMENT
+  REPORT
+  ACCOUNTING_EXPORT
+
+  @@map("integration_internal_type")
+}
+
+enum IntegrationMappingStatus {
+  UNMAPPED
+  MAPPED
+  IGNORED
+  CONFLICT
+  STALE
+
+  @@map("integration_mapping_status")
+}
+
+enum IntegrationMappingMatchedBy {
+  AUTO
+  MANUAL
+  IMPORT_PRESET
+  SYSTEM
+
+  @@map("integration_mapping_matched_by")
+}
+
+enum IntegrationSyncJobType {
+  FULL_SYNC
+  INCREMENTAL_SYNC
+  WEBHOOK_RECONCILE
+  IMPORT_APPLY
+  EXPORT
+
+  @@map("integration_sync_job_type")
+}
+
+enum IntegrationSyncJobStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  PARTIAL_FAILED
+  FAILED
+  CANCELED
+  DEAD_LETTER
+
+  @@map("integration_sync_job_status")
+}
+
+enum IntegrationHealthSeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+
+  @@map("integration_health_severity")
+}
+
+enum IntegrationHealthStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+
+  @@map("integration_health_status")
+}
+
+enum IntegrationHealthEventType {
+  TOKEN_EXPIRING
+  TOKEN_EXPIRED
+  RATE_LIMITED
+  SYNC_FAILED
+  WEBHOOK_FAILED
+  MAPPING_CONFLICT
+  PROVIDER_DEGRADED
+  IMPORT_ANOMALY
+
+  @@map("integration_health_event_type")
 }
 
 // ============================================================================
@@ -296,6 +463,11 @@ model Tenant {
   payrollExports     PayrollExport[]
   usageMetrics       UsageMetric[]
   employeeInvitations EmployeeInvitation[]
+  integrationAccounts IntegrationAccount[]
+  integrationCredentials IntegrationCredential[]
+  integrationExternalMappings IntegrationExternalMapping[]
+  integrationSyncJobs IntegrationSyncJob[]
+  integrationHealthEvents IntegrationHealthEvent[]
 
   // Relations 1:1
   distributionConfig DistributionConfig?
@@ -340,6 +512,9 @@ model User {
   auditLogs                  AuditLog[]
   employeeInvitationsSent     EmployeeInvitation[] @relation("EmployeeInvitationInvitedBy")
   employeeInvitationsAccepted EmployeeInvitation[] @relation("EmployeeInvitationAcceptedBy") 
+  integrationAccountsConnected IntegrationAccount[] @relation("IntegrationAccountConnectedBy")
+  integrationAccountsDisconnected IntegrationAccount[] @relation("IntegrationAccountDisconnectedBy")
+  integrationSyncJobsRequested IntegrationSyncJob[] @relation("IntegrationSyncJobRequestedBy")
 
   @@unique([tenantId, email], name: "unique_user_email_per_tenant")
   @@index([tenantId])
@@ -995,6 +1170,181 @@ model PayrollExport {
   @@index([tenantId])
   @@index([tenantId, periodStart, periodEnd])
   @@map("payroll_exports")
+}
+
+// ============================================================================
+// SMARTTIPS CONNECT - CORE FOUNDATION
+// ============================================================================
+
+/// Tenant-scoped connected provider account.
+/// Do not store credentials or tokens in settings.
+model IntegrationAccount {
+  id                String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String                   @map("tenant_id") @db.Uuid
+  provider          IntegrationProvider
+  category          IntegrationCategory
+  environment       IntegrationEnvironment
+  displayName       String                   @map("display_name") @db.VarChar(255)
+  externalAccountId String?                  @map("external_account_id") @db.VarChar(255)
+  externalMerchantId String?                 @map("external_merchant_id") @db.VarChar(255)
+  status            IntegrationAccountStatus @default(PENDING)
+  capabilities      Json
+  settings          Json
+  connectedById     String?                  @map("connected_by_id") @db.Uuid
+  disconnectedById  String?                  @map("disconnected_by_id") @db.Uuid
+  connectedAt       DateTime?                @map("connected_at") @db.Timestamptz(6)
+  lastSyncAt        DateTime?                @map("last_sync_at") @db.Timestamptz(6)
+  disconnectedAt    DateTime?                @map("disconnected_at") @db.Timestamptz(6)
+  createdAt         DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime?                @map("deleted_at") @db.Timestamptz(6)
+
+  tenant         Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  connectedBy    User?                        @relation("IntegrationAccountConnectedBy", fields: [connectedById], references: [id], onDelete: SetNull)
+  disconnectedBy User?                        @relation("IntegrationAccountDisconnectedBy", fields: [disconnectedById], references: [id], onDelete: SetNull)
+  credentials    IntegrationCredential[]
+  mappings       IntegrationExternalMapping[]
+  syncJobs       IntegrationSyncJob[]
+  healthEvents   IntegrationHealthEvent[]
+
+  // PostgreSQL allows multiple NULL values in a unique index, so service logic
+  // also prevents duplicate active accounts when externalAccountId is absent.
+  @@unique([tenantId, provider, externalAccountId, environment], name: "unique_integration_account_per_external_account")
+  @@index([tenantId])
+  @@index([tenantId, provider])
+  @@index([tenantId, status])
+  @@index([tenantId, provider, status])
+  @@index([tenantId, deletedAt])
+  @@index([connectedById])
+  @@index([disconnectedById])
+  @@map("integration_accounts")
+}
+
+/// Encrypted tenant/provider credential storage.
+/// encryptedPayload must never contain plaintext and must never be logged.
+model IntegrationCredential {
+  id                   String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String                      @map("tenant_id") @db.Uuid
+  integrationAccountId String                      @map("integration_account_id") @db.Uuid
+  kind                 IntegrationCredentialKind
+  status               IntegrationCredentialStatus @default(ACTIVE)
+  encryptedPayload     String                      @map("encrypted_payload") @db.Text
+  encryptionKeyVersion String                      @map("encryption_key_version") @db.VarChar(100)
+  scopes               Json
+  expiresAt            DateTime?                   @map("expires_at") @db.Timestamptz(6)
+  lastRefreshedAt      DateTime?                   @map("last_refreshed_at") @db.Timestamptz(6)
+  rotatedAt            DateTime?                   @map("rotated_at") @db.Timestamptz(6)
+  revokedAt            DateTime?                   @map("revoked_at") @db.Timestamptz(6)
+  createdAt            DateTime                    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant             Tenant             @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  integrationAccount IntegrationAccount @relation(fields: [integrationAccountId], references: [id], onDelete: Restrict)
+
+  @@unique([integrationAccountId, kind], name: "unique_credential_kind_per_account")
+  @@index([tenantId, integrationAccountId])
+  @@index([tenantId, status])
+  @@index([expiresAt])
+  @@map("integration_credentials")
+}
+
+/// Maps tenant-scoped vendor IDs to SmartTips entity IDs.
+/// Do not store raw vendor payloads in metadata.
+model IntegrationExternalMapping {
+  id                   String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String                      @map("tenant_id") @db.Uuid
+  integrationAccountId String                      @map("integration_account_id") @db.Uuid
+  provider             IntegrationProvider
+  externalType         IntegrationExternalType     @map("external_type")
+  externalId           String                      @map("external_id") @db.VarChar(255)
+  internalType         IntegrationInternalType     @map("internal_type")
+  internalId           String                      @map("internal_id") @db.Uuid
+  displayName          String?                     @map("display_name") @db.VarChar(255)
+  status               IntegrationMappingStatus    @default(UNMAPPED)
+  matchedBy            IntegrationMappingMatchedBy @map("matched_by")
+  confidence           Decimal?                    @db.Decimal(5, 4)
+  canonicalHash        String?                     @map("canonical_hash") @db.VarChar(64)
+  metadata             Json
+  createdAt            DateTime                    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt            DateTime?                   @map("deleted_at") @db.Timestamptz(6)
+
+  tenant             Tenant             @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  integrationAccount IntegrationAccount @relation(fields: [integrationAccountId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, integrationAccountId, externalType, externalId], name: "unique_external_mapping_per_account")
+  @@index([tenantId, integrationAccountId])
+  @@index([tenantId, externalType])
+  @@index([tenantId, internalType, internalId])
+  @@index([tenantId, status])
+  @@map("integration_external_mappings")
+}
+
+/// Durable async sync/export/import-apply job ledger.
+/// safeErrorMessage must not include raw provider response bodies.
+model IntegrationSyncJob {
+  id                   String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String                   @map("tenant_id") @db.Uuid
+  integrationAccountId String?                  @map("integration_account_id") @db.Uuid
+  provider             IntegrationProvider
+  jobType              IntegrationSyncJobType   @map("job_type")
+  status               IntegrationSyncJobStatus @default(QUEUED)
+  idempotencyKey       String                   @map("idempotency_key") @db.VarChar(255)
+  cursorFrom           Json?                    @map("cursor_from")
+  cursorTo             Json?                    @map("cursor_to")
+  requestedById        String?                  @map("requested_by_id") @db.Uuid
+  startedAt            DateTime?                @map("started_at") @db.Timestamptz(6)
+  finishedAt           DateTime?                @map("finished_at") @db.Timestamptz(6)
+  nextRetryAt          DateTime?                @map("next_retry_at") @db.Timestamptz(6)
+  attemptCount         Int                      @default(0) @map("attempt_count")
+  maxAttempts          Int                      @default(3) @map("max_attempts")
+  errorCode            String?                  @map("error_code") @db.VarChar(100)
+  safeErrorMessage     String?                  @map("safe_error_message") @db.Text
+  stats                Json
+  createdAt            DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant             Tenant              @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  integrationAccount IntegrationAccount? @relation(fields: [integrationAccountId], references: [id], onDelete: SetNull)
+  requestedBy        User?               @relation("IntegrationSyncJobRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, idempotencyKey], name: "unique_sync_job_idempotency_per_tenant")
+  @@index([tenantId, integrationAccountId, createdAt])
+  @@index([tenantId, status])
+  @@index([status, nextRetryAt])
+  @@index([tenantId, jobType])
+  @@index([requestedById])
+  @@map("integration_sync_jobs")
+}
+
+/// Visible operational health for managers and support.
+/// safeDetails must not include raw payloads, tokens, headers, imported rows, or employee full PII.
+model IntegrationHealthEvent {
+  id                   String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String                     @map("tenant_id") @db.Uuid
+  integrationAccountId String?                    @map("integration_account_id") @db.Uuid
+  provider             IntegrationProvider
+  severity             IntegrationHealthSeverity
+  status               IntegrationHealthStatus    @default(OPEN)
+  eventType            IntegrationHealthEventType @map("event_type")
+  messageKey           String                     @map("message_key") @db.VarChar(255)
+  safeDetails          Json                       @map("safe_details")
+  correlationId        String?                    @map("correlation_id") @db.VarChar(255)
+  firstSeenAt          DateTime                   @map("first_seen_at") @db.Timestamptz(6)
+  lastSeenAt           DateTime                   @map("last_seen_at") @db.Timestamptz(6)
+  resolvedAt           DateTime?                  @map("resolved_at") @db.Timestamptz(6)
+  createdAt            DateTime                   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant             Tenant              @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  integrationAccount IntegrationAccount? @relation(fields: [integrationAccountId], references: [id], onDelete: SetNull)
+
+  // correlationId is nullable, so dedupe is enforced in service logic rather
+  // than through a PostgreSQL unique index that would not constrain NULLs.
+  @@index([tenantId, status, severity])
+  @@index([tenantId, integrationAccountId, lastSeenAt])
+  @@index([provider, eventType])
+  @@map("integration_health_events")
 }
 
 // ============================================================================
