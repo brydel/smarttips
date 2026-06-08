@@ -32,45 +32,48 @@ def settings_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Iterator[No
     get_settings.cache_clear()
 
 
-class PoolMemoryRegressor:
+class TipMemoryRegressor:
     def __init__(self) -> None:
         self.prediction = 0.0
 
     def predict_one(self, x: dict[str, int | float | str]) -> float:
         return self.prediction
 
-    def learn_one(self, x: dict[str, int | float | str], y: float) -> PoolMemoryRegressor:
+    def learn_one(self, x: dict[str, int | float | str], y: float) -> TipMemoryRegressor:
         self.prediction = y
         return self
 
 
-def pool_features(sales_signal: float, orders_signal: int) -> dict[str, int | float | str]:
+def tip_features(sales_total_cents: int, assigned_sales_cents: int) -> dict[str, int | float | str]:
     return {
+        "role": "SERVER",
+        "shift_type": "DINNER",
         "day_of_week": 4,
         "hour_start": 17,
         "hour_end": 23,
-        "shift_type": "DINNER",
         "employee_count": 6,
-        "sales_signal": sales_signal,
-        "orders_signal": orders_signal,
+        "expected_sales_cents": 390_000,
+        "sales_total_cents": sales_total_cents,
+        "assigned_sales_cents": assigned_sales_cents,
+        "orders_count": 90,
     }
 
 
 @pytest.mark.asyncio
-async def test_pool_local_store_round_trip_preserves_prediction_and_legacy_artifact_shape(
+async def test_tip_local_store_round_trip_preserves_prediction_and_legacy_artifact_shape(
     tmp_path: Path,
 ) -> None:
     tenant_id = uuid4()
-    model = TipModelWrapper(model=PoolMemoryRegressor())
+    model = TipModelWrapper(model=TipMemoryRegressor())
 
-    for sales_total, orders_count, target in (
-        (3_900.0, 90, 590.0),
-        (4_250.0, 105, 650.0),
-        (5_100.0, 125, 790.0),
+    for sales_total_cents, assigned_sales_cents, target_cents in (
+        (390_000, 120_000, 5_900),
+        (425_000, 140_000, 6_500),
+        (510_000, 180_000, 7_900),
     ):
-        model.learn(pool_features(sales_total, orders_count), target)
+        model.learn(tip_features(sales_total_cents, assigned_sales_cents), target_cents)
 
-    prediction_features = pool_features(4_600.0, 112)
+    prediction_features = tip_features(460_000, 150_000)
     prediction_before = model.predict(prediction_features)
     store = LocalModelStore[TipModelWrapper]()
 

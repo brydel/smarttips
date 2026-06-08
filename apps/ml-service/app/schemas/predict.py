@@ -1,29 +1,14 @@
-from pydantic import Field, model_validator
+from pydantic import Field, StrictInt, model_validator
 
-from app.models.features import ShiftType
+from app.models.features import EmployeeRole, ShiftType
+from app.models.tip_model import MAX_REASONABLE_TIPS_PREDICTION_CENTS
 from app.schemas.common import ShiftScopedRequest, StrictBase
 
 
-class PredictFeatures(StrictBase):
-    day_of_week: int = Field(
-        ge=0,
-        le=6,
-        description="Day of week where Monday=0 and Sunday=6.",
-        examples=[4],
-    )
-
-    hour_start: int = Field(
-        ge=0,
-        le=23,
-        description="Shift start hour in 24-hour format.",
-        examples=[17],
-    )
-
-    hour_end: int = Field(
-        ge=0,
-        le=23,
-        description="Shift end hour in 24-hour format (inclusive). Overnight shifts are allowed.",
-        examples=[23],
+class PostShiftTipFeatures(StrictBase):
+    role: EmployeeRole = Field(
+        description="Employee role worked during the closed shift.",
+        examples=[EmployeeRole.SERVER],
     )
 
     shift_type: ShiftType = Field(
@@ -31,30 +16,64 @@ class PredictFeatures(StrictBase):
         examples=[ShiftType.DINNER],
     )
 
-    employee_count: int = Field(
+    day_of_week: StrictInt = Field(
+        ge=0,
+        le=6,
+        description="Day of week where Monday=0 and Sunday=6.",
+        examples=[4],
+    )
+
+    hour_start: StrictInt = Field(
+        ge=0,
+        le=23,
+        description="Shift start hour in 24-hour format.",
+        examples=[17],
+    )
+
+    hour_end: StrictInt = Field(
+        ge=0,
+        le=23,
+        description="Shift end hour in 24-hour format. Overnight shifts are allowed.",
+        examples=[23],
+    )
+
+    employee_count: StrictInt = Field(
         ge=1,
         le=100,
-        description="Number of employees scheduled for the shift.",
+        description="Actual number of employees who worked during the shift.",
         examples=[6],
     )
 
-    expected_sales: float = Field(
-        ge=0.0,
-        le=1_000_000.0,
-        allow_inf_nan=False,
-        description="Expected sales amount before shift closure. Must be finite.",
-        examples=[4200.50],
+    expected_sales_cents: StrictInt = Field(
+        ge=0,
+        le=100_000_000,
+        description="Expected sales captured for the shift, in cents.",
+        examples=[420_050],
     )
 
-    expected_orders: int = Field(
+    sales_total_cents: StrictInt = Field(
+        ge=0,
+        le=100_000_000,
+        description="Actual sales total after shift close, in cents.",
+        examples=[431_075],
+    )
+
+    assigned_sales_cents: StrictInt = Field(
+        ge=0,
+        le=100_000_000,
+        description="Sales assigned to the employee after shift close, in cents.",
+        examples=[168_450],
+    )
+
+    orders_count: StrictInt = Field(
         ge=0,
         le=100_000,
-        description="Expected order count before shift closure.",
-        examples=[110],
+        description="Actual number of orders after shift close.",
+        examples=[118],
     )
 
     @model_validator(mode="after")
-    def validate_shift_duration(self) -> "PredictFeatures":
+    def validate_shift_duration(self) -> "PostShiftTipFeatures":
         duration_hours = (self.hour_end - self.hour_start) % 24
 
         if duration_hours == 0:
@@ -67,20 +86,19 @@ class PredictFeatures(StrictBase):
 
 
 class PredictRequest(ShiftScopedRequest):
-    features: PredictFeatures = Field(
-        description="Feature payload used by the online ML model.",
+    features: PostShiftTipFeatures = Field(
+        description="Post-shift feature payload used by the online individual tip model.",
     )
 
 
 class PredictResponse(ShiftScopedRequest):
-    prediction: float = Field(
-        ge=0.0,
-        le=1_000_000.0,
-        allow_inf_nan=False,
-        description="Predicted total tips amount for the shift. Must be finite.",
-        examples=[615.25],
+    prediction_cents: StrictInt = Field(
+        ge=0,
+        le=MAX_REASONABLE_TIPS_PREDICTION_CENTS,
+        description="Predicted individual tips received, in cents.",
+        examples=[61_525],
     )
-    model_version: int = Field(
+    model_version: StrictInt = Field(
         ge=0,
         description=(
             "Tenant-specific model version used for the prediction. "

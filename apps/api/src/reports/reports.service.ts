@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AssignmentStatus, Prisma } from '@prisma/client';
 import { stringify } from 'csv-stringify/sync';
-import pdfmake = require('pdfmake');
+import pdfmake from 'pdfmake';
 import type { Content, TableCell, TDocumentDefinitions } from 'pdfmake/interfaces';
 
 import { PrismaService } from '../prisma/prisma.service';

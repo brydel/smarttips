@@ -121,7 +121,7 @@ async def predict(
     return PredictResponse(
         tenant_id=payload.tenant_id,
         shift_id=payload.shift_id,
-        prediction=prediction,
+        prediction_cents=prediction,
         model_version=model_version,
     )
 
@@ -139,7 +139,7 @@ async def train(
         status_str, model_version = await service.train(
             tenant_id=payload.tenant_id,
             features=payload.features.model_dump(mode="python"),
-            target=payload.target.tips_total,
+            target_cents=payload.target.tips_received_cents,
             idempotency_key=payload.idempotency_key,
         )
     except (TypeError, ValueError) as error:

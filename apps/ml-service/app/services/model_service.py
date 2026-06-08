@@ -170,7 +170,7 @@ class ModelService:
         self,
         tenant_id: TenantId,
         features: dict[str, object],
-    ) -> tuple[float, int]:
+    ) -> tuple[int, int]:
         river_features = to_river_predict_dict(features)
 
         lock = await self._get_tenant_lock(tenant_id)
@@ -194,7 +194,7 @@ class ModelService:
         self,
         tenant_id: TenantId,
         features: dict[str, object],
-        target: float,
+        target_cents: int,
         idempotency_key: str,
     ) -> tuple[TrainStatus, int]:
         river_features = to_river_train_dict(features)
@@ -219,7 +219,7 @@ class ModelService:
                 return "already_trained", existing_after_lock.metadata.model_version
 
             model = await self._get_or_load_model(tenant_id)
-            model.learn(river_features, target)
+            model.learn(river_features, target_cents)
 
             try:
                 persisted_meta = await self._model_store.save(tenant_id, model)
