@@ -4,12 +4,15 @@ import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { DistributionExceptionFilter } from './distribution/distribution-exception.filter';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
   const nodeEnv = config.get<string>('NODE_ENV', 'development');
+
+  app.enableShutdownHooks();
 
   app.use(
     helmet({
@@ -39,6 +42,7 @@ async function bootstrap() {
   );
 
   app.setGlobalPrefix('api/v1');
+  app.useGlobalFilters(new DistributionExceptionFilter());
 
   // CORS_ORIGINS = liste multi-valeur pour le CORS (peut contenir plusieurs URLs séparées par virgule)
   // FRONTEND_URL = URL UNIQUE utilisée uniquement pour générer les magic links (invitations)
