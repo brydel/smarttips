@@ -11,10 +11,11 @@ interface KpiCardProps {
   value: string;
   hint?: string;
   accentClass: string;
-  notImplemented?: boolean;
+  /** Affiche un tiret tant que les données ne sont pas chargées. */
+  pending?: boolean;
 }
 
-function KpiCard({ icon, label, value, hint, accentClass, notImplemented }: KpiCardProps) {
+function KpiCard({ icon, label, value, hint, accentClass, pending }: KpiCardProps) {
   return (
     <div className="bg-st-card border border-st-border rounded-xl p-4 flex flex-col gap-3 min-w-0">
       <div className="flex items-center justify-between gap-2">
@@ -26,18 +27,13 @@ function KpiCard({ icon, label, value, hint, accentClass, notImplemented }: KpiC
         >
           {icon}
         </span>
-        {notImplemented && (
-          <span className="text-[9.5px] font-mono uppercase tracking-wider text-st-dim border border-st-border rounded-pill px-1.5 py-0.5">
-            Après validation
-          </span>
-        )}
       </div>
 
       <div>
         <div className="text-[10.5px] font-mono uppercase tracking-[0.12em] text-st-dim mb-1">
           {label}
         </div>
-        {notImplemented ? (
+        {pending ? (
           <div className="flex items-center gap-2">
             <span className="text-[22px] font-mono text-st-dim leading-none">—</span>
           </div>
@@ -54,10 +50,9 @@ function KpiCard({ icon, label, value, hint, accentClass, notImplemented }: KpiC
 
 interface EmployeeTipSummaryCardsProps {
   summary?: EmployeeDashboardSummary;
-  notImplemented?: boolean;
 }
 
-export function EmployeeTipSummaryCards({ summary, notImplemented }: EmployeeTipSummaryCardsProps) {
+export function EmployeeTipSummaryCards({ summary }: EmployeeTipSummaryCardsProps) {
   const cards: KpiCardProps[] = [
     {
       label: 'Cette semaine',
@@ -65,7 +60,7 @@ export function EmployeeTipSummaryCards({ summary, notImplemented }: EmployeeTip
       icon: <TrendingUp size={15} className="text-st-emerald-glow" />,
       accentClass: 'bg-st-emerald/10',
       hint: '7 derniers jours',
-      notImplemented: notImplemented || !summary,
+      pending: !summary,
     },
     {
       label: 'Ce mois',
@@ -73,21 +68,21 @@ export function EmployeeTipSummaryCards({ summary, notImplemented }: EmployeeTip
       icon: <CalendarDays size={15} className="text-st-indigo-glow" />,
       accentClass: 'bg-st-indigo/10',
       hint: '30 derniers jours',
-      notImplemented: notImplemented || !summary,
+      pending: !summary,
     },
     {
       label: 'Shifts ce mois',
       value: summary ? String(summary.monthShiftCount) : '—',
       icon: <BarChart2 size={15} className="text-st-gold" />,
       accentClass: 'bg-st-gold/10',
-      notImplemented: notImplemented || !summary,
+      pending: !summary,
     },
     {
       label: 'Moyenne / shift',
       value: summary ? fmtMoneyShort(summary.averagePerShift) : '—',
       icon: <Coins size={15} className="text-st-emerald-glow" />,
       accentClass: 'bg-st-emerald/10',
-      notImplemented: notImplemented || !summary,
+      pending: !summary,
     },
   ];
 

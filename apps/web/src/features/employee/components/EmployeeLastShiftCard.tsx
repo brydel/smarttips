@@ -14,31 +14,10 @@ import {
 
 interface EmployeeLastShiftCardProps {
   lastShift?: EmployeeLastShift | null;
-  notImplemented?: boolean;
 }
 
-export function EmployeeLastShiftCard({ lastShift, notImplemented }: EmployeeLastShiftCardProps) {
-  // Not implemented state
-  if (notImplemented || lastShift === undefined) {
-    return (
-      <div className="bg-st-card border border-st-border rounded-xl p-5">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Clock size={14} className="text-st-dim" />
-            <span className="text-[12px] font-medium text-st-sec font-sans">Dernier shift</span>
-          </div>
-          <span className="text-[9.5px] font-mono uppercase tracking-wider text-st-dim border border-st-border rounded-pill px-1.5 py-0.5">
-            Après validation
-          </span>
-        </div>
-        <p className="text-[12.5px] text-st-dim font-sans leading-relaxed">
-          Votre dernier shift et le montant reçu apparaîtront ici.
-        </p>
-      </div>
-    );
-  }
-
-  // Empty state (no shift yet)
+export function EmployeeLastShiftCard({ lastShift }: EmployeeLastShiftCardProps) {
+  // État vide : chargement en cours (undefined) ou aucun shift distribué (null).
   if (!lastShift) {
     return (
       <div className="bg-st-card border border-st-border rounded-xl p-5">

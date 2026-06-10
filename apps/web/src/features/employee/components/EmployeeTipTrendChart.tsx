@@ -25,46 +25,27 @@ function ChartTooltip({ active, payload, label }: ChartTooltipProps) {
 
 interface EmployeeTipTrendChartProps {
   trend?: EmployeeTrendPoint[];
-  notImplemented?: boolean;
 }
 
-export function EmployeeTipTrendChart({ trend, notImplemented }: EmployeeTipTrendChartProps) {
-  // Coming-soon placeholder UI
-  if (notImplemented || !trend?.length) {
+export function EmployeeTipTrendChart({ trend }: EmployeeTipTrendChartProps) {
+  const hasData = Boolean(trend?.length) && (trend ?? []).some((pt) => pt.amount > 0);
+
+  // État vide honnête : aucune barre fictive.
+  if (!trend?.length || !hasData) {
     return (
       <div className="bg-st-card border border-st-border rounded-xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <div className="text-[10.5px] font-mono uppercase tracking-[0.12em] text-st-dim mb-0.5">
-              Tendance des pourboires
-            </div>
-            <div className="text-[13px] text-st-hi font-medium font-sans">30 derniers jours</div>
+        <div className="mb-4">
+          <div className="text-[10.5px] font-mono uppercase tracking-[0.12em] text-st-dim mb-0.5">
+            Tendance des pourboires
           </div>
-          <span className="text-[9.5px] font-mono uppercase tracking-wider text-st-dim border border-st-border rounded-pill px-1.5 py-0.5">
-            Bientôt
-          </span>
+          <div className="text-[13px] text-st-hi font-medium font-sans">30 derniers jours</div>
         </div>
-
-        {/* Placeholder chart bars */}
-        <div className="flex items-end gap-1.5 h-[100px] px-2">
-          {Array.from({ length: 30 }, (_, i) => {
-            const h = 20 + Math.sin(i * 0.7) * 15 + Math.cos(i * 0.4) * 10 + (i / 30) * 30;
-            return (
-              <div
-                key={i}
-                className="flex-1 rounded-sm"
-                style={{
-                  height: `${h}%`,
-                  background: i % 7 === 6 ? 'rgba(212,165,116,.25)' : 'rgba(99,102,241,.12)',
-                }}
-              />
-            );
-          })}
+        <div className="flex flex-col items-center justify-center h-[100px] gap-2">
+          <TrendingUp size={18} className="text-st-dim" />
+          <p className="text-[12px] text-st-dim font-sans text-center">
+            Aucun pourboire distribué sur les 30 derniers jours.
+          </p>
         </div>
-        <p className="text-[11px] text-st-dim font-sans text-center mt-3 flex items-center justify-center gap-1.5">
-          <TrendingUp size={11} className="text-st-dim" />
-          Vos gains sur 30 jours seront affichés ici
-        </p>
       </div>
     );
   }
