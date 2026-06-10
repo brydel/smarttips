@@ -20,6 +20,7 @@ import { DistributionChart } from '../../../components/dashboard/overview/distri
 import { RolesCard } from '../../../components/dashboard/overview/roles-card';
 import { TopPerformersCard } from '../../../components/dashboard/overview/top-performers-card';
 import { TomorrowStrip } from '../../../components/dashboard/overview/tomorrow-strip';
+import { ActionInboxSection } from '../../../components/dashboard/action-inbox-section';
 import {
   HeroSkeleton,
   KpiSkeleton,
@@ -352,6 +353,9 @@ export default function DashboardPage() {
           </div>
           <PeriodPicker value={period} onChange={setPeriod} />
         </div>
+
+        {/* ── Action inbox (états gérés par le panneau, indépendant des stats) ── */}
+        <ActionInboxSection />
 
         {/* ── Error state ─────────────────────────────────────────────────── */}
         {isError && !isLoading && <ErrorState onRetry={refetch} />}

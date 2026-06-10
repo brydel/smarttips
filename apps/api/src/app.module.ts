@@ -15,6 +15,7 @@ import { TenantConfigModule } from './tenant-config/tenant-config.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { EmailModule } from './email/email.module';
 import { AuditModule } from './audit/audit.module';
+import { ActionInboxModule } from './action-inbox/action-inbox.module';
 import { ReportsModule } from './reports/reports.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { MlClientModule } from './ml-client/ml-client.module';
@@ -67,6 +68,7 @@ import { QueueModule } from './queue/queue.module';
     InvitationsModule,
     EmailModule,
     AuditModule,
+    ActionInboxModule,
     ReportsModule,
     IntegrationsModule,
   ],
