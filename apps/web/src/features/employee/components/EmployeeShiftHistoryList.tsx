@@ -55,6 +55,14 @@ function PeriodPicker({ value, onChange }: PeriodPickerProps) {
   );
 }
 
+// ── Status labels ─────────────────────────────────────────────────────────────
+
+/** Codes stables renvoyés par l'API (statut du pool), traduits côté front. */
+const STATUS_LABELS: Record<string, string> = {
+  DISTRIBUTED: 'Calculé',
+  FINALIZED: 'Finalisé',
+};
+
 // ── Row ───────────────────────────────────────────────────────────────────────
 
 interface ShiftRowProps {
@@ -120,7 +128,7 @@ function ShiftRow({ record }: ShiftRowProps) {
                     record.paidAt ? 'text-st-emerald-glow' : 'text-st-dim',
                   )}
                 >
-                  {record.paidAt ? 'Payé' : record.status}
+                  {record.paidAt ? 'Payé' : (STATUS_LABELS[record.status] ?? record.status)}
                 </span>
               </>
             )}
@@ -285,7 +293,6 @@ function DetailRow({
 
 interface EmployeeShiftHistoryListProps {
   records?: EmployeeShiftRecord[];
-  notImplemented?: boolean;
   isLoading?: boolean;
   isError?: boolean;
   period: TipPeriod;
@@ -294,7 +301,6 @@ interface EmployeeShiftHistoryListProps {
 
 export function EmployeeShiftHistoryList({
   records,
-  notImplemented,
   isLoading,
   isError,
   period,
@@ -313,38 +319,8 @@ export function EmployeeShiftHistoryList({
         )}
       </div>
 
-      {/* Not-implemented state */}
-      {notImplemented && (
-        <div className="rounded-xl border border-st-border bg-st-card p-8 flex flex-col items-center gap-4 text-center">
-          <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center"
-            style={{
-              background: 'rgba(212,165,116,.08)',
-              border: '1px solid rgba(212,165,116,.2)',
-            }}
-          >
-            <CalendarDays size={22} className="text-st-gold" />
-          </div>
-          <div>
-            <p className="text-[14px] text-st-hi font-medium font-sans mb-1">
-              Historique des pourboires
-            </p>
-            <p className="text-[12.5px] text-st-sec font-sans leading-relaxed max-w-xs">
-              Votre historique détaillé par shift, avec les montants reçus et le détail du calcul,
-              sera disponible prochainement.
-            </p>
-          </div>
-          <div
-            className="px-3 py-1.5 rounded-md text-[11px] font-mono text-st-dim"
-            style={{ background: 'rgba(99,102,241,.06)', border: '1px solid rgba(99,102,241,.15)' }}
-          >
-            Backend requis · GET /employee/me/distributions
-          </div>
-        </div>
-      )}
-
       {/* Loading */}
-      {isLoading && !notImplemented && (
+      {isLoading && (
         <div className="flex items-center justify-center py-12">
           <svg
             className="animate-spin text-st-indigo"
@@ -361,7 +337,7 @@ export function EmployeeShiftHistoryList({
       )}
 
       {/* Error */}
-      {isError && !notImplemented && (
+      {isError && (
         <div className="rounded-xl border border-st-border bg-st-card p-6 text-center">
           <p className="text-[13px] text-st-sec font-sans">
             Impossible de charger vos shifts. Réessayez.
@@ -370,7 +346,7 @@ export function EmployeeShiftHistoryList({
       )}
 
       {/* Empty */}
-      {!notImplemented && !isLoading && !isError && records?.length === 0 && (
+      {!isLoading && !isError && records?.length === 0 && (
         <div className="rounded-xl border border-st-border bg-st-card p-8 text-center">
           <CalendarDays size={24} className="text-st-dim mx-auto mb-3" />
           <p className="text-[13px] text-st-sec font-sans">
@@ -380,7 +356,7 @@ export function EmployeeShiftHistoryList({
       )}
 
       {/* Records list */}
-      {!notImplemented && records && records.length > 0 && (
+      {records && records.length > 0 && (
         <div className="flex flex-col gap-2">
           {records.map((record) => (
             <ShiftRow key={record.id} record={record} />

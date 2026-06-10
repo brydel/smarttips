@@ -1,33 +1,23 @@
 /**
  * Employee API — Personal space endpoints
  *
+ * Portefeuille de pourboires (BIS-55) : implémenté.
+ * - GET /employee/me/dashboard      → EmployeeDashboardSummary
+ * - GET /employee/me/distributions  → EmployeeShiftRecord[] (?range=7d|30d|90d|all)
+ * Les deux routes sont @Roles(EMPLOYEE) et strictement scopées à l'employé
+ * authentifié côté backend (identité depuis le JWT, jamais d'employeeId client).
+ *
  * ╔══════════════════════════════════════════════════════════════════════════╗
- * ║  BACKEND ENDPOINTS NOT YET IMPLEMENTED                                  ║
+ * ║  BACKEND ENDPOINTS NOT YET IMPLEMENTED                                    ║
  * ║                                                                          ║
- * ║  The following NestJS routes need to be added in the API:               ║
- * ║                                                                          ║
- * ║  1. GET  /employee/me/dashboard                                          ║
- * ║     @Roles(EMPLOYEE) — returns EmployeeDashboardSummary                  ║
- * ║     Filtered by req.user.id → linked Employee → aggregated tips          ║
- * ║                                                                          ║
- * ║  2. GET  /employee/me/distributions                                      ║
- * ║     @Roles(EMPLOYEE) — returns EmployeeShiftRecord[]                     ║
- * ║     Queries TipDistribution WHERE employee.userId = req.user.id          ║
- * ║     Supports ?range=7d|30d|90d|all query param                           ║
- * ║                                                                          ║
- * ║  3. PATCH /me                                                            ║
+ * ║  1. PATCH /me                                                             ║
  * ║     @Roles(ANY authenticated) — updates User.name / User.email           ║
  * ║     Body: { firstName: string; lastName: string; email: string }         ║
  * ║                                                                          ║
- * ║  4. PATCH /me/password                                                   ║
+ * ║  2. PATCH /me/password                                                    ║
  * ║     @Roles(ANY authenticated) — changes hashed password                  ║
  * ║     Body: { currentPassword: string; newPassword: string }               ║
  * ║     Must verify currentPassword with bcrypt before saving.               ║
- * ║                                                                          ║
- * ║  Security notes:                                                         ║
- * ║  - All queries MUST use req.user.id / req.user.tenantId from JWT         ║
- * ║  - Never accept employeeId in the request body or query params           ║
- * ║  - Use employee.userId = req.user.id to find the employee record         ║
  * ║                                                                          ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
  */
@@ -49,33 +39,35 @@ export async function getMyProfile(signal?: AbortSignal): Promise<AuthUser> {
   return data;
 }
 
-// ── Pending backend: GET /employee/me/dashboard ───────────────────────────────
+// ── Implemented: GET /employee/me/dashboard ───────────────────────────────────
 /**
  * Returns the employee's tip summary (week/month totals, trend, last shift).
- *
- * @throws {Error} with code 'ENDPOINT_NOT_IMPLEMENTED' until backend adds this route.
+ * Backend scope: authenticated employee only, redacted explanations.
  */
-export async function getMyDashboard(_signal?: AbortSignal): Promise<EmployeeDashboardSummary> {
-  throw Object.assign(
-    new Error('GET /employee/me/dashboard is not yet implemented in the backend.'),
-    { code: 'ENDPOINT_NOT_IMPLEMENTED' as const },
-  );
+export async function getMyDashboard(signal?: AbortSignal): Promise<EmployeeDashboardSummary> {
+  const { data } = await apiClient.get<EmployeeDashboardSummary>('/employee/me/dashboard', {
+    signal,
+  });
+  return data;
 }
 
-// ── Pending backend: GET /employee/me/distributions ──────────────────────────
+// ── Implemented: GET /employee/me/distributions ───────────────────────────────
 /**
  * Returns the employee's personal tip distributions filtered by period.
- *
- * @throws {Error} with code 'ENDPOINT_NOT_IMPLEMENTED' until backend adds this route.
+ * Query string built explicitly (plain `range=30d` key, no brackets).
  */
 export async function getMyDistributions(
-  _params?: { range?: TipPeriod },
-  _signal?: AbortSignal,
+  params?: { range?: TipPeriod },
+  signal?: AbortSignal,
 ): Promise<EmployeeShiftRecord[]> {
-  throw Object.assign(
-    new Error('GET /employee/me/distributions is not yet implemented in the backend.'),
-    { code: 'ENDPOINT_NOT_IMPLEMENTED' as const },
-  );
+  const search = new URLSearchParams();
+  if (params?.range) search.set('range', params.range);
+
+  const url = search.toString()
+    ? `/employee/me/distributions?${search}`
+    : '/employee/me/distributions';
+  const { data } = await apiClient.get<EmployeeShiftRecord[]>(url, { signal });
+  return data;
 }
 
 // ── Pending backend: PATCH /me ────────────────────────────────────────────────

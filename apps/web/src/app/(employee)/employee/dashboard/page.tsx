@@ -25,7 +25,7 @@ function getFirstName(name: string): string {
 
 export default function EmployeeDashboardPage() {
   const { user } = useAuth();
-  const { data: summary, notImplemented, isLoading, isError } = useEmployeeDashboard();
+  const { data: summary, isLoading, isError } = useEmployeeDashboard();
 
   const firstName = user ? getFirstName(user.name) : '';
   const greeting = getGreeting();
@@ -91,7 +91,7 @@ export default function EmployeeDashboardPage() {
       )}
 
       {/* Error */}
-      {isError && !notImplemented && (
+      {isError && (
         <div className="rounded-xl border border-st-border bg-st-card p-5 text-center">
           <p className="text-[13px] text-st-sec font-sans">
             Impossible de charger vos données. Réessayez.
@@ -100,15 +100,15 @@ export default function EmployeeDashboardPage() {
       )}
 
       {/* KPI cards */}
-      <EmployeeTipSummaryCards summary={summary} notImplemented={notImplemented} />
+      <EmployeeTipSummaryCards summary={summary} />
 
       {/* Layout: chart + last shift */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
         {/* Trend chart */}
-        <EmployeeTipTrendChart trend={summary?.trend30Days} notImplemented={notImplemented} />
+        <EmployeeTipTrendChart trend={summary?.trend30Days} />
 
         {/* Last shift */}
-        <EmployeeLastShiftCard lastShift={summary?.lastShift} notImplemented={notImplemented} />
+        <EmployeeLastShiftCard lastShift={summary?.lastShift} />
       </div>
 
       {/* CTA strip */}

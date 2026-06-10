@@ -8,7 +8,7 @@ import type { TipPeriod } from '../../../../features/employee/types/employee.typ
 
 export default function EmployeeShiftsPage() {
   const [period, setPeriod] = useState<TipPeriod>('30d');
-  const { data, notImplemented, isLoading, isError } = useEmployeeShifts(period);
+  const { data, isLoading, isError } = useEmployeeShifts(period);
 
   return (
     <div className="flex flex-col gap-5 p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto w-full">
@@ -33,7 +33,6 @@ export default function EmployeeShiftsPage() {
       {/* History list with filters */}
       <EmployeeShiftHistoryList
         records={data ?? undefined}
-        notImplemented={notImplemented}
         isLoading={isLoading}
         isError={isError}
         period={period}
