@@ -39,3 +39,7 @@ export const INVITATIONS_KEY = 'invitations' as const;
 
 // ── Action inbox (manager) ───────────────────────────────────────────
 export const ACTION_INBOX_KEY = 'action-inbox' as const;
+
+// ── Disputes (BIS-56) ────────────────────────────────────────────────
+export const EMPLOYEE_DISPUTES_KEY = 'employee-disputes' as const;
+export const DISPUTES_QUEUE_KEY = 'disputes-queue' as const;

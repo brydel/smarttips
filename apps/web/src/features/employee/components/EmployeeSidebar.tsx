@@ -2,7 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, CalendarDays, UserCircle, LogOut, Brain } from 'lucide-react';
+import {
+  LayoutDashboard,
+  CalendarDays,
+  MessageCircleQuestion,
+  UserCircle,
+  LogOut,
+  Brain,
+} from 'lucide-react';
 import { cn } from '../../../lib/cn';
 import { useAuth } from '../../../hooks/use-auth';
 import { ThemeToggle } from '../../../components/theme/theme-toggle';
@@ -10,6 +17,7 @@ import { ThemeToggle } from '../../../components/theme/theme-toggle';
 const NAV_ITEMS = [
   { href: '/employee/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
   { href: '/employee/shifts', label: 'Mes shifts', icon: CalendarDays },
+  { href: '/employee/disputes', label: 'Demandes', icon: MessageCircleQuestion },
   { href: '/employee/profile', label: 'Mon profil', icon: UserCircle },
 ] as const;
 

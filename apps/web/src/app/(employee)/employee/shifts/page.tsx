@@ -1,14 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CalendarDays } from 'lucide-react';
 import { useEmployeeShifts } from '../../../../features/employee/hooks/use-employee-shifts';
 import { EmployeeShiftHistoryList } from '../../../../features/employee/components/EmployeeShiftHistoryList';
-import type { TipPeriod } from '../../../../features/employee/types/employee.types';
+import type {
+  EmployeeShiftRecord,
+  TipPeriod,
+} from '../../../../features/employee/types/employee.types';
+import { useMyDisputes } from '../../../../features/disputes/hooks/use-my-disputes';
+import { DisputeCreateModal } from '../../../../features/disputes/components/DisputeCreateModal';
 
 export default function EmployeeShiftsPage() {
   const [period, setPeriod] = useState<TipPeriod>('30d');
+  const [disputeRecord, setDisputeRecord] = useState<EmployeeShiftRecord | null>(null);
+
   const { data, isLoading, isError } = useEmployeeShifts(period);
+  const { activeByDistributionId, create, isCreating } = useMyDisputes();
+
+  const activeDisputeDistributionIds = useMemo(
+    () => new Set(activeByDistributionId.keys()),
+    [activeByDistributionId],
+  );
 
   return (
     <div className="flex flex-col gap-5 p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto w-full">
@@ -37,6 +50,16 @@ export default function EmployeeShiftsPage() {
         isError={isError}
         period={period}
         onPeriodChange={setPeriod}
+        activeDisputeDistributionIds={activeDisputeDistributionIds}
+        onAskQuestion={setDisputeRecord}
+      />
+
+      {/* « Poser une question » (BIS-56) */}
+      <DisputeCreateModal
+        record={disputeRecord}
+        onClose={() => setDisputeRecord(null)}
+        onSubmit={create}
+        submitting={isCreating}
       />
     </div>
   );

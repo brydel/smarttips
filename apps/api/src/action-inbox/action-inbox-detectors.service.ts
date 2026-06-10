@@ -7,6 +7,7 @@ import {
   Prisma,
   ShiftStatus,
   ShiftType,
+  TipDisputeStatus,
   TipPoolStatus,
 } from '@prisma/client';
 
@@ -74,6 +75,7 @@ export class ActionInboxDetectorsService {
         this.detectDistributionPendingApproval(tenantId),
         this.detectShiftCloseOverdue(tenantId, now),
         this.detectShiftUnassigned(tenantId, now),
+        this.detectDisputeOpen(tenantId),
       ])
     ).flat();
 
@@ -298,5 +300,51 @@ export class ActionInboxDetectorsService {
       },
       dedupeKey: dedupeKey(ActionItemType.SHIFT_UNASSIGNED, shift.id),
     }));
+  }
+
+  /**
+   * Litige employé OPEN en attente de prise en charge (BIS-56).
+   * Auto-résolu dès que le litige quitte OPEN (pris en charge, résolu ou retiré).
+   * Payload minimal : catégorie, date, type de shift — JAMAIS le message
+   * de l'employé ni son identité.
+   */
+  private async detectDisputeOpen(tenantId: string): Promise<DetectedItem[]> {
+    const disputes = await this.prisma.tipDispute.findMany({
+      where: { tenantId, status: TipDisputeStatus.OPEN },
+      select: {
+        id: true,
+        category: true,
+        createdAt: true,
+        tipDistribution: {
+          select: {
+            tipPool: {
+              select: {
+                shiftId: true,
+                shift: { select: { date: true, shiftType: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return disputes.map((dispute) => {
+      const shift = dispute.tipDistribution.tipPool.shift;
+      return {
+        type: ActionItemType.DISPUTE_OPEN,
+        severity: ActionItemSeverity.WARNING,
+        title: `Question d'employé · ${shiftLabel(shift.date, shift.shiftType)}`,
+        entityType: 'TipDispute',
+        entityId: dispute.id,
+        shiftId: dispute.tipDistribution.tipPool.shiftId,
+        payload: {
+          category: dispute.category,
+          shiftDate: shift.date.toISOString().slice(0, 10),
+          shiftType: shift.shiftType,
+          openedAt: dispute.createdAt.toISOString(),
+        },
+        dedupeKey: dedupeKey(ActionItemType.DISPUTE_OPEN, dispute.id),
+      };
+    });
   }
 }

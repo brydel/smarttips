@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, CalendarDays, Info } from 'lucide-react';
+import Link from 'next/link';
+import { ChevronDown, ChevronUp, CalendarDays, Info, MessageCircleQuestion } from 'lucide-react';
 import { cn } from '../../../lib/cn';
 import type { EmployeeShiftRecord, TipPeriod } from '../types/employee.types';
 import {
@@ -67,9 +68,13 @@ const STATUS_LABELS: Record<string, string> = {
 
 interface ShiftRowProps {
   record: EmployeeShiftRecord;
+  /** Une demande (litige BIS-56) est active sur cette distribution. */
+  hasActiveDispute?: boolean;
+  /** Présent = l'entrée est éligible à « Poser une question ». */
+  onAskQuestion?: (record: EmployeeShiftRecord) => void;
 }
 
-function ShiftRow({ record }: ShiftRowProps) {
+function ShiftRow({ record, hasActiveDispute, onAskQuestion }: ShiftRowProps) {
   const [expanded, setExpanded] = useState(false);
 
   const explainText = record.explanation ? buildShortExplain(record.explanation) : null;
@@ -131,6 +136,18 @@ function ShiftRow({ record }: ShiftRowProps) {
                   {record.paidAt ? 'Payé' : (STATUS_LABELS[record.status] ?? record.status)}
                 </span>
               </>
+            )}
+            {hasActiveDispute && (
+              <span
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-pill text-[9px] font-mono uppercase tracking-wide border"
+                style={{
+                  color: 'var(--st-indigo-glow)',
+                  background: 'rgba(99,102,241,.1)',
+                  borderColor: 'rgba(99,102,241,.25)',
+                }}
+              >
+                <MessageCircleQuestion size={9} /> Question en cours
+              </span>
             )}
           </div>
         </div>
@@ -259,6 +276,35 @@ function ShiftRow({ record }: ShiftRowProps) {
               )}
             </div>
           )}
+
+          {/* Poser une question (BIS-56) — n'affecte jamais le montant. */}
+          <div className="mt-3 flex justify-end">
+            {hasActiveDispute ? (
+              <Link
+                href="/employee/disputes"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-[8px] text-[11.5px] border transition-colors"
+                style={{
+                  color: 'var(--st-indigo-glow)',
+                  borderColor: 'rgba(99,102,241,.25)',
+                  background: 'rgba(99,102,241,.08)',
+                  textDecoration: 'none',
+                }}
+              >
+                <MessageCircleQuestion size={12} /> Voir ma demande en cours
+              </Link>
+            ) : (
+              onAskQuestion && (
+                <button
+                  type="button"
+                  onClick={() => onAskQuestion(record)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-[8px] text-[11.5px] border border-st-border text-st-sec hover:text-st-hi hover:bg-st-raised transition-colors cursor-pointer"
+                  style={{ background: 'transparent', fontFamily: 'inherit' }}
+                >
+                  <MessageCircleQuestion size={12} /> Poser une question
+                </button>
+              )
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -297,6 +343,10 @@ interface EmployeeShiftHistoryListProps {
   isError?: boolean;
   period: TipPeriod;
   onPeriodChange: (v: TipPeriod) => void;
+  /** Ids des distributions avec une demande active (litige BIS-56). */
+  activeDisputeDistributionIds?: ReadonlySet<string>;
+  /** Présent = active le bouton « Poser une question » sur chaque entrée. */
+  onAskQuestion?: (record: EmployeeShiftRecord) => void;
 }
 
 export function EmployeeShiftHistoryList({
@@ -305,6 +355,8 @@ export function EmployeeShiftHistoryList({
   isError,
   period,
   onPeriodChange,
+  activeDisputeDistributionIds,
+  onAskQuestion,
 }: EmployeeShiftHistoryListProps) {
   return (
     <div className="flex flex-col gap-4">
@@ -359,7 +411,12 @@ export function EmployeeShiftHistoryList({
       {records && records.length > 0 && (
         <div className="flex flex-col gap-2">
           {records.map((record) => (
-            <ShiftRow key={record.id} record={record} />
+            <ShiftRow
+              key={record.id}
+              record={record}
+              hasActiveDispute={activeDisputeDistributionIds?.has(record.id) ?? false}
+              onAskQuestion={onAskQuestion}
+            />
           ))}
         </div>
       )}
