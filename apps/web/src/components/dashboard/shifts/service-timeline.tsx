@@ -127,8 +127,8 @@ export function ServiceTimeline({ shifts, onShiftClick }: ServiceTimelineProps) 
       <div
         style={{
           padding: '20px 22px',
-          background: '#0F1422',
-          border: '1px solid #1B2236',
+          background: 'var(--st-card)',
+          border: '1px solid var(--st-border)',
           borderRadius: 14,
           marginBottom: 18,
           position: 'relative',
@@ -151,21 +151,21 @@ export function ServiceTimeline({ shifts, onShiftClick }: ServiceTimelineProps) 
                 textTransform: 'uppercase',
                 letterSpacing: '0.16em',
                 fontSize: 10.5,
-                color: '#8892B0',
+                color: 'var(--st-sec)',
               }}
             >
               {todayTitleCase}
             </span>
             <h3
               className="font-display"
-              style={{ fontSize: 22, margin: '4px 0 0', color: '#F4F6FB', lineHeight: 1 }}
+              style={{ fontSize: 22, margin: '4px 0 0', color: 'var(--st-hi)', lineHeight: 1 }}
             >
               Rythme de service{' '}
               <em
                 style={{
                   fontFamily: 'var(--st-font-display)',
                   fontStyle: 'italic',
-                  color: '#5A6485',
+                  color: 'var(--st-dim)',
                 }}
               >
                 en direct.
@@ -223,7 +223,7 @@ export function ServiceTimeline({ shifts, onShiftClick }: ServiceTimelineProps) 
             {ticks.map((h, i) => (
               <div
                 key={h}
-                style={{ flex: 1, borderLeft: i === 0 ? 'none' : '1px dashed #1B2236' }}
+                style={{ flex: 1, borderLeft: i === 0 ? 'none' : '1px dashed var(--st-border)' }}
               />
             ))}
           </div>
@@ -272,7 +272,7 @@ export function ServiceTimeline({ shifts, onShiftClick }: ServiceTimelineProps) 
                   transition: 'transform .15s ease, box-shadow .15s ease',
                   background: isClosed
                     ? 'rgba(0,0,0,0)'
-                    : `color-mix(in srgb, var(--type-c) 14%, #0A0E1A)`,
+                    : `color-mix(in srgb, var(--type-c) 14%, var(--st-bg))`,
                   border: '1px solid transparent',
                   borderLeftWidth: 3,
                   borderLeftColor: 'var(--type-c)',
@@ -318,7 +318,7 @@ export function ServiceTimeline({ shifts, onShiftClick }: ServiceTimelineProps) 
                         style={{
                           fontSize: Math.max(9, Math.min(11.5, blockH * 0.18)),
                           fontWeight: 600,
-                          color: '#F4F6FB',
+                          color: 'var(--st-hi)',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -414,7 +414,7 @@ export function ServiceTimeline({ shifts, onShiftClick }: ServiceTimelineProps) 
                   padding: '2px 7px',
                   borderRadius: 999,
                   background: '#D4A574',
-                  color: '#0A0E1A',
+                  color: 'var(--st-bg)',
                   fontSize: 9.5,
                   fontWeight: 600,
                   fontFamily: 'var(--st-font-mono)',
@@ -443,7 +443,7 @@ export function ServiceTimeline({ shifts, onShiftClick }: ServiceTimelineProps) 
                 style={{
                   flex: 1,
                   fontSize: 10,
-                  color: '#5A6485',
+                  color: 'var(--st-dim)',
                   fontFamily: 'var(--st-font-mono)',
                   textAlign: 'left',
                   paddingLeft: 4,

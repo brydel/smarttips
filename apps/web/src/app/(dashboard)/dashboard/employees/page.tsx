@@ -257,7 +257,7 @@ export default function EmployeesPage() {
         flexDirection: 'column',
         flex: 1,
         overflow: 'hidden',
-        background: '#0A0E1A',
+        background: 'var(--st-bg)',
       }}
     >
       {/* ── Page Header ───────────────────────────────────────────────── */}
@@ -265,7 +265,7 @@ export default function EmployeesPage() {
         className="page-container-employees"
         style={{
           padding: '28px 32px 20px',
-          borderBottom: '1px solid #1B2236',
+          borderBottom: '1px solid var(--st-border)',
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'space-between',
@@ -282,19 +282,22 @@ export default function EmployeesPage() {
               fontSize: 48,
               fontWeight: 400,
               lineHeight: 1,
-              color: '#F4F6FB',
+              color: 'var(--st-hi)',
               margin: '0 0 10px',
             }}
           >
             Équipe
-            <span style={{ color: '#3A4366', fontStyle: 'italic' }}> &amp; performance.</span>
+            <span style={{ color: 'var(--st-muted)', fontStyle: 'italic' }}>
+              {' '}
+              &amp; performance.
+            </span>
           </h1>
           {/* Inline stats */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
             <Stat value={totalCount} label="membres" />
-            <span style={{ color: '#1B2236', fontSize: 16 }}>·</span>
+            <span style={{ color: 'var(--st-border)', fontSize: 16 }}>·</span>
             <Stat value={activeCount} label="actifs" color="#34D399" />
-            <span style={{ color: '#1B2236', fontSize: 16 }}>·</span>
+            <span style={{ color: 'var(--st-border)', fontSize: 16 }}>·</span>
             <Stat value="—" label="en service" color="#818CF8" />
           </div>
         </div>
@@ -319,10 +322,10 @@ export default function EmployeesPage() {
             flexShrink: 0,
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = '#4F46E5';
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--st-indigo-dim)';
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = '#6366F1';
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--st-indigo)';
           }}
         >
           <UserPlus size={14} />+ Inviter
@@ -396,9 +399,9 @@ export default function EmployeesPage() {
               style={{
                 padding: '6px 10px',
                 borderRadius: 8,
-                background: '#141A2B',
-                border: '1px solid #252D45',
-                color: '#C5CCE0',
+                background: 'var(--st-raised)',
+                border: '1px solid var(--st-stroke)',
+                color: 'var(--st-pri)',
                 fontSize: 12.5,
                 cursor: 'pointer',
                 outline: 'none',
@@ -414,7 +417,7 @@ export default function EmployeesPage() {
             <div
               style={{
                 display: 'flex',
-                border: '1px solid #252D45',
+                border: '1px solid var(--st-stroke)',
                 borderRadius: 8,
                 overflow: 'hidden',
               }}
@@ -435,9 +438,9 @@ export default function EmployeesPage() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     padding: '6px 10px',
-                    background: view === v ? '#252D45' : 'transparent',
+                    background: view === v ? 'var(--st-stroke)' : 'transparent',
                     border: 'none',
-                    color: view === v ? '#F4F6FB' : '#5A6485',
+                    color: view === v ? 'var(--st-hi)' : 'var(--st-dim)',
                     cursor: 'pointer',
                     transition: 'all .15s ease',
                   }}
@@ -457,7 +460,7 @@ export default function EmployeesPage() {
                 left: 10,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#5A6485',
+                color: 'var(--st-dim)',
                 pointerEvents: 'none',
               }}
               aria-hidden="true"
@@ -472,16 +475,16 @@ export default function EmployeesPage() {
                 width: '100%',
                 padding: '7px 10px 7px 30px',
                 borderRadius: 8,
-                background: '#141A2B',
-                border: '1px solid #252D45',
-                color: '#F4F6FB',
+                background: 'var(--st-raised)',
+                border: '1px solid var(--st-stroke)',
+                color: 'var(--st-hi)',
                 fontSize: 13,
                 outline: 'none',
                 fontFamily: 'inherit',
                 transition: 'border-color .15s ease',
               }}
               onFocus={(e) => (e.currentTarget.style.borderColor = '#6366F1')}
-              onBlur={(e) => (e.currentTarget.style.borderColor = '#252D45')}
+              onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--st-stroke)')}
             />
           </div>
 
@@ -489,7 +492,7 @@ export default function EmployeesPage() {
           <span
             style={{
               fontSize: 12,
-              color: '#5A6485',
+              color: 'var(--st-dim)',
               flexShrink: 0,
               fontFamily: 'var(--st-font-mono, monospace)',
             }}
@@ -533,9 +536,9 @@ export default function EmployeesPage() {
           <div
             className="employees-list"
             style={{
-              background: '#0F1422',
+              background: 'var(--st-card)',
               borderRadius: 12,
-              border: '1px solid #1B2236',
+              border: '1px solid var(--st-border)',
               overflow: 'hidden',
             }}
           >
@@ -546,7 +549,7 @@ export default function EmployeesPage() {
                 gridTemplateColumns: '2fr 1fr 100px 120px 100px 80px',
                 gap: 0,
                 padding: '10px 16px',
-                borderBottom: '1px solid #1B2236',
+                borderBottom: '1px solid var(--st-border)',
               }}
             >
               {/* QUAL-H3: use index as key to avoid duplicate empty-string keys */}
@@ -555,7 +558,7 @@ export default function EmployeesPage() {
                   key={i}
                   style={{
                     fontSize: 10.5,
-                    color: '#5A6485',
+                    color: 'var(--st-dim)',
                     fontFamily: 'var(--st-font-mono, monospace)',
                     fontWeight: 600,
                     textTransform: 'uppercase',
@@ -590,15 +593,16 @@ export default function EmployeesPage() {
                     gridTemplateColumns: '2fr 1fr 100px 120px 100px 80px',
                     gap: 0,
                     padding: '12px 16px',
-                    borderBottom: idx < pageEmployees.length - 1 ? '1px solid #141A2B' : 'none',
+                    borderBottom:
+                      idx < pageEmployees.length - 1 ? '1px solid var(--st-raised)' : 'none',
                     cursor: 'pointer',
                     transition: 'background .15s ease',
                     alignItems: 'center',
                     outline: 'none',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = '#141A2B')}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--st-raised)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                  onFocus={(e) => (e.currentTarget.style.background = '#141A2B')}
+                  onFocus={(e) => (e.currentTarget.style.background = 'var(--st-raised)')}
                   onBlur={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
                   {/* Employee */}
@@ -625,7 +629,7 @@ export default function EmployeesPage() {
                         style={{
                           fontSize: 13.5,
                           fontWeight: 600,
-                          color: '#F4F6FB',
+                          color: 'var(--st-hi)',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -637,7 +641,7 @@ export default function EmployeesPage() {
                         <div
                           style={{
                             fontSize: 11,
-                            color: '#5A6485',
+                            color: 'var(--st-dim)',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
@@ -674,11 +678,11 @@ export default function EmployeesPage() {
                         width: 6,
                         height: 6,
                         borderRadius: '50%',
-                        background: emp.active ? '#34D399' : '#3A4366',
+                        background: emp.active ? '#34D399' : 'var(--st-muted)',
                         flexShrink: 0,
                       }}
                     />
-                    <span style={{ fontSize: 12, color: emp.active ? '#34D399' : '#5A6485' }}>
+                    <span style={{ fontSize: 12, color: emp.active ? '#34D399' : 'var(--st-dim)' }}>
                       {emp.active ? 'Actif' : 'Inactif'}
                     </span>
                   </div>
@@ -688,7 +692,7 @@ export default function EmployeesPage() {
                     className="employees-col-wage"
                     style={{
                       fontSize: 13,
-                      color: '#F4F6FB',
+                      color: 'var(--st-hi)',
                       fontFamily: 'var(--st-font-mono, monospace)',
                       fontWeight: 600,
                     }}
@@ -720,7 +724,7 @@ export default function EmployeesPage() {
                         background: 'transparent',
                         border: 'none',
                         cursor: 'pointer',
-                        color: '#3A4366',
+                        color: 'var(--st-muted)',
                         padding: 4,
                         borderRadius: 5,
                         transition: 'color .15s ease',
@@ -728,7 +732,7 @@ export default function EmployeesPage() {
                       }}
                       aria-label={`Archiver ${emp.firstName} ${emp.lastName}`}
                       onMouseEnter={(e) => (e.currentTarget.style.color = '#EF4444')}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = '#3A4366')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--st-muted)')}
                     >
                       ✕
                     </button>
@@ -761,8 +765,8 @@ export default function EmployeesPage() {
                 padding: '5px 8px',
                 borderRadius: 7,
                 background: 'transparent',
-                border: '1px solid #252D45',
-                color: safePageIndex === 0 ? '#252D45' : '#8892B0',
+                border: '1px solid var(--st-stroke)',
+                color: safePageIndex === 0 ? 'var(--st-stroke)' : 'var(--st-sec)',
                 cursor: safePageIndex === 0 ? 'not-allowed' : 'pointer',
                 transition: 'all .15s ease',
               }}
@@ -773,7 +777,7 @@ export default function EmployeesPage() {
             <span
               style={{
                 fontSize: 12.5,
-                color: '#8892B0',
+                color: 'var(--st-sec)',
                 fontFamily: 'var(--st-font-mono, monospace)',
               }}
             >
@@ -791,8 +795,8 @@ export default function EmployeesPage() {
                 padding: '5px 8px',
                 borderRadius: 7,
                 background: 'transparent',
-                border: '1px solid #252D45',
-                color: safePageIndex === totalPages - 1 ? '#252D45' : '#8892B0',
+                border: '1px solid var(--st-stroke)',
+                color: safePageIndex === totalPages - 1 ? 'var(--st-stroke)' : 'var(--st-sec)',
                 cursor: safePageIndex === totalPages - 1 ? 'not-allowed' : 'pointer',
                 transition: 'all .15s ease',
               }}
@@ -850,7 +854,7 @@ export default function EmployeesPage() {
 function Stat({
   value,
   label,
-  color = '#C5CCE0',
+  color = 'var(--st-pri)',
 }: {
   value: number | string;
   label: string;
@@ -869,7 +873,7 @@ function Stat({
       >
         {value}
       </span>
-      <span style={{ fontSize: 12.5, color: '#5A6485' }}>{label}</span>
+      <span style={{ fontSize: 12.5, color: 'var(--st-dim)' }}>{label}</span>
     </div>
   );
 }
@@ -879,9 +883,9 @@ function LoadingSkeleton({ view }: { view: 'grid' | 'list' }) {
     return (
       <div
         style={{
-          background: '#0F1422',
+          background: 'var(--st-card)',
           borderRadius: 12,
-          border: '1px solid #1B2236',
+          border: '1px solid var(--st-border)',
           overflow: 'hidden',
         }}
       >
@@ -890,8 +894,9 @@ function LoadingSkeleton({ view }: { view: 'grid' | 'list' }) {
             key={i}
             style={{
               height: 56,
-              borderBottom: i < 5 ? '1px solid #141A2B' : 'none',
-              background: 'linear-gradient(90deg, #141A2B 25%, #1B2236 50%, #141A2B 75%)',
+              borderBottom: i < 5 ? '1px solid var(--st-raised)' : 'none',
+              background:
+                'linear-gradient(90deg, var(--st-raised) 25%, var(--st-border) 50%, var(--st-raised) 75%)',
               backgroundSize: '200% 100%',
               animation: 'shifts-fade-up .3s ease both',
               animationDelay: `${i * 0.05}s`,
@@ -912,8 +917,8 @@ function LoadingSkeleton({ view }: { view: 'grid' | 'list' }) {
           style={{
             height: 160,
             borderRadius: 12,
-            background: '#0F1422',
-            border: '1px solid #1B2236',
+            background: 'var(--st-card)',
+            border: '1px solid var(--st-border)',
             animation: 'shifts-fade-up .3s ease both',
             animationDelay: `${i * 0.04}s`,
           }}
@@ -932,13 +937,13 @@ function ErrorState() {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '60px 24px',
-        color: '#5A6485',
+        color: 'var(--st-dim)',
         textAlign: 'center',
         gap: 8,
       }}
     >
       <div style={{ fontSize: 32 }}>⚠</div>
-      <div style={{ fontSize: 15, color: '#8892B0' }}>Erreur de chargement</div>
+      <div style={{ fontSize: 15, color: 'var(--st-sec)' }}>Erreur de chargement</div>
       <div style={{ fontSize: 12.5 }}>Impossible de récupérer les employés. Réessayez.</div>
     </div>
   );
@@ -958,7 +963,7 @@ function EmptyState({ search, onInvite }: { search: string; onInvite: () => void
       }}
     >
       <div style={{ fontSize: 40, opacity: 0.3 }}>👥</div>
-      <div style={{ fontSize: 15, color: '#8892B0', fontWeight: 500 }}>
+      <div style={{ fontSize: 15, color: 'var(--st-sec)', fontWeight: 500 }}>
         {search ? 'Aucun résultat pour cette recherche' : 'Aucun employé trouvé'}
       </div>
       {!search && (
@@ -968,8 +973,8 @@ function EmptyState({ search, onInvite }: { search: string; onInvite: () => void
             marginTop: 4,
             padding: '7px 16px',
             borderRadius: 8,
-            background: '#141A2B',
-            border: '1px solid #252D45',
+            background: 'var(--st-raised)',
+            border: '1px solid var(--st-stroke)',
             color: '#818CF8',
             fontSize: 13,
             cursor: 'pointer',
@@ -977,7 +982,7 @@ function EmptyState({ search, onInvite }: { search: string; onInvite: () => void
             transition: 'all .15s ease',
           }}
           onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#6366F1')}
-          onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#252D45')}
+          onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--st-stroke)')}
         >
           + Inviter le premier employé
         </button>
@@ -999,7 +1004,7 @@ const STATUS_COLORS: Record<InvitationListItem['status'], string> = {
   PENDING: '#EAB308',
   ACCEPTED: '#34D399',
   REVOKED: '#EF4444',
-  EXPIRED: '#5A6485',
+  EXPIRED: 'var(--st-dim)',
 };
 
 function InvitationsSection({
@@ -1021,7 +1026,7 @@ function InvitationsSection({
         style={{
           fontSize: 13,
           fontWeight: 600,
-          color: '#5A6485',
+          color: 'var(--st-dim)',
           textTransform: 'uppercase',
           letterSpacing: '0.06em',
           marginBottom: 12,
@@ -1032,9 +1037,9 @@ function InvitationsSection({
       </h2>
       <div
         style={{
-          background: '#0F1422',
+          background: 'var(--st-card)',
           borderRadius: 12,
-          border: '1px solid #1B2236',
+          border: '1px solid var(--st-border)',
           overflow: 'hidden',
         }}
       >
@@ -1049,7 +1054,7 @@ function InvitationsSection({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '10px 16px',
-                borderBottom: isLast ? 'none' : '1px solid #141A2B',
+                borderBottom: isLast ? 'none' : '1px solid var(--st-raised)',
                 gap: 12,
                 flexWrap: 'wrap',
               }}
@@ -1066,10 +1071,10 @@ function InvitationsSection({
               >
                 {/* Employé */}
                 <div style={{ minWidth: 140 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F6FB', margin: 0 }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--st-hi)', margin: 0 }}>
                     {inv.employee.firstName} {inv.employee.lastName}
                   </p>
-                  <p style={{ fontSize: 11, color: '#5A6485', margin: 0 }}>{inv.email}</p>
+                  <p style={{ fontSize: 11, color: 'var(--st-dim)', margin: 0 }}>{inv.email}</p>
                 </div>
                 {/* Status */}
                 <span
@@ -1089,13 +1094,17 @@ function InvitationsSection({
                   {STATUS_LABELS[inv.status]}
                 </span>
                 {/* Dates */}
-                <p style={{ fontSize: 11, color: '#5A6485', margin: 0, whiteSpace: 'nowrap' }}>
+                <p
+                  style={{ fontSize: 11, color: 'var(--st-dim)', margin: 0, whiteSpace: 'nowrap' }}
+                >
                   Expire {new Date(inv.expiresAt).toLocaleDateString('fr-CA')}
                   {inv.acceptedAt &&
                     ` · Acceptée ${new Date(inv.acceptedAt).toLocaleDateString('fr-CA')}`}
                 </p>
                 {/* Inviteur */}
-                <p style={{ fontSize: 11, color: '#5A6485', margin: 0, whiteSpace: 'nowrap' }}>
+                <p
+                  style={{ fontSize: 11, color: 'var(--st-dim)', margin: 0, whiteSpace: 'nowrap' }}
+                >
                   par {inv.inviter.name}
                 </p>
               </div>
@@ -1131,8 +1140,8 @@ function InvitationsSection({
                         padding: '4px 10px',
                         borderRadius: 6,
                         background: 'transparent',
-                        border: '1px solid #252D45',
-                        color: '#5A6485',
+                        border: '1px solid var(--st-stroke)',
+                        color: 'var(--st-dim)',
                         fontSize: 11,
                         cursor: 'pointer',
                         fontFamily: 'inherit',
@@ -1148,8 +1157,8 @@ function InvitationsSection({
                       padding: '4px 10px',
                       borderRadius: 6,
                       background: 'transparent',
-                      border: '1px solid #252D45',
-                      color: '#5A6485',
+                      border: '1px solid var(--st-stroke)',
+                      color: 'var(--st-dim)',
                       fontSize: 11,
                       cursor: 'pointer',
                       fontFamily: 'inherit',
@@ -1161,8 +1170,8 @@ function InvitationsSection({
                         'rgba(239,68,68,.3)';
                     }}
                     onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.color = '#5A6485';
-                      (e.currentTarget as HTMLButtonElement).style.borderColor = '#252D45';
+                      (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-dim)';
+                      (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--st-stroke)';
                     }}
                   >
                     Révoquer

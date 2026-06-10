@@ -28,26 +28,21 @@ export async function distributeShift(shiftId: string): Promise<void> {
   await apiClient.post(`${BASE}/${shiftId}/distribute`);
 }
 
-/*
- * NOTE: The following endpoints do NOT exist in the current backend:
- *   - POST /shifts/:id/distribution/approve   → "Approuver la distribution"
- *   - PATCH /tip-distributions/:id/adjust     → "Ajustement manuel"
- *
- * These actions are therefore displayed as disabled in the UI.
- * When the backend implements them, add the service functions here:
- *
- *   export async function approveDistribution(shiftId: string): Promise<void> {
- *     await apiClient.post(`${BASE}/${shiftId}/distribution/approve`);
- *   }
- *
- *   export async function adjustDistribution(
- *     distributionId: string,
- *     payload: { amount: number; reason: string },
- *   ): Promise<TipDistribution> {
- *     const { data } = await apiClient.patch<TipDistribution>(
- *       `/tip-distributions/${distributionId}/adjust`,
- *       payload,
- *     );
- *     return data;
- *   }
- */
+export async function downloadTipPoolReportPdf(shiftId: string): Promise<Blob> {
+  const { data } = await apiClient.get<Blob>('/reports/tip-pool', {
+    params: { shiftId },
+    responseType: 'blob',
+  });
+  return data;
+}
+
+export function saveBlob(blob: Blob, filename: string): void {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}

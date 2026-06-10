@@ -42,7 +42,7 @@ export function TonightHero({ shift }: TonightHeroProps) {
       className="relative rounded-[14px] border border-st-border overflow-hidden isolate mb-3.5"
       style={{
         background:
-          'linear-gradient(135deg, var(--st-d-1) 0%, var(--st-d-1) 60%, color-mix(in oklch, var(--st-indigo) 8%, var(--st-d-1)) 100%)',
+          'linear-gradient(135deg, var(--st-card) 0%, var(--st-card) 60%, color-mix(in oklch, var(--st-indigo) 8%, var(--st-card)) 100%)',
       }}
     >
       {/* Glow overlay */}
@@ -79,7 +79,7 @@ export function TonightHero({ shift }: TonightHeroProps) {
               />
               Service en cours
             </span>
-            <span className="font-mono text-[10.5px]" style={{ color: 'var(--st-d-6)' }}>
+            <span className="font-mono text-[10.5px]" style={{ color: 'var(--st-dim)' }}>
               {SHIFT_TYPE_LABEL[shift.type] ?? shift.type} · {shift.startTime} → {shift.endTime}
             </span>
           </div>
@@ -87,7 +87,7 @@ export function TonightHero({ shift }: TonightHeroProps) {
           {/* Eyebrow */}
           <p
             className="uppercase tracking-[0.16em] font-mono text-[10.5px] font-medium"
-            style={{ color: 'var(--st-d-7)' }}
+            style={{ color: 'var(--st-sec)' }}
           >
             Cagnotte en direct · ce soir
           </p>
@@ -109,10 +109,10 @@ export function TonightHero({ shift }: TonightHeroProps) {
           {/* Stats row */}
           <div
             className="flex flex-wrap items-center gap-3 mt-1 text-[12px]"
-            style={{ color: 'var(--st-d-7)' }}
+            style={{ color: 'var(--st-sec)' }}
           >
             <span>
-              <span className="font-mono font-medium" style={{ color: 'var(--st-d-9)' }}>
+              <span className="font-mono font-medium" style={{ color: 'var(--st-hi)' }}>
                 {shift.liveOrdersCount}
               </span>{' '}
               tickets
@@ -120,7 +120,7 @@ export function TonightHero({ shift }: TonightHeroProps) {
             <span className="w-[3px] h-[3px] rounded-full bg-st-muted" />
             <span>
               ~
-              <span className="font-mono" style={{ color: 'var(--st-d-9)' }}>
+              <span className="font-mono" style={{ color: 'var(--st-hi)' }}>
                 ${tips.toFixed(0)}
               </span>{' '}
               tips estimés
@@ -131,7 +131,7 @@ export function TonightHero({ shift }: TonightHeroProps) {
           <div className="mt-4 max-w-sm">
             <div
               className="flex justify-between text-[10.5px] mb-1.5 font-mono"
-              style={{ color: 'var(--st-d-6)' }}
+              style={{ color: 'var(--st-dim)' }}
             >
               <span>{shift.startTime}</span>
               <span style={{ color: 'var(--st-indigo-glow)' }}>
@@ -146,7 +146,7 @@ export function TonightHero({ shift }: TonightHeroProps) {
               aria-valuemax={100}
               aria-label={`Progression du service : ${shift.progressPct.toFixed(0)}%`}
               className="h-1 rounded-[2px] relative overflow-hidden"
-              style={{ background: 'var(--st-d-3)' }}
+              style={{ background: 'var(--st-border)' }}
             >
               <div
                 className="absolute inset-y-0 left-0 rounded-[2px] transition-all duration-700"
@@ -177,8 +177,8 @@ export function TonightHero({ shift }: TonightHeroProps) {
               href={`/dashboard/shifts/${shift.id}`}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-[13.5px] border transition-colors hover:bg-st-raised"
               style={{
-                color: 'var(--st-d-9)',
-                borderColor: 'var(--st-d-4)',
+                color: 'var(--st-hi)',
+                borderColor: 'var(--st-stroke)',
               }}
             >
               <Receipt size={13} />
@@ -190,22 +190,22 @@ export function TonightHero({ shift }: TonightHeroProps) {
         {/* ── Middle: team on duty ────────────────────────────────────── */}
         <div
           className="pl-0 pt-4 border-t sm:pt-0 sm:pl-7 sm:border-t-0 sm:border-l"
-          style={{ borderColor: 'var(--st-d-3)' }}
+          style={{ borderColor: 'var(--st-border)' }}
         >
           <p
             className="uppercase tracking-[0.16em] font-mono text-[10.5px] font-medium mb-2"
-            style={{ color: 'var(--st-d-7)' }}
+            style={{ color: 'var(--st-sec)' }}
           >
             Équipe en service
           </p>
           <div className="flex items-baseline gap-1.5 mb-3.5">
             <span
               className="font-mono font-medium tabular-nums"
-              style={{ fontSize: 26, color: 'var(--st-d-9)' }}
+              style={{ fontSize: 26, color: 'var(--st-hi)' }}
             >
               {shift.teamCount}
             </span>
-            <span className="text-[12px]" style={{ color: 'var(--st-d-6)' }}>
+            <span className="text-[12px]" style={{ color: 'var(--st-dim)' }}>
               présents
             </span>
           </div>
@@ -221,12 +221,12 @@ export function TonightHero({ shift }: TonightHeroProps) {
                   >
                     {initials}
                   </span>
-                  <span className="text-[12px] flex-1 truncate" style={{ color: 'var(--st-d-8)' }}>
+                  <span className="text-[12px] flex-1 truncate" style={{ color: 'var(--st-pri)' }}>
                     {m.firstName} {m.lastName}
                   </span>
                   <span
                     className="text-[10px] font-mono uppercase shrink-0"
-                    style={{ color: 'var(--st-d-6)' }}
+                    style={{ color: 'var(--st-dim)' }}
                   >
                     {m.role}
                   </span>
@@ -234,7 +234,7 @@ export function TonightHero({ shift }: TonightHeroProps) {
               );
             })}
             {shift.teamCount > 5 && (
-              <p className="text-[11px]" style={{ color: 'var(--st-d-6)' }}>
+              <p className="text-[11px]" style={{ color: 'var(--st-dim)' }}>
                 + {shift.teamCount - 5} autres
               </p>
             )}
@@ -242,11 +242,11 @@ export function TonightHero({ shift }: TonightHeroProps) {
         </div>
 
         {/* ── Right: service rhythm ──────────────────────────────────── */}
-        <div className="hidden lg:block pl-7 border-l" style={{ borderColor: 'var(--st-d-3)' }}>
+        <div className="hidden lg:block pl-7 border-l" style={{ borderColor: 'var(--st-border)' }}>
           <div className="flex items-center justify-between">
             <p
               className="uppercase tracking-[0.16em] font-mono text-[10.5px] font-medium"
-              style={{ color: 'var(--st-d-7)' }}
+              style={{ color: 'var(--st-sec)' }}
             >
               Rythme · 30 min
             </p>
@@ -261,7 +261,7 @@ export function TonightHero({ shift }: TonightHeroProps) {
           </div>
           <div
             className="flex justify-between text-[9.5px] font-mono mt-2"
-            style={{ color: 'var(--st-d-6)' }}
+            style={{ color: 'var(--st-dim)' }}
           >
             <span>{shift.startTime}</span>
             <span>20:30</span>
@@ -270,8 +270,8 @@ export function TonightHero({ shift }: TonightHeroProps) {
           <div
             className="mt-4 p-3 rounded-[6px] flex gap-2.5 items-start"
             style={{
-              background: 'var(--st-d-2)',
-              border: '1px solid var(--st-d-3)',
+              background: 'var(--st-raised)',
+              border: '1px solid var(--st-border)',
             }}
           >
             <svg
@@ -288,9 +288,9 @@ export function TonightHero({ shift }: TonightHeroProps) {
             >
               <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8" />
             </svg>
-            <p className="text-[11.5px] leading-[1.5]" style={{ color: 'var(--st-d-8)' }}>
-              Service à <strong style={{ color: 'var(--st-d-9)' }}>+18%</strong> vs. samedi dernier
-              — vous êtes sur une bonne soirée.
+            <p className="text-[11.5px] leading-[1.5]" style={{ color: 'var(--st-pri)' }}>
+              Service à <strong style={{ color: 'var(--st-hi)' }}>+18%</strong> vs. samedi dernier —
+              vous êtes sur une bonne soirée.
             </p>
           </div>
         </div>

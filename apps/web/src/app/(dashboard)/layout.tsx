@@ -74,7 +74,10 @@ function DashboardShell({ children }: { children: ReactNode }) {
             }}
           />
           {/* Sidebar panel */}
-          <div id="mobile-sidebar" className="absolute left-0 top-0 h-full w-64 bg-st-bg shadow-lg">
+          <div
+            id="mobile-sidebar"
+            className="absolute left-0 top-0 h-full w-[min(88vw,18rem)] bg-st-bg shadow-lg"
+          >
             <Sidebar onClose={() => setSidebarOpen(false)} />
           </div>
         </div>

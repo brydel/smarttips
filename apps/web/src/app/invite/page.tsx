@@ -222,7 +222,7 @@ function InvitePageInner() {
     <div
       style={{
         minHeight: '100dvh',
-        background: '#0A0E1A',
+        background: 'var(--st-bg)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -237,14 +237,14 @@ function InvitePageInner() {
             style={{
               fontSize: 24,
               fontWeight: 800,
-              color: '#F4F6FB',
+              color: 'var(--st-hi)',
               letterSpacing: '-0.02em',
               marginBottom: 4,
             }}
           >
             Smart<span style={{ color: '#6366F1' }}>Tips</span>
           </div>
-          <p style={{ fontSize: 13, color: '#5A6485', margin: 0 }}>
+          <p style={{ fontSize: 13, color: 'var(--st-dim)', margin: 0 }}>
             Portail d&apos;activation de compte employ&eacute;
           </p>
         </div>
@@ -252,9 +252,9 @@ function InvitePageInner() {
         {/* Card principale */}
         <div
           style={{
-            background: '#0F1422',
+            background: 'var(--st-card)',
             borderRadius: 16,
-            border: '1px solid #1B2236',
+            border: '1px solid var(--st-border)',
             overflow: 'hidden',
           }}
         >
@@ -274,12 +274,12 @@ function InvitePageInner() {
                   width: 36,
                   height: 36,
                   borderRadius: '50%',
-                  border: '3px solid #1B2236',
+                  border: '3px solid var(--st-border)',
                   borderTopColor: '#6366F1',
                   animation: 'spin 1s linear infinite',
                 }}
               />
-              <p style={{ fontSize: 14, color: '#8892B0', margin: 0 }}>
+              <p style={{ fontSize: 14, color: 'var(--st-sec)', margin: 0 }}>
                 V&eacute;rification de l&apos;invitation&hellip;
               </p>
               <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -292,14 +292,23 @@ function InvitePageInner() {
               <div style={{ fontSize: 40, marginBottom: 16 }}>
                 {phase.reason === 'expired' ? '⏰' : phase.reason === 'accepted' ? '✅' : '🚫'}
               </div>
-              <h1 style={{ fontSize: 18, fontWeight: 700, color: '#F4F6FB', margin: '0 0 12px' }}>
+              <h1
+                style={{ fontSize: 18, fontWeight: 700, color: 'var(--st-hi)', margin: '0 0 12px' }}
+              >
                 {phase.reason === 'expired'
                   ? 'Invitation expirée'
                   : phase.reason === 'accepted'
                     ? 'Invitation déjà utilisée'
                     : 'Invitation invalide'}
               </h1>
-              <p style={{ fontSize: 14, color: '#8892B0', margin: '0 0 24px', lineHeight: 1.6 }}>
+              <p
+                style={{
+                  fontSize: 14,
+                  color: 'var(--st-sec)',
+                  margin: '0 0 24px',
+                  lineHeight: 1.6,
+                }}
+              >
                 {phase.message}
               </p>
               <a
@@ -321,14 +330,14 @@ function InvitePageInner() {
                     marginBottom: 24,
                     padding: '12px 14px',
                     borderRadius: 10,
-                    background: '#141A2B',
-                    border: '1px solid #1B2236',
+                    background: 'var(--st-raised)',
+                    border: '1px solid var(--st-border)',
                   }}
                 >
                   <p
                     style={{
                       fontSize: 11,
-                      color: '#5A6485',
+                      color: 'var(--st-dim)',
                       margin: '0 0 2px',
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
@@ -337,11 +346,18 @@ function InvitePageInner() {
                   >
                     Invitation de
                   </p>
-                  <p style={{ fontSize: 15, fontWeight: 700, color: '#F4F6FB', margin: '0 0 4px' }}>
+                  <p
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 700,
+                      color: 'var(--st-hi)',
+                      margin: '0 0 4px',
+                    }}
+                  >
                     {phase.data.tenant.name}
                   </p>
-                  <p style={{ fontSize: 12, color: '#8892B0', margin: 0 }}>
-                    Compte : <span style={{ color: '#C5CCE0' }}>{phase.data.email}</span>
+                  <p style={{ fontSize: 12, color: 'var(--st-sec)', margin: 0 }}>
+                    Compte : <span style={{ color: 'var(--st-pri)' }}>{phase.data.email}</span>
                   </p>
                 </div>
               )}
@@ -361,7 +377,9 @@ function InvitePageInner() {
                 </div>
               )}
 
-              <h2 style={{ fontSize: 16, fontWeight: 700, color: '#F4F6FB', margin: '0 0 20px' }}>
+              <h2
+                style={{ fontSize: 16, fontWeight: 700, color: 'var(--st-hi)', margin: '0 0 20px' }}
+              >
                 Créer votre compte
               </h2>
 
@@ -427,7 +445,7 @@ function InvitePageInner() {
                         background: 'none',
                         border: 'none',
                         cursor: 'pointer',
-                        color: '#5A6485',
+                        color: 'var(--st-dim)',
                         fontSize: 11,
                         fontFamily: 'inherit',
                       }}
@@ -499,12 +517,14 @@ function InvitePageInner() {
                   width: 36,
                   height: 36,
                   borderRadius: '50%',
-                  border: '3px solid #1B2236',
+                  border: '3px solid var(--st-border)',
                   borderTopColor: '#6366F1',
                   animation: 'spin 1s linear infinite',
                 }}
               />
-              <p style={{ fontSize: 14, color: '#8892B0', margin: 0 }}>Création de votre compte…</p>
+              <p style={{ fontSize: 14, color: 'var(--st-sec)', margin: 0 }}>
+                Création de votre compte…
+              </p>
               <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
           )}
@@ -537,10 +557,17 @@ function InvitePageInner() {
                 ✓
               </div>
               <div>
-                <h2 style={{ fontSize: 18, fontWeight: 700, color: '#F4F6FB', margin: '0 0 8px' }}>
+                <h2
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 700,
+                    color: 'var(--st-hi)',
+                    margin: '0 0 8px',
+                  }}
+                >
                   Compte créé avec succès !
                 </h2>
-                <p style={{ fontSize: 14, color: '#8892B0', margin: 0 }}>
+                <p style={{ fontSize: 14, color: 'var(--st-sec)', margin: 0 }}>
                   Redirection vers votre espace employé…
                 </p>
               </div>
@@ -549,7 +576,7 @@ function InvitePageInner() {
         </div>
 
         {/* Footer */}
-        <p style={{ textAlign: 'center', fontSize: 11, color: '#3A4366', marginTop: 24 }}>
+        <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--st-muted)', marginTop: 24 }}>
           SmartTips · Pourboires équitables pour tous
         </p>
       </div>
@@ -564,7 +591,7 @@ function FullPageSpinner() {
     <div
       style={{
         minHeight: '100dvh',
-        background: '#0A0E1A',
+        background: 'var(--st-bg)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -575,7 +602,7 @@ function FullPageSpinner() {
           width: 36,
           height: 36,
           borderRadius: '50%',
-          border: '3px solid #1B2236',
+          border: '3px solid var(--st-border)',
           borderTopColor: '#6366F1',
           animation: 'spin 1s linear infinite',
         }}
@@ -604,7 +631,7 @@ function FormField({
         style={{
           display: 'block',
           fontSize: 12,
-          color: '#8892B0',
+          color: 'var(--st-sec)',
           marginBottom: 6,
           fontWeight: 500,
         }}
@@ -618,7 +645,9 @@ function FormField({
       </label>
       {children}
       {hint && !error && (
-        <p style={{ fontSize: 11, color: '#5A6485', margin: '4px 0 0', lineHeight: 1.4 }}>{hint}</p>
+        <p style={{ fontSize: 11, color: 'var(--st-dim)', margin: '4px 0 0', lineHeight: 1.4 }}>
+          {hint}
+        </p>
       )}
       {error && (
         <p role="alert" style={{ fontSize: 11, color: '#EF4444', margin: '4px 0 0' }}>
@@ -635,9 +664,9 @@ function inputStyle(hasError: boolean): React.CSSProperties {
     // padding-y à 12px → hauteur ~44px (WCAG 2.5.5 touch target minimum)
     padding: '12px 12px',
     borderRadius: 8,
-    background: '#141A2B',
-    border: `1px solid ${hasError ? 'rgba(239,68,68,.5)' : '#252D45'}`,
-    color: '#F4F6FB',
+    background: 'var(--st-raised)',
+    border: `1px solid ${hasError ? 'rgba(239,68,68,.5)' : 'var(--st-stroke)'}`,
+    color: 'var(--st-hi)',
     fontSize: 14,
     outline: 'none',
     fontFamily: 'inherit',

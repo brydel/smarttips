@@ -144,13 +144,13 @@ export default function DistributionsPage() {
           <div>
             <h1 className="font-display text-3xl sm:text-[38px] text-st-hi leading-[1.05]">
               Distributions{' '}
-              <em className="italic" style={{ color: '#8892B0' }}>
-                en attente.
+              <em className="italic" style={{ color: 'var(--st-sec)' }}>
+                à vérifier.
               </em>
             </h1>
             <div className="flex flex-wrap items-center gap-3 mt-2.5 text-[13px] text-st-sec">
               <span>
-                <span className="font-mono text-st-gold">{stats.closed}</span> à distribuer
+                <span className="font-mono text-st-gold">{stats.closed}</span> shifts fermés
               </span>
               <Dot />
               <span>
@@ -166,7 +166,7 @@ export default function DistributionsPage() {
           {/* Period pills */}
           <div
             className="flex gap-1 p-0.5 rounded-md shrink-0 self-start sm:self-auto"
-            style={{ background: '#0F1422', border: '1px solid #252D45' }}
+            style={{ background: 'var(--st-card)', border: '1px solid var(--st-stroke)' }}
           >
             {(
               [
@@ -191,7 +191,7 @@ export default function DistributionsPage() {
 
         {/* ── KPI cards ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <KpiCard label="À distribuer" value={stats.closed} sub={`shifts clôturés`} tone="gold" />
+          <KpiCard label="Shifts fermés" value={stats.closed} sub="prêts à vérifier" tone="gold" />
           <KpiCard label="Volume période" value={stats.total} sub="tous statuts" />
           <KpiCard label="En service" value={stats.inProgress} sub="shifts actifs" tone="indigo" />
           <KpiCard label="Planifiés" value={stats.planned} sub="à venir" tone="neutral" />
@@ -216,7 +216,7 @@ export default function DistributionsPage() {
             dotColor="#D4A574"
             onClick={() => setStatusFilter('CLOSED')}
           >
-            À distribuer <Count n={stats.closed} />
+            Fermés <Count n={stats.closed} />
           </TabPill>
           <TabPill
             active={statusFilter === 'IN_PROGRESS'}
@@ -422,7 +422,7 @@ function Heatmap({ days, shiftsByDay, today, selectedDate, onSelect }: HeatmapPr
               style={{
                 background:
                   level === 0
-                    ? '#141A2B'
+                    ? 'var(--st-raised)'
                     : level === 1
                       ? 'rgba(99,102,241,.15)'
                       : level === 2
@@ -435,9 +435,9 @@ function Heatmap({ days, shiftsByDay, today, selectedDate, onSelect }: HeatmapPr
                   : isToday
                     ? '1px solid #D4A574'
                     : level === 0
-                      ? '1px solid #1B2236'
+                      ? '1px solid var(--st-border)'
                       : '1px solid transparent',
-                color: level >= 3 ? 'white' : '#5A6485',
+                color: level >= 3 ? 'white' : 'var(--st-dim)',
                 outline: 'none',
               }}
               aria-label={`${date}: ${count} shift${count !== 1 ? 's' : ''}`}
@@ -491,7 +491,7 @@ function Count({ n }: { n: number }) {
   return (
     <span
       className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-pill text-[10px] font-mono font-medium ml-0.5"
-      style={{ background: '#1B2236', color: '#8892B0' }}
+      style={{ background: 'var(--st-border)', color: 'var(--st-sec)' }}
     >
       {n}
     </span>
@@ -510,12 +510,12 @@ function DateGroup({ date, shifts, onShiftClick }: DateGroupProps) {
   return (
     <div
       className="rounded-md overflow-hidden"
-      style={{ background: '#0F1422', border: '1px solid #1B2236' }}
+      style={{ background: 'var(--st-card)', border: '1px solid var(--st-border)' }}
     >
       {/* Date header */}
       <header
         className="flex items-center gap-3 px-4 py-3 border-b"
-        style={{ borderColor: '#1B2236' }}
+        style={{ borderColor: 'var(--st-border)' }}
       >
         <div className="flex-1 min-w-0">
           <p className="text-[13px] text-st-hi capitalize font-medium">{formatDateGroup(date)}</p>
@@ -550,9 +550,9 @@ function ShiftRow({ shift, onClick }: ShiftRowProps) {
       className={cn(
         'w-full text-left transition-colors duration-100',
         'border-b last:border-0',
-        isClosed ? 'hover:bg-[#1B2236]' : 'hover:bg-[#141A2B] opacity-60',
+        isClosed ? 'hover:bg-st-raised' : 'hover:bg-st-raised opacity-60',
       )}
-      style={{ borderColor: '#141A2B' }}
+      style={{ borderColor: 'var(--st-raised)' }}
       onClick={onClick}
       aria-label={`${cfg.label} ${formatTime(shift.startTime)} → ${formatTime(shift.endTime)}`}
     >
@@ -567,7 +567,7 @@ function ShiftRow({ shift, onClick }: ShiftRowProps) {
         {/* Checkbox placeholder — future bulk selection */}
         <span
           className="w-[18px] h-[18px] rounded-[4px] border border-st-stroke shrink-0"
-          style={{ borderColor: isClosed ? '#3A4366' : '#1B2236' }}
+          style={{ borderColor: isClosed ? 'var(--st-muted)' : 'var(--st-border)' }}
         />
 
         {/* Type + time */}
@@ -604,7 +604,8 @@ function ShiftRow({ shift, onClick }: ShiftRowProps) {
                 color: '#D4A574',
               }}
             >
-              <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#D4A574]" />À distribuer
+              <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#D4A574]" />
+              Prêt pour vérification
             </span>
           ) : (
             <span className="text-st-dim italic text-[11px]">—</span>
@@ -617,7 +618,7 @@ function ShiftRow({ shift, onClick }: ShiftRowProps) {
             className="flex items-center gap-1 text-[11px] font-medium text-st-indigo-glow px-2.5 py-1 rounded-md whitespace-nowrap"
             style={{ background: 'rgba(99,102,241,.1)' }}
           >
-            Voir <ArrowRight size={11} />
+            Vérifier <ArrowRight size={11} />
           </span>
         ) : (
           <span className="text-st-dim italic text-[11px]">—</span>
@@ -664,7 +665,7 @@ interface EmptyStateProps {
 
 function EmptyState({ statusFilter, selectedDate }: EmptyStateProps) {
   const messages: Record<string, string> = {
-    CLOSED: "Tous les shifts récents ont été distribués ou il n'y a aucun shift clôturé.",
+    CLOSED: 'Aucun shift fermé à vérifier dans cette période.',
     IN_PROGRESS: 'Aucun shift en cours dans cette période.',
     PLANNED: 'Aucun shift planifié dans cette période.',
     all: 'Aucun shift dans cette période.',

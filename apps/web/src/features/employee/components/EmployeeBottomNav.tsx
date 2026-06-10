@@ -18,9 +18,9 @@ export function EmployeeBottomNav() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-40 md:hidden"
       style={{
-        background: 'rgba(10,14,26,.95)',
+        background: 'color-mix(in srgb, var(--st-bg) 95%, transparent)',
         backdropFilter: 'blur(16px)',
-        borderTop: '1px solid #1B2236',
+        borderTop: '1px solid var(--st-border)',
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
       aria-label="Navigation employé"

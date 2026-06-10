@@ -8,15 +8,6 @@ interface EmployeeProfileFormProps {
   user: AuthUser;
 }
 
-/**
- * Profile display / edit form.
- *
- * Editing is disabled because PATCH /me is not yet implemented in the backend.
- * When the endpoint is added:
- *   1. Remove `disabled` attributes and "Bientôt disponible" badge
- *   2. Wire `onSubmit` to `useMutation(updateMyProfile)`
- *   3. Add form validation with react-hook-form + zod
- */
 export function EmployeeProfileForm({ user }: EmployeeProfileFormProps) {
   // Split name into first/last for display
   const nameParts = user.name.trim().split(/\s+/);
@@ -38,7 +29,7 @@ export function EmployeeProfileForm({ user }: EmployeeProfileFormProps) {
             Informations personnelles
           </span>
         </div>
-        <Badge tone="neutral">Bientôt disponible</Badge>
+        <Badge tone="neutral">Lecture seule</Badge>
       </div>
 
       {/* Form */}
@@ -53,7 +44,7 @@ export function EmployeeProfileForm({ user }: EmployeeProfileFormProps) {
 
         <div className="mt-5 pt-4 border-t border-st-border flex items-center justify-between gap-3 flex-wrap">
           <p className="text-[11.5px] text-st-dim font-sans leading-relaxed">
-            La modification du profil sera disponible dans une prochaine version.
+            Votre profil est consultable ici. Demandez une modification à votre gestionnaire.
           </p>
           <button
             type="button"

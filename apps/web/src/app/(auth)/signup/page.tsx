@@ -203,7 +203,7 @@ export default function SignupPage() {
                           ? password.length >= 10 && !errors.password
                             ? 'var(--st-emerald)'
                             : 'var(--st-gold)'
-                          : 'var(--st-d-3)',
+                          : 'var(--st-border)',
                     }}
                   />
                 ))}

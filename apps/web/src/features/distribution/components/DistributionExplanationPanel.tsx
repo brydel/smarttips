@@ -35,7 +35,11 @@ export function DistributionExplanationPanel({
 }: DistributionExplanationPanelProps) {
   const exp = distribution.explanation;
   const { employee } = distribution;
-  const meta = ROLE_META[employee.role] ?? { label: employee.role, color: '#8892B0', icon: '●' };
+  const meta = ROLE_META[employee.role] ?? {
+    label: employee.role,
+    color: 'var(--st-sec)',
+    icon: '●',
+  };
 
   const roleCoef = toNum(exp.roleCoefficient);
   const empCoef = toNum(exp.employeeCoefficient);
@@ -79,8 +83,8 @@ export function DistributionExplanationPanel({
           <div
             className="rounded-md p-3.5 text-[13px] leading-[1.7] text-st-pri"
             style={{
-              background: 'var(--st-d-1, #0F1422)',
-              border: `1px solid color-mix(in srgb, ${meta.color} 30%, #252D45)`,
+              background: 'var(--st-card)',
+              border: `1px solid color-mix(in srgb, ${meta.color} 30%, var(--st-stroke))`,
               borderLeft: `3px solid ${meta.color}`,
             }}
           >
@@ -228,7 +232,7 @@ export function DistributionExplanationPanel({
             </div>
             <div
               className="h-3.5 rounded-pill overflow-hidden relative"
-              style={{ background: 'var(--st-d-2, #141A2B)', border: '1px solid #252D45' }}
+              style={{ background: 'var(--st-raised)', border: '1px solid var(--st-stroke)' }}
             >
               <div
                 className="absolute left-0 top-0 bottom-0 rounded-pill transition-all duration-300"
@@ -246,7 +250,7 @@ export function DistributionExplanationPanel({
           {/* Per-hour comparison card */}
           <div
             className="rounded-md p-3.5 flex items-center gap-4"
-            style={{ background: 'var(--st-d-1, #0F1422)', border: '1px solid #252D45' }}
+            style={{ background: 'var(--st-card)', border: '1px solid var(--st-stroke)' }}
           >
             <div className="flex-1 min-w-0">
               <div className="text-[9px] font-mono uppercase tracking-[0.12em] text-st-dim mb-1">
@@ -266,7 +270,10 @@ export function DistributionExplanationPanel({
           </div>
 
           {/* Detail table */}
-          <div className="rounded-md overflow-hidden" style={{ border: '1px solid #252D45' }}>
+          <div
+            className="rounded-md overflow-hidden"
+            style={{ border: '1px solid var(--st-stroke)' }}
+          >
             <table className="w-full text-[12px]">
               <tbody>
                 <DetailRow label="Score brut" value={fmtScore(rawScore)} accent="indigo" />
@@ -311,7 +318,7 @@ function ScoreBar({ baseScore, rawScore, roleColor, salesActive }: ScoreBarProps
   return (
     <div
       className="flex h-[22px] rounded-sm overflow-hidden"
-      style={{ background: 'var(--st-d-2, #141A2B)', border: '1px solid #252D45' }}
+      style={{ background: 'var(--st-raised)', border: '1px solid var(--st-stroke)' }}
     >
       <div
         className="flex items-center justify-center text-[10.5px] font-mono text-white transition-all"
@@ -361,7 +368,7 @@ function GuardrailNote({ tone, text }: GuardrailNoteProps) {
     neutral: {
       bg: 'rgba(90,100,133,.08)',
       border: 'rgba(90,100,133,.25)',
-      iconColor: '#8892B0',
+      iconColor: 'var(--st-sec)',
     },
   }[tone];
 
@@ -394,13 +401,13 @@ function DetailRow({ label, value, accent, bold }: DetailRowProps) {
     <tr className="border-b border-st-border last:border-0">
       <td
         className={cn('py-2 px-3 text-st-sec', bold && 'font-medium text-st-pri')}
-        style={{ background: 'var(--st-d-1, #0F1422)' }}
+        style={{ background: 'var(--st-card)' }}
       >
         {label}
       </td>
       <td
         className={cn('py-2 px-3 font-mono text-right', valueColor, bold && 'font-medium')}
-        style={{ background: 'var(--st-d-1, #0F1422)' }}
+        style={{ background: 'var(--st-card)' }}
       >
         {value}
       </td>

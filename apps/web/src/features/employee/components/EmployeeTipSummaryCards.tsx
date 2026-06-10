@@ -28,7 +28,7 @@ function KpiCard({ icon, label, value, hint, accentClass, notImplemented }: KpiC
         </span>
         {notImplemented && (
           <span className="text-[9.5px] font-mono uppercase tracking-wider text-st-dim border border-st-border rounded-pill px-1.5 py-0.5">
-            Bientôt
+            Après validation
           </span>
         )}
       </div>

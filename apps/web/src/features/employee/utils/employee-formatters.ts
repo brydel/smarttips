@@ -1,5 +1,5 @@
 /**
- * Employee space formatters — BIS-23.
+ * Employee space formatters.
  * All monetary values come in as strings (Prisma Decimal → JSON).
  */
 import { format, parseISO } from 'date-fns';

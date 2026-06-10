@@ -20,8 +20,8 @@ export function UndoToast({ employee: emp, onUndo }: UndoToastProps) {
         position: 'fixed',
         bottom: 24,
         right: 24,
-        background: '#141A2B',
-        border: '1px solid #252D45',
+        background: 'var(--st-raised)',
+        border: '1px solid var(--st-stroke)',
         borderRadius: 12,
         padding: '12px 16px',
         display: 'flex',
@@ -41,7 +41,7 @@ export function UndoToast({ employee: emp, onUndo }: UndoToastProps) {
         style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}
         aria-hidden="true"
       >
-        <circle cx={16} cy={16} r={14} fill="none" stroke="#1B2236" strokeWidth={3} />
+        <circle cx={16} cy={16} r={14} fill="none" stroke="var(--st-border)" strokeWidth={3} />
         <circle
           className="team-undo-ring"
           cx={16}
@@ -68,7 +68,7 @@ export function UndoToast({ employee: emp, onUndo }: UndoToastProps) {
             style={{
               fontSize: 13,
               fontWeight: 600,
-              color: '#F4F6FB',
+              color: 'var(--st-hi)',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -76,7 +76,7 @@ export function UndoToast({ employee: emp, onUndo }: UndoToastProps) {
           >
             {emp.firstName} {emp.lastName}
           </div>
-          <div style={{ fontSize: 11.5, color: '#5A6485' }}>Archivé</div>
+          <div style={{ fontSize: 11.5, color: 'var(--st-dim)' }}>Archivé</div>
         </div>
       </div>
 

@@ -129,7 +129,7 @@ export function DistributionSimulationCard({ config }: SimulationCardProps) {
         className="flex items-start gap-3 px-5 py-4 border-b border-st-border"
         style={{
           background:
-            'linear-gradient(135deg, var(--st-d-1, #0F1422), color-mix(in oklch, #6366F1 4%, #0F1422))',
+            'linear-gradient(135deg, var(--st-card), color-mix(in oklch, #6366F1 4%, var(--st-card)))',
         }}
       >
         <div className="flex-shrink-0 w-8 h-8 rounded-sm bg-st-indigo/12 flex items-center justify-center">
@@ -284,7 +284,7 @@ export function DistributionSimulationCard({ config }: SimulationCardProps) {
         <p className="text-[10.5px] text-st-dim font-mono text-center">
           Simulation indicative · équipe type · {totalHeadcount} personnes.
           <br />
-          Ne remplace pas le moteur de calcul backend.
+          Le calcul final reste celui du serveur.
         </p>
       </div>
     </div>

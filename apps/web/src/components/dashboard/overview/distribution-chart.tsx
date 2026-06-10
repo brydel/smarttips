@@ -41,16 +41,16 @@ export function DistributionChart({ dailyTips }: DistributionChartProps) {
         <div>
           <span
             className="uppercase tracking-[0.16em] font-mono text-[10.5px] font-medium block mb-1"
-            style={{ color: 'var(--st-d-7)' }}
+            style={{ color: 'var(--st-sec)' }}
           >
             Distribution des pourboires
           </span>
           <h3
             className="text-[20px] leading-none"
-            style={{ fontFamily: 'var(--font-instrument-serif)', color: 'var(--st-d-9)' }}
+            style={{ fontFamily: 'var(--font-instrument-serif)', color: 'var(--st-hi)' }}
           >
             7 derniers jours{' '}
-            <em style={{ color: 'var(--st-d-7)', fontStyle: 'italic' }}>· rythme stable</em>
+            <em style={{ color: 'var(--st-sec)', fontStyle: 'italic' }}>· rythme stable</em>
           </h3>
         </div>
         <span
@@ -77,20 +77,24 @@ export function DistributionChart({ dailyTips }: DistributionChartProps) {
             </defs>
             <XAxis
               dataKey="day"
-              tick={{ fill: '#5A6485', fontSize: 10.5, fontFamily: 'var(--font-jetbrains-mono)' }}
+              tick={{
+                fill: 'var(--st-dim)',
+                fontSize: 10.5,
+                fontFamily: 'var(--font-jetbrains-mono)',
+              }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis hide domain={[0, maxValue * 1.15]} />
             <Tooltip
               contentStyle={{
-                background: '#0F1422',
-                border: '1px solid #1B2236',
+                background: 'var(--st-card)',
+                border: '1px solid var(--st-border)',
                 borderRadius: 10,
                 fontSize: 12,
                 fontFamily: 'inherit',
               }}
-              labelStyle={{ color: '#8892B0' }}
+              labelStyle={{ color: 'var(--st-sec)' }}
               itemStyle={{ color: '#818CF8' }}
               formatter={(v: number) => [
                 `$${v.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
@@ -100,7 +104,7 @@ export function DistributionChart({ dailyTips }: DistributionChartProps) {
             {highlightDay >= 0 && chartData[highlightDay] && (
               <ReferenceLine
                 x={chartData[highlightDay]!.day}
-                stroke="#3A4366"
+                stroke="var(--st-stroke)"
                 strokeDasharray="2 3"
               />
             )}
@@ -111,7 +115,7 @@ export function DistributionChart({ dailyTips }: DistributionChartProps) {
               strokeWidth={1.8}
               fill="url(#dashGrad)"
               dot={false}
-              activeDot={{ r: 4, fill: '#818CF8', strokeWidth: 2, stroke: '#0A0E1A' }}
+              activeDot={{ r: 4, fill: '#818CF8', strokeWidth: 2, stroke: 'var(--st-bg)' }}
             />
           </AreaChart>
         </ResponsiveContainer>

@@ -67,7 +67,7 @@ export function WeekKpi({ total, prevTotal, dailyData }: WeekKpiProps) {
       <div className="flex items-center justify-between mb-1.5">
         <span
           className="uppercase tracking-[0.16em] font-mono text-[10.5px] font-medium"
-          style={{ color: 'var(--st-d-7)' }}
+          style={{ color: 'var(--st-sec)' }}
         >
           Pourboires · 7 jours
         </span>
@@ -88,7 +88,7 @@ export function WeekKpi({ total, prevTotal, dailyData }: WeekKpiProps) {
         className="font-mono font-medium tabular-nums tracking-[-0.02em] leading-none"
         style={{
           fontSize: 40,
-          color: 'var(--st-d-9)',
+          color: 'var(--st-hi)',
           display: 'inline-flex',
           alignItems: 'baseline',
           gap: 2,
@@ -98,9 +98,9 @@ export function WeekKpi({ total, prevTotal, dailyData }: WeekKpiProps) {
         {Number(intPart).toLocaleString('fr-FR')}
         <span style={{ fontSize: 22, opacity: 0.55 }}>.{decPart}</span>
       </span>
-      <p className="text-[11px] mt-1" style={{ color: 'var(--st-d-6)' }}>
+      <p className="text-[11px] mt-1" style={{ color: 'var(--st-dim)' }}>
         vs. sem. précédente{' '}
-        <span className="font-mono" style={{ color: 'var(--st-d-8)' }}>
+        <span className="font-mono" style={{ color: 'var(--st-pri)' }}>
           ${prevTotal.toFixed(0)}
         </span>
       </p>
@@ -124,7 +124,7 @@ export function FairnessKpi({ value }: { value: number | null }) {
       <div className="flex items-center justify-between mb-1.5">
         <span
           className="uppercase tracking-[0.16em] font-mono text-[10.5px] font-medium"
-          style={{ color: 'var(--st-d-7)' }}
+          style={{ color: 'var(--st-sec)' }}
         >
           Score d&apos;équité
         </span>
@@ -137,15 +137,15 @@ export function FairnessKpi({ value }: { value: number | null }) {
       <div className="flex items-baseline gap-1.5 mt-1">
         <span
           className="font-mono font-medium tabular-nums tracking-[-0.02em] leading-none"
-          style={{ fontSize: 40, color: value === null ? 'var(--st-d-5)' : 'var(--st-gold)' }}
+          style={{ fontSize: 40, color: value === null ? 'var(--st-muted)' : 'var(--st-gold)' }}
         >
           {value === null ? '—' : score}
         </span>
-        <span className="font-mono text-[12px]" style={{ color: 'var(--st-d-6)' }}>
+        <span className="font-mono text-[12px]" style={{ color: 'var(--st-dim)' }}>
           /100
         </span>
       </div>
-      <p className="text-[11px] mt-1" style={{ color: 'var(--st-d-6)' }}>
+      <p className="text-[11px] mt-1" style={{ color: 'var(--st-dim)' }}>
         {value === null ? 'Aucune distribution ce mois' : 'Excellent · cible 85+'}
       </p>
       <div className="mt-2.5" aria-hidden="true">
@@ -187,7 +187,7 @@ export function ActionableKpi({ alerts }: { alerts: DashboardAlert[] }) {
         <div className="flex items-center justify-between mb-3">
           <span
             className="uppercase tracking-[0.16em] font-mono text-[10.5px] font-medium"
-            style={{ color: 'var(--st-d-7)' }}
+            style={{ color: 'var(--st-sec)' }}
           >
             À traiter · 0
           </span>
@@ -205,10 +205,10 @@ export function ActionableKpi({ alerts }: { alerts: DashboardAlert[] }) {
             style={{ color: 'var(--st-emerald-glow)', opacity: 0.85 }}
             aria-hidden="true"
           />
-          <p className="text-[13px] font-medium" style={{ color: 'var(--st-d-8)' }}>
+          <p className="text-[13px] font-medium" style={{ color: 'var(--st-pri)' }}>
             Tout est en ordre
           </p>
-          <p className="text-[11.5px]" style={{ color: 'var(--st-d-6)' }}>
+          <p className="text-[11.5px]" style={{ color: 'var(--st-dim)' }}>
             Aucune action requise pour le moment.
           </p>
         </div>
@@ -232,7 +232,7 @@ export function ActionableKpi({ alerts }: { alerts: DashboardAlert[] }) {
       <div className="flex items-center justify-between mb-3">
         <span
           className="uppercase tracking-[0.16em] font-mono text-[10.5px] font-medium"
-          style={{ color: 'var(--st-d-7)' }}
+          style={{ color: 'var(--st-sec)' }}
         >
           À traiter · {count}
         </span>
@@ -261,10 +261,10 @@ export function ActionableKpi({ alerts }: { alerts: DashboardAlert[] }) {
                 {t.icon}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-[12.5px] truncate" style={{ color: 'var(--st-d-9)' }}>
+                <p className="text-[12.5px] truncate" style={{ color: 'var(--st-hi)' }}>
                   {t.label}
                 </p>
-                <p className="text-[11px]" style={{ color: 'var(--st-d-6)' }}>
+                <p className="text-[11px]" style={{ color: 'var(--st-dim)' }}>
                   {t.sub}
                 </p>
               </div>
@@ -273,7 +273,7 @@ export function ActionableKpi({ alerts }: { alerts: DashboardAlert[] }) {
                 height="12"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="var(--st-d-6)"
+                stroke="var(--st-dim)"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -299,7 +299,7 @@ interface Insight {
   desc: string;
 }
 
-// Static insights — will be replaced by ML recommendations API in a future ticket
+// Demo-safe guidance based on existing product flows.
 const STATIC_INSIGHTS: Insight[] = [
   {
     kind: 'Opportunité',
@@ -308,16 +308,16 @@ const STATIC_INSIGHTS: Insight[] = [
     desc: 'Les serveurs de la section Terrasse surperforment. Renforcer cette zone rapporterait ~$320 de plus.',
   },
   {
-    kind: 'Équité',
+    kind: 'Règles',
     tone: 'emerald',
-    title: 'Cuisine sous-récompensée',
-    desc: 'Le ratio cuisine/salle est à 0.31 — en dessous de votre politique (0.40). Ajustement recommandé.',
+    title: 'Fallback par règles disponible',
+    desc: 'SmartTips utilise les règles configurées lorsque le ML n’est pas disponible ou pas configuré.',
   },
   {
-    kind: 'Win',
+    kind: 'Audit',
     tone: 'emerald',
-    title: 'Bar revenu au-dessus de la cible',
-    desc: '2 semaines stables. Badge Or auto-attribué.',
+    title: 'Exporter pour vérifier',
+    desc: 'Les exports de distribution et les rapports donnent une trace lisible pour le gestionnaire.',
   },
 ];
 
@@ -337,15 +337,15 @@ export function InsightsCard() {
             className="uppercase tracking-[0.16em] font-mono text-[10.5px] font-medium"
             style={{ color: 'var(--st-gold)' }}
           >
-            Recommandations IA
+            Actions recommandées
           </span>
         </div>
         <Link
-          href="/dashboard/ai-insights"
+          href="/dashboard/distributions"
           className="text-[11.5px] hover:opacity-80 transition-opacity"
           style={{ color: 'var(--st-indigo-glow)', textDecoration: 'none' }}
         >
-          Tout voir →
+          Ouvrir →
         </Link>
       </div>
       <div className="flex flex-col gap-2.5">
@@ -356,8 +356,8 @@ export function InsightsCard() {
               key={i}
               className="p-3.5 rounded-[10px] border"
               style={{
-                background: 'var(--st-d-2)',
-                borderColor: 'var(--st-d-3)',
+                background: 'var(--st-raised)',
+                borderColor: 'var(--st-border)',
                 borderLeft: `3px solid ${cfg.c}`,
               }}
             >
@@ -367,10 +367,10 @@ export function InsightsCard() {
               >
                 {ins.kind}
               </span>
-              <p className="text-[13.5px] font-medium mb-1" style={{ color: 'var(--st-d-9)' }}>
+              <p className="text-[13.5px] font-medium mb-1" style={{ color: 'var(--st-hi)' }}>
                 {ins.title}
               </p>
-              <p className="text-[12px] leading-[1.55]" style={{ color: 'var(--st-d-7)' }}>
+              <p className="text-[12px] leading-[1.55]" style={{ color: 'var(--st-sec)' }}>
                 {ins.desc}
               </p>
             </div>

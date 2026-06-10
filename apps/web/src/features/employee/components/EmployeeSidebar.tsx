@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, CalendarDays, UserCircle, LogOut, Brain } from 'lucide-react';
 import { cn } from '../../../lib/cn';
 import { useAuth } from '../../../hooks/use-auth';
+import { ThemeToggle } from '../../../components/theme/theme-toggle';
 
 const NAV_ITEMS = [
   { href: '/employee/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
@@ -100,6 +101,11 @@ export function EmployeeSidebar({ onClose }: EmployeeSidebarProps = {}) {
           );
         })}
       </nav>
+
+      {/* Theme toggle */}
+      <div className="px-3 pb-3 shrink-0">
+        <ThemeToggle />
+      </div>
 
       {/* Logout */}
       <button

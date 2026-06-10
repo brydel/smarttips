@@ -95,14 +95,14 @@ export function EmployeeTipTrendChart({ trend, notImplemented }: EmployeeTipTren
           </defs>
           <XAxis
             dataKey="date"
-            tick={{ fill: '#5A6485', fontSize: 9, fontFamily: 'var(--st-font-mono)' }}
+            tick={{ fill: 'var(--st-dim)', fontSize: 9, fontFamily: 'var(--st-font-mono)' }}
             tickLine={false}
             axisLine={false}
             interval={6}
           />
           <YAxis
             domain={[0, maxAmount * 1.2]}
-            tick={{ fill: '#5A6485', fontSize: 9, fontFamily: 'var(--st-font-mono)' }}
+            tick={{ fill: 'var(--st-dim)', fontSize: 9, fontFamily: 'var(--st-font-mono)' }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v: number) => `$${v}`}

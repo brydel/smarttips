@@ -1,5 +1,5 @@
 /**
- * Employee personal space types — BIS-23.
+ * Employee personal space types.
  *
  * These types are aligned with the planned backend API shape.
  * All amounts are strings (Prisma Decimal serialised to JSON) and must be
