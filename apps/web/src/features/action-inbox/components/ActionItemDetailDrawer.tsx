@@ -9,6 +9,7 @@ import { fr } from 'date-fns/locale';
 import type { ActionItem, UpdateActionItemStatusPayload } from '../types/action-inbox.types';
 import {
   actionItemHref,
+  actionItemLinkLabel,
   formatEvidence,
   SEVERITY_CONFIG,
   STATUS_LABELS,
@@ -176,7 +177,7 @@ export function ActionItemDetailDrawer({
                 className="inline-flex items-center gap-1.5 text-[12.5px] hover:opacity-80 transition-opacity"
                 style={{ color: 'var(--st-indigo-glow)', textDecoration: 'none' }}
               >
-                Ouvrir le shift concerné <ArrowUpRight size={13} />
+                {actionItemLinkLabel(item)} <ArrowUpRight size={13} />
               </Link>
             </section>
           )}

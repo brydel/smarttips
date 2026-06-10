@@ -2,7 +2,8 @@ export type ActionItemType =
   | 'DISTRIBUTION_MISSING'
   | 'DISTRIBUTION_PENDING_APPROVAL'
   | 'SHIFT_CLOSE_OVERDUE'
-  | 'SHIFT_UNASSIGNED';
+  | 'SHIFT_UNASSIGNED'
+  | 'DISPUTE_OPEN';
 
 export type ActionItemSeverity = 'INFO' | 'WARNING' | 'CRITICAL';
 

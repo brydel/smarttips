@@ -222,6 +222,11 @@ enum AuditAction {
   ACTION_ITEM_RESOLVED
   ACTION_ITEM_DISMISSED
 
+  DISPUTE_OPENED
+  DISPUTE_REVIEW_STARTED
+  DISPUTE_RESOLVED
+  DISPUTE_WITHDRAWN
+
   @@map("audit_action")
 }
 
@@ -230,8 +235,34 @@ enum ActionItemType {
   DISTRIBUTION_PENDING_APPROVAL
   SHIFT_CLOSE_OVERDUE
   SHIFT_UNASSIGNED
+  DISPUTE_OPEN
 
   @@map("action_item_type")
+}
+
+enum TipDisputeStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+  WITHDRAWN
+
+  @@map("tip_dispute_status")
+}
+
+enum TipDisputeCategory {
+  AMOUNT
+  HOURS
+  ROLE
+  OTHER
+
+  @@map("tip_dispute_category")
+}
+
+enum TipDisputeOutcome {
+  EXPLAINED
+  MANUAL_FOLLOW_UP
+
+  @@map("tip_dispute_outcome")
 }
 
 enum ActionItemSeverity {
@@ -490,6 +521,7 @@ model Tenant {
   fairnessAudits     FairnessAudit[]
   auditLogs          AuditLog[]
   actionItems        ActionItem[]
+  tipDisputes        TipDispute[]
   payrollExports     PayrollExport[]
   usageMetrics       UsageMetric[]
   employeeInvitations EmployeeInvitation[]
@@ -546,6 +578,8 @@ model User {
   integrationAccountsDisconnected IntegrationAccount[] @relation("IntegrationAccountDisconnectedBy")
   integrationSyncJobsRequested IntegrationSyncJob[] @relation("IntegrationSyncJobRequestedBy")
   actionItemsResolved        ActionItem[]           @relation("ActionItemResolvedBy")
+  tipDisputesReviewed        TipDispute[]           @relation("TipDisputeReviewedBy")
+  tipDisputesResolved        TipDispute[]           @relation("TipDisputeResolvedBy")
 
   @@unique([tenantId, email], name: "unique_user_email_per_tenant")
   @@index([tenantId])
@@ -636,6 +670,7 @@ model Employee {
   tipDistributions TipDistribution[]
   mlPredictions    MLPrediction[]
   invitations EmployeeInvitation[]
+  tipDisputes      TipDispute[]
 
   @@unique([tenantId, employeeNumber], name: "unique_employee_number_per_tenant")
   @@index([tenantId])
@@ -1002,6 +1037,7 @@ model TipDistribution {
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
   mlModel  MLModel? @relation(fields: [mlModelId], references: [id], onDelete: SetNull)
   adjuster User?    @relation("TipDistributionAdjustedBy", fields: [adjustedBy], references: [id], onDelete: SetNull)
+  disputes TipDispute[]
 
   @@unique([tipPoolId, employeeId], name: "unique_distribution_per_employee_per_pool")
   @@index([tenantId])
@@ -1219,6 +1255,50 @@ model ActionItem {
   @@index([shiftId])
   @@index([resolvedById])
   @@map("action_items")
+}
+
+/// Structured tip dispute (BIS-56).
+/// An employee questions ONE of their own tip distributions; a manager reviews
+/// and resolves it. Disputes NEVER mutate payouts or distribution amounts.
+/// evidenceSnapshot is an immutable, redacted copy captured at creation time:
+/// only the employee's own data (whitelisted explanation keys, own hours/role),
+/// never coworker data and never raw engine/ML internals.
+/// One active dispute (OPEN or IN_REVIEW) per distribution is enforced at the
+/// service layer (no partial unique index in V1).
+model TipDispute {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String             @map("tenant_id") @db.Uuid
+  employeeId        String             @map("employee_id") @db.Uuid
+  tipDistributionId String             @map("tip_distribution_id") @db.Uuid
+  category          TipDisputeCategory
+  message           String             @db.VarChar(2000)
+  status            TipDisputeStatus   @default(OPEN)
+  evidenceSnapshot  Json               @map("evidence_snapshot")
+  outcome           TipDisputeOutcome?
+  resolutionNote    String?            @map("resolution_note") @db.VarChar(1000)
+  reviewStartedAt   DateTime?          @map("review_started_at") @db.Timestamptz(6)
+  reviewedById      String?            @map("reviewed_by") @db.Uuid
+  resolvedAt        DateTime?          @map("resolved_at") @db.Timestamptz(6)
+  resolvedById      String?            @map("resolved_by") @db.Uuid
+  withdrawnAt       DateTime?          @map("withdrawn_at") @db.Timestamptz(6)
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  employee        Employee        @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  tipDistribution TipDistribution @relation(fields: [tipDistributionId], references: [id], onDelete: Cascade)
+  reviewedBy      User?           @relation("TipDisputeReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  resolvedBy      User?           @relation("TipDisputeResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, status, createdAt])
+  @@index([tenantId, employeeId, createdAt])
+  @@index([tenantId, tipDistributionId, status])
+  @@index([tipDistributionId])
+  @@index([employeeId])
+  @@index([reviewedById])
+  @@index([resolvedById])
+  @@map("tip_disputes")
 }
 
 model PayrollExport {

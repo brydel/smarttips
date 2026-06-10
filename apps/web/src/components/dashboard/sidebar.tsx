@@ -10,6 +10,7 @@ import {
   ChevronRight,
   LayoutDashboard,
   LogOut,
+  MessagesSquare,
   Shield,
   Split,
   UtensilsCrossed,
@@ -69,6 +70,13 @@ const WORKSPACE_BLUEPRINT = [
     caption: 'Membres actifs',
     icon: Users,
     tone: 'amber',
+  },
+  {
+    href: '/dashboard/disputes',
+    label: 'Litiges',
+    caption: 'Questions des employés',
+    icon: MessagesSquare,
+    tone: 'teal',
   },
   {
     href: '/dashboard/menu',
@@ -135,6 +143,10 @@ export function Sidebar({ onClose }: SidebarProps = {}) {
       '/dashboard/menu': {
         metric: null,
         hint: 'Catalogue géré',
+      },
+      '/dashboard/disputes': {
+        metric: null,
+        hint: 'Questions des employés',
       },
     };
 

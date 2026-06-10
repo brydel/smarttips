@@ -31,6 +31,7 @@ describe('ActionInboxDetectorsService', () => {
   const mockPrisma = {
     shift: { findMany: jest.fn() },
     tipPool: { findMany: jest.fn() },
+    tipDispute: { findMany: jest.fn() },
     actionItem: {
       findMany: jest.fn(),
       create: jest.fn(),
@@ -45,6 +46,7 @@ describe('ActionInboxDetectorsService', () => {
   function resetToEmpty() {
     mockPrisma.shift.findMany.mockResolvedValue([]);
     mockPrisma.tipPool.findMany.mockResolvedValue([]);
+    mockPrisma.tipDispute.findMany.mockResolvedValue([]);
     mockPrisma.actionItem.findMany.mockResolvedValue([]);
     mockPrisma.actionItem.create.mockResolvedValue({ id: EXISTING_ITEM_ID });
     mockPrisma.actionItem.update.mockResolvedValue({});
@@ -259,5 +261,53 @@ describe('ActionInboxDetectorsService', () => {
     expect(
       (mockPrisma.tipPool.findMany.mock.calls[0][0].where as { status: TipPoolStatus }).status,
     ).toBe(TipPoolStatus.DISTRIBUTED);
+  });
+
+  it('creates a DISPUTE_OPEN item without employee message or identity (BIS-56)', async () => {
+    const DISPUTE_ID = '88888888-8888-4888-8888-888888888888';
+
+    mockPrisma.tipDispute.findMany.mockResolvedValue([
+      {
+        id: DISPUTE_ID,
+        category: 'AMOUNT',
+        createdAt: new Date('2026-06-09T18:00:00Z'),
+        tipDistribution: {
+          tipPool: {
+            shiftId: SHIFT_ID,
+            shift: { date: new Date('2026-06-08T00:00:00Z'), shiftType: ShiftType.DINNER },
+          },
+        },
+      },
+    ]);
+
+    await service.refresh(TENANT_ID, USER_ID);
+
+    expect(mockPrisma.tipDispute.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ tenantId: TENANT_ID, status: 'OPEN' }),
+      }),
+    );
+
+    expect(mockPrisma.actionItem.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          type: ActionItemType.DISPUTE_OPEN,
+          severity: ActionItemSeverity.WARNING,
+          entityType: 'TipDispute',
+          entityId: DISPUTE_ID,
+          shiftId: SHIFT_ID,
+          dedupeKey: `${ActionItemType.DISPUTE_OPEN}:${DISPUTE_ID}`,
+        }),
+      }),
+    );
+
+    // Évidence minimale : ni message employé, ni nom, ni montant.
+    const data = mockPrisma.actionItem.create.mock.calls[0][0].data;
+    expect(data.payload).toEqual({
+      category: 'AMOUNT',
+      shiftDate: '2026-06-08',
+      shiftType: ShiftType.DINNER,
+      openedAt: '2026-06-09T18:00:00.000Z',
+    });
   });
 });

@@ -13,6 +13,7 @@ export const TYPE_LABELS: Record<ActionItemType, string> = {
   DISTRIBUTION_PENDING_APPROVAL: 'Distribution à finaliser',
   SHIFT_CLOSE_OVERDUE: 'Clôture en retard',
   SHIFT_UNASSIGNED: 'Personnel manquant',
+  DISPUTE_OPEN: "Question d'employé",
 };
 
 export const STATUS_LABELS: Record<ActionItemStatus, string> = {
@@ -65,11 +66,22 @@ const TIP_POOL_STATUS_LABELS: Record<string, string> = {
 
 /** Lien profond vers l'écran où l'action se traite. */
 export function actionItemHref(item: ActionItem): string | null {
+  if (item.type === 'DISPUTE_OPEN') {
+    return '/dashboard/disputes';
+  }
   if (!item.shiftId) return null;
   if (item.type === 'DISTRIBUTION_MISSING' || item.type === 'DISTRIBUTION_PENDING_APPROVAL') {
     return `/dashboard/shifts/${item.shiftId}/distribution`;
   }
   return `/dashboard/shifts/${item.shiftId}`;
+}
+
+/** Libellé du lien de traitement, selon la destination. */
+export function actionItemLinkLabel(item: ActionItem): string {
+  if (item.type === 'DISPUTE_OPEN') {
+    return 'Ouvrir la file des litiges';
+  }
+  return 'Ouvrir le shift concerné';
 }
 
 export interface EvidenceEntry {
@@ -87,11 +99,27 @@ function fmtDateTime(value: unknown): string {
  * Rend les évidences du payload avec des libellés FR.
  * Seules les clés connues (ids, dates, compteurs) sont affichées.
  */
+const DISPUTE_CATEGORY_LABELS: Record<string, string> = {
+  AMOUNT: 'Montant',
+  HOURS: 'Heures',
+  ROLE: 'Rôle',
+  OTHER: 'Autre',
+};
+
 export function formatEvidence(payload: Record<string, unknown> | null): EvidenceEntry[] {
   if (!payload) return [];
 
   const entries: EvidenceEntry[] = [];
 
+  if (typeof payload.category === 'string') {
+    entries.push({
+      label: 'Catégorie',
+      value: DISPUTE_CATEGORY_LABELS[payload.category] ?? payload.category,
+    });
+  }
+  if (typeof payload.openedAt === 'string') {
+    entries.push({ label: 'Ouverte le', value: fmtDateTime(payload.openedAt) });
+  }
   if (typeof payload.shiftDate === 'string') {
     entries.push({ label: 'Date du shift', value: payload.shiftDate });
   }

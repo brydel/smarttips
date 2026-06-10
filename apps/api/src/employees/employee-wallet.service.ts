@@ -2,12 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { EmployeeRole, Prisma, TipPoolStatus } from '@prisma/client';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { redactExplanation } from './explanation-redaction';
 import { WalletRange } from './dto/employee-wallet-query.dto';
 import {
   EmployeeDashboardSummaryView,
   EmployeeLastShiftView,
   EmployeeShiftRecordView,
-  EmployeeWalletExplanation,
   EmployeeWalletStatus,
 } from './types/employee-wallet.types';
 
@@ -22,30 +22,6 @@ const RANGE_DAYS: Record<WalletRange, number | null> = {
 const MAX_RECORDS = 200;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-/**
- * Clés d'explication exposables à l'employé (liste blanche stricte).
- * Jamais de spread du JSON brut : les internals moteur (source, schemaVersion,
- * engineVersion, policyVersion) et ML (modelVersion, mlWeight, mlShare,
- * rulesShare, blendAlpha) ne doivent pas sortir.
- */
-const EXPLANATION_STRING_KEYS = [
-  'roleCoefficient',
-  'employeeCoefficient',
-  'hoursWorked',
-  'salesGenerated',
-  'shiftAvgSales',
-  'salesBonus',
-  'baseScore',
-  'rawScore',
-  'scoreShare',
-  'rawAmount',
-  'capAmount',
-  'minAmount',
-  'finalAmount',
-] as const;
-
-const EXPLANATION_BOOLEAN_KEYS = ['capApplied', 'minimumApplied'] as const;
 
 /** Date civile UTC (les shifts utilisent @db.Date, minuit UTC). */
 function isoDate(date: Date): string {
@@ -244,7 +220,7 @@ export class EmployeeWalletService {
   ): EmployeeShiftRecordView {
     const shift = row.tipPool.shift;
     const assignment = hoursByShift.get(shift.id);
-    const explanation = this.redactExplanation(row.explanation);
+    const explanation = redactExplanation(row.explanation);
 
     return {
       id: row.id,
@@ -281,38 +257,5 @@ export class EmployeeWalletService {
       computationMethod: row.computationMethod,
       explanation: record.explanation,
     };
-  }
-
-  /**
-   * Copie clé par clé sur liste blanche — jamais de spread du JSON brut.
-   * Les lignes ML ne livrent que les champs de base (part, montants, plafonds).
-   */
-  private redactExplanation(value: Prisma.JsonValue): EmployeeWalletExplanation | null {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) {
-      return null;
-    }
-
-    const raw = value as Record<string, unknown>;
-    const out: EmployeeWalletExplanation = {};
-
-    for (const key of EXPLANATION_STRING_KEYS) {
-      const candidate = raw[key];
-      if (typeof candidate === 'string') {
-        out[key] = candidate;
-      }
-    }
-
-    for (const key of EXPLANATION_BOOLEAN_KEYS) {
-      const candidate = raw[key];
-      if (typeof candidate === 'boolean') {
-        out[key] = candidate;
-      }
-    }
-
-    if (typeof raw.roundingAdjustmentCents === 'number') {
-      out.roundingAdjustmentCents = raw.roundingAdjustmentCents;
-    }
-
-    return Object.keys(out).length > 0 ? out : null;
   }
 }
