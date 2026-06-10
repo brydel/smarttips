@@ -1,5 +1,5 @@
 /**
- * Service API pour les invitations employés (BIS-43).
+ * Service API pour les invitations employés.
  *
  * Sécurité :
  * - Jamais de tokenHash exposé côté frontend

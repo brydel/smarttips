@@ -17,10 +17,10 @@ interface StatusCfg {
 const CONFIG: Record<ShiftStatus, StatusCfg> = {
   PLANNED: {
     label: 'Planifié',
-    color: '#8892B0',
-    bg: '#1B2236',
+    color: 'var(--st-sec)',
+    bg: 'var(--st-border)',
     borderColor: 'rgba(136,146,176,.25)',
-    dotBg: '#5A6485',
+    dotBg: 'var(--st-dim)',
     pulse: false,
   },
   IN_PROGRESS: {

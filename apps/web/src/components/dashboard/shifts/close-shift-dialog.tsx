@@ -26,18 +26,18 @@ const labelStyle: React.CSSProperties = {
   textTransform: 'uppercase',
   letterSpacing: '0.14em',
   fontSize: 10,
-  color: '#5A6485',
+  color: 'var(--st-dim)',
   fontWeight: 500,
   marginBottom: 6,
   display: 'block',
 };
 
 const inputStyle: React.CSSProperties = {
-  background: '#0F1422',
-  border: '1px solid #252D45',
+  background: 'var(--st-card)',
+  border: '1px solid var(--st-stroke)',
   borderRadius: 6,
   padding: '9px 11px',
-  color: '#F4F6FB',
+  color: 'var(--st-hi)',
   fontFamily: 'var(--st-font-mono)',
   fontSize: 15,
   outline: 'none',
@@ -204,7 +204,7 @@ export function CloseShiftDialog({
                   style={{
                     fontFamily: 'var(--st-font-mono)',
                     fontSize: 18,
-                    color: '#F4F6FB',
+                    color: 'var(--st-hi)',
                     fontWeight: 600,
                   }}
                 >
@@ -217,7 +217,7 @@ export function CloseShiftDialog({
                   style={{
                     fontFamily: 'var(--st-font-mono)',
                     fontSize: 18,
-                    color: '#F4F6FB',
+                    color: 'var(--st-hi)',
                     fontWeight: 600,
                   }}
                 >
@@ -242,7 +242,7 @@ export function CloseShiftDialog({
               </div>
             </div>
           </div>
-          <p style={{ fontSize: 12, color: '#8892B0', fontFamily: 'var(--st-font-ui)' }}>
+          <p style={{ fontSize: 12, color: 'var(--st-sec)', fontFamily: 'var(--st-font-ui)' }}>
             Un pool a déjà été déclaré. Seule la clôture du shift sera effectuée.
           </p>
         </div>
@@ -256,7 +256,7 @@ export function CloseShiftDialog({
             <p
               style={{
                 fontSize: 13,
-                color: '#8892B0',
+                color: 'var(--st-sec)',
                 fontFamily: 'var(--st-font-ui)',
                 marginBottom: 18,
               }}
@@ -272,7 +272,7 @@ export function CloseShiftDialog({
                   left: 11,
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#5A6485',
+                  color: 'var(--st-dim)',
                   fontFamily: 'var(--st-font-mono)',
                   fontSize: 14,
                   pointerEvents: 'none',
@@ -293,7 +293,7 @@ export function CloseShiftDialog({
                 style={{
                   ...inputStyle,
                   paddingLeft: 22,
-                  borderColor: focusedInput === 'cash' ? '#D4A574' : '#252D45',
+                  borderColor: focusedInput === 'cash' ? '#D4A574' : 'var(--st-stroke)',
                   boxShadow: focusedInput === 'cash' ? '0 0 0 3px rgba(212,165,116,.15)' : 'none',
                   fontSize: 22,
                 }}
@@ -308,7 +308,7 @@ export function CloseShiftDialog({
             <p
               style={{
                 fontSize: 13,
-                color: '#8892B0',
+                color: 'var(--st-sec)',
                 fontFamily: 'var(--st-font-ui)',
                 marginBottom: 18,
               }}
@@ -324,7 +324,7 @@ export function CloseShiftDialog({
                   left: 11,
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#5A6485',
+                  color: 'var(--st-dim)',
                   fontFamily: 'var(--st-font-mono)',
                   fontSize: 14,
                   pointerEvents: 'none',
@@ -345,7 +345,7 @@ export function CloseShiftDialog({
                 style={{
                   ...inputStyle,
                   paddingLeft: 22,
-                  borderColor: focusedInput === 'card' ? '#818CF8' : '#252D45',
+                  borderColor: focusedInput === 'card' ? '#818CF8' : 'var(--st-stroke)',
                   boxShadow: focusedInput === 'card' ? '0 0 0 3px rgba(99,102,241,.15)' : 'none',
                   fontSize: 22,
                 }}
@@ -354,7 +354,9 @@ export function CloseShiftDialog({
             </div>
             {/* Back hint */}
             <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 11, color: '#5A6485', fontFamily: 'var(--st-font-mono)' }}>
+              <span
+                style={{ fontSize: 11, color: 'var(--st-dim)', fontFamily: 'var(--st-font-mono)' }}
+              >
                 Espèces :
               </span>
               <span
@@ -376,7 +378,7 @@ export function CloseShiftDialog({
             <p
               style={{
                 fontSize: 13,
-                color: '#8892B0',
+                color: 'var(--st-sec)',
                 fontFamily: 'var(--st-font-ui)',
                 marginBottom: 16,
               }}
@@ -426,7 +428,7 @@ export function CloseShiftDialog({
                     style={{
                       fontFamily: 'var(--st-font-mono)',
                       fontSize: 18,
-                      color: '#F4F6FB',
+                      color: 'var(--st-hi)',
                       fontWeight: 600,
                       fontVariantNumeric: 'tabular-nums',
                     }}
@@ -456,7 +458,7 @@ export function CloseShiftDialog({
                 fontSize: 13,
                 resize: 'vertical',
                 lineHeight: 1.5,
-                borderColor: focusedInput === 'notes' ? '#6366F1' : '#252D45',
+                borderColor: focusedInput === 'notes' ? '#6366F1' : 'var(--st-stroke)',
                 boxShadow: focusedInput === 'notes' ? '0 0 0 3px rgba(99,102,241,.15)' : 'none',
               }}
             />
@@ -532,7 +534,7 @@ export function CloseShiftDialog({
             <h3
               style={{
                 fontSize: 20,
-                color: '#F4F6FB',
+                color: 'var(--st-hi)',
                 fontFamily: 'var(--st-font-display)',
                 marginBottom: 8,
                 lineHeight: 1.2,
@@ -543,7 +545,7 @@ export function CloseShiftDialog({
             <p
               style={{
                 fontSize: 13,
-                color: '#8892B0',
+                color: 'var(--st-sec)',
                 fontFamily: 'var(--st-font-ui)',
                 marginBottom: 20,
                 lineHeight: 1.6,
@@ -558,8 +560,8 @@ export function CloseShiftDialog({
                 justifyContent: 'center',
                 gap: 20,
                 padding: '12px 0',
-                borderTop: '1px dashed #1B2236',
-                borderBottom: '1px dashed #1B2236',
+                borderTop: '1px dashed var(--st-border)',
+                borderBottom: '1px dashed var(--st-border)',
               }}
             >
               <div style={{ textAlign: 'center' }}>
@@ -568,14 +570,14 @@ export function CloseShiftDialog({
                   {cash.toFixed(2)} $
                 </span>
               </div>
-              <div style={{ width: 1, background: '#1B2236' }} />
+              <div style={{ width: 1, background: 'var(--st-border)' }} />
               <div style={{ textAlign: 'center' }}>
                 <div style={{ ...labelStyle, marginBottom: 2, textAlign: 'center' }}>Carte</div>
                 <span style={{ fontFamily: 'var(--st-font-mono)', fontSize: 16, color: '#818CF8' }}>
                   {card.toFixed(2)} $
                 </span>
               </div>
-              <div style={{ width: 1, background: '#1B2236' }} />
+              <div style={{ width: 1, background: 'var(--st-border)' }} />
               <div style={{ textAlign: 'center' }}>
                 <div style={{ ...labelStyle, marginBottom: 2, textAlign: 'center' }}>Total</div>
                 <span style={{ fontFamily: 'var(--st-font-mono)', fontSize: 16, color: '#34D399' }}>
@@ -623,8 +625,8 @@ export function CloseShiftDialog({
         style={{
           width: 480,
           maxWidth: '100%',
-          background: '#0F1422',
-          border: '1px solid #252D45',
+          background: 'var(--st-card)',
+          border: '1px solid var(--st-stroke)',
           borderRadius: 14,
           boxShadow: '0 24px 60px -20px rgba(0,0,0,.6)',
           display: 'flex',
@@ -636,7 +638,7 @@ export function CloseShiftDialog({
         <div
           style={{
             padding: '18px 24px 16px',
-            borderBottom: '1px solid #1B2236',
+            borderBottom: '1px solid var(--st-border)',
             display: 'flex',
             alignItems: 'flex-start',
             gap: 12,
@@ -651,7 +653,7 @@ export function CloseShiftDialog({
             <h2
               id="dialog-title"
               className="font-display"
-              style={{ fontSize: 22, color: '#F4F6FB', margin: 0, lineHeight: 1.15 }}
+              style={{ fontSize: 22, color: 'var(--st-hi)', margin: 0, lineHeight: 1.15 }}
             >
               Clôturer le service
             </h2>
@@ -664,7 +666,7 @@ export function CloseShiftDialog({
             style={{
               background: 'transparent',
               border: 0,
-              color: '#8892B0',
+              color: 'var(--st-sec)',
               cursor: isPending ? 'not-allowed' : 'pointer',
               padding: 6,
               borderRadius: 6,
@@ -701,8 +703,8 @@ export function CloseShiftDialog({
         <div
           style={{
             padding: '14px 20px',
-            borderTop: '1px solid #1B2236',
-            background: '#0A0E1A',
+            borderTop: '1px solid var(--st-border)',
+            background: 'var(--st-bg)',
             display: 'flex',
             alignItems: 'center',
             gap: 10,
@@ -729,10 +731,10 @@ export function CloseShiftDialog({
               disabled={isPending}
               style={{
                 background: 'transparent',
-                border: '1px solid #252D45',
+                border: '1px solid var(--st-stroke)',
                 borderRadius: 10,
                 padding: '7px 14px',
-                color: '#8892B0',
+                color: 'var(--st-sec)',
                 fontSize: 12,
                 fontFamily: 'var(--st-font-ui)',
                 cursor: isPending ? 'not-allowed' : 'pointer',
@@ -751,10 +753,10 @@ export function CloseShiftDialog({
             disabled={isPending}
             style={{
               background: 'transparent',
-              border: '1px solid #252D45',
+              border: '1px solid var(--st-stroke)',
               borderRadius: 10,
               padding: '7px 14px',
-              color: '#F4F6FB',
+              color: 'var(--st-hi)',
               fontSize: 12,
               fontFamily: 'var(--st-font-ui)',
               cursor: isPending ? 'not-allowed' : 'pointer',
@@ -771,11 +773,15 @@ export function CloseShiftDialog({
               // ROB-M4: block advancing past step 2 when pool is zero and not confirmed
               disabled={step === 2 && isZeroPool && !confirmedZero}
               style={{
-                background: step === 2 && isZeroPool && !confirmedZero ? '#1B2236' : '#1B2236',
-                border: '1px solid #252D45',
+                background:
+                  step === 2 && isZeroPool && !confirmedZero
+                    ? 'var(--st-border)'
+                    : 'var(--st-border)',
+                border: '1px solid var(--st-stroke)',
                 borderRadius: 10,
                 padding: '7px 14px',
-                color: step === 2 && isZeroPool && !confirmedZero ? '#3A4366' : '#F4F6FB',
+                color:
+                  step === 2 && isZeroPool && !confirmedZero ? 'var(--st-muted)' : 'var(--st-hi)',
                 fontSize: 12,
                 fontFamily: 'var(--st-font-ui)',
                 cursor: step === 2 && isZeroPool && !confirmedZero ? 'not-allowed' : 'pointer',

@@ -74,8 +74,8 @@ export function DistributionActions({ userRole }: DistributionActionsProps) {
               className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-[13px] font-medium border cursor-not-allowed opacity-50"
               style={{
                 background: 'transparent',
-                borderColor: '#3A4366',
-                color: '#8892B0',
+                borderColor: 'var(--st-stroke)',
+                color: 'var(--st-sec)',
               }}
               title="Ajustement manuel — endpoint backend requis"
             >

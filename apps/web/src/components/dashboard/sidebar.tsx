@@ -1,218 +1,343 @@
 'use client';
 
-import { type ReactNode } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard,
-  Split,
-  Calendar,
-  Users,
-  Sparkles,
-  UtensilsCrossed,
-  Tag,
-  Shield,
-  Zap,
-  Settings,
-  LogOut,
-  ChevronRight,
   Brain,
+  Calendar,
+  FileText,
+  ChevronRight,
+  LayoutDashboard,
+  LogOut,
+  Shield,
+  Split,
+  UtensilsCrossed,
+  Users,
   X,
 } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { useAuth } from '../../hooks/use-auth';
-
-interface NavItem {
-  href: string;
-  label: string;
-  icon: ReactNode;
-  badge?: string;
-  badgeTone?: 'gold' | 'indigo' | 'neutral';
-}
-
-interface NavGroup {
-  label: string;
-  items: NavItem[];
-}
+import { ThemeToggle } from '../theme/theme-toggle';
+import { SidebarCard } from './sidebar/sidebar-card';
+import { SidebarMLStatusCard } from './sidebar/sidebar-ml-status';
+import { SidebarRoleBreakdown } from './sidebar/sidebar-role-breakdown';
+import { useSidebarStats } from './sidebar/use-sidebar-stats';
+import type { SidebarCardData } from './sidebar/types';
 
 interface SidebarProps {
   onClose?: () => void;
 }
 
-const NAV: NavGroup[] = [
+/**
+ * Static metadata for the workspace + configuration sections.
+ * KPIs are merged from `useSidebarStats` at render time so static and dynamic
+ * concerns stay clearly separated.
+ */
+const WORKSPACE_BLUEPRINT = [
   {
-    label: 'Workspace',
-    items: [
-      { href: '/dashboard', label: "Vue d'ensemble", icon: <LayoutDashboard size={15} /> },
-      {
-        href: '/dashboard/distributions',
-        label: 'Distributions',
-        icon: <Split size={15} />,
-        badge: '2',
-        badgeTone: 'neutral',
-      },
-      { href: '/dashboard/shifts', label: 'Shifts', icon: <Calendar size={15} /> },
-      { href: '/dashboard/employees', label: 'Équipe', icon: <Users size={15} /> },
-      {
-        href: '/dashboard/ai-insights',
-        label: 'AI Insights',
-        icon: <Sparkles size={15} />,
-        badge: '3',
-        badgeTone: 'gold',
-      },
-      { href: '/dashboard/menu', label: 'Menu', icon: <UtensilsCrossed size={15} /> },
-      { href: '/dashboard/categories', label: 'Catégories', icon: <Tag size={15} /> },
-    ],
+    href: '/dashboard',
+    label: "Vue d'ensemble",
+    caption: 'Performance globale',
+    icon: LayoutDashboard,
+    tone: 'indigo',
   },
   {
-    label: 'Configurer',
-    items: [
-      {
-        href: '/dashboard/settings/distribution',
-        label: 'Distribution',
-        icon: <Shield size={15} />,
-      },
-      { href: '/dashboard/integrations', label: 'Intégrations', icon: <Zap size={15} /> },
-      { href: '/dashboard/settings', label: 'Paramètres', icon: <Settings size={15} /> },
-    ],
+    href: '/dashboard/distributions',
+    label: 'Distributions',
+    caption: 'Pools de pourboires',
+    icon: Split,
+    tone: 'emerald',
+  },
+  {
+    href: '/dashboard/reports',
+    label: 'Reports',
+    caption: 'Exports & audit',
+    icon: FileText,
+    tone: 'violet',
+  },
+  {
+    href: '/dashboard/shifts',
+    label: 'Shifts',
+    caption: 'Services planifiés',
+    icon: Calendar,
+    tone: 'sky',
+  },
+  {
+    href: '/dashboard/employees',
+    label: 'Équipe',
+    caption: 'Membres actifs',
+    icon: Users,
+    tone: 'amber',
+  },
+  {
+    href: '/dashboard/menu',
+    label: 'Menu',
+    caption: 'Catalogue actif',
+    icon: UtensilsCrossed,
+    tone: 'rose',
+  },
+] as const satisfies ReadonlyArray<Omit<SidebarCardData, 'metric' | 'hint' | 'badge' | 'progress'>>;
+
+const CONFIGURATION: ReadonlyArray<{
+  href: string;
+  label: string;
+  caption: string;
+  icon: typeof LayoutDashboard;
+}> = [
+  {
+    href: '/dashboard/settings/distribution',
+    label: 'Distribution',
+    caption: 'Règles & méthodes',
+    icon: Shield,
   },
 ];
 
-function NavLink({ href, label, icon, badge, badgeTone }: NavItem) {
-  const pathname = usePathname();
-  const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
-
-  const badgeClass = {
-    gold: 'bg-st-gold/15 text-st-gold-glow',
-    indigo: 'bg-st-indigo/15 text-st-indigo-glow',
-    neutral: 'bg-st-raised text-st-sec',
-  }[badgeTone ?? 'neutral'];
-
-  return (
-    <Link
-      href={href}
-      className={cn(
-        'relative flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm',
-        'font-sans transition-colors duration-150 outline-none',
-        'focus-visible:ring-2 focus-visible:ring-st-indigo',
-        isActive
-          ? 'bg-st-raised text-st-hi'
-          : 'text-st-sec hover:bg-st-raised/60 hover:text-st-pri',
-      )}
-    >
-      {isActive && (
-        <span className="absolute left-[-14px] top-[8px] bottom-[8px] w-0.5 rounded-r bg-st-indigo" />
-      )}
-      <span className={cn(isActive ? 'text-st-hi' : 'text-st-dim')}>{icon}</span>
-      <span className="flex-1">{label}</span>
-      {badge && (
-        <span className={cn('text-[10px] font-mono px-1.5 py-0.5 rounded-pill', badgeClass)}>
-          {badge}
-        </span>
-      )}
-    </Link>
-  );
+/**
+ * Match active route. For non-root routes we accept any prefix so child pages
+ * (e.g. `/dashboard/shifts/[id]`) keep the parent card highlighted.
+ */
+function isItemActive(pathname: string | null, href: string): boolean {
+  if (!pathname) return false;
+  if (href === '/dashboard') return pathname === '/dashboard';
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function Sidebar({ onClose }: SidebarProps = {}) {
   const { user, logout } = useAuth();
+  const pathname = usePathname();
+  const stats = useSidebarStats();
+
+  /** Merge static cards with live KPIs once per stats update. */
+  const workspaceCards = useMemo<SidebarCardData[]>(() => {
+    const enrichmentByHref: Record<string, Partial<SidebarCardData>> = {
+      '/dashboard': {
+        metric: stats.tipsDeltaLabel,
+        hint: 'vs hier · pourboires',
+      },
+      '/dashboard/distributions': {
+        metric: stats.distributionsPending === null ? null : stats.distributionsPending.toString(),
+        hint: stats.distributionsHint,
+        badge:
+          stats.distributionsPending && stats.distributionsPending > 0
+            ? stats.distributionsPending.toString()
+            : null,
+      },
+      '/dashboard/shifts': {
+        metric: stats.tomorrowShiftsCount === null ? null : stats.tomorrowShiftsCount.toString(),
+        hint: stats.shiftStatusLabel,
+        progress: stats.liveShiftProgress,
+      },
+      '/dashboard/employees': {
+        metric: stats.activeEmployees === null ? null : stats.activeEmployees.toString(),
+        hint: stats.liveTeamCount !== null ? `${stats.liveTeamCount} en service` : 'membres actifs',
+      },
+      '/dashboard/menu': {
+        metric: null,
+        hint: 'Catalogue géré',
+      },
+    };
+
+    return WORKSPACE_BLUEPRINT.map((card) => ({
+      ...card,
+      metric: null,
+      ...enrichmentByHref[card.href],
+    }));
+  }, [stats]);
 
   return (
-    <aside className="relative flex h-full w-64 flex-col border-r border-st-border bg-st-bg">
-      {/* Mobile close button */}
+    <aside
+      className={cn(
+        'relative flex h-full w-72 flex-col overflow-hidden border-r border-st-border bg-st-bg',
+        'before:pointer-events-none before:absolute before:inset-0',
+        'before:bg-[radial-gradient(120%_60%_at_50%_0%,rgba(99,102,241,0.06),transparent_60%)]',
+      )}
+      aria-label="Navigation principale"
+    >
       {onClose && (
         <button
+          type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 p-1.5 rounded-md text-st-dim hover:text-st-hi hover:bg-st-raised md:hidden"
+          className={cn(
+            'absolute right-3 top-3 z-10 rounded-md p-1.5 text-st-dim',
+            'hover:bg-st-raised hover:text-st-hi md:hidden',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-st-indigo',
+          )}
           aria-label="Fermer le menu"
         >
-          <X size={16} />
+          <X size={16} aria-hidden="true" />
         </button>
       )}
 
-      {/* Logo + Restaurant name */}
-      <div className="flex items-center gap-2.5 px-4 py-4">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-st-indigo to-[#4338CA] shadow-indigo">
-          <Brain size={14} className="text-white" />
+      {/* Brand + tenant */}
+      <div className="relative flex items-center gap-2.5 px-4 pb-3 pt-4">
+        <div
+          className={cn(
+            'flex h-8 w-8 shrink-0 items-center justify-center rounded-md',
+            'bg-gradient-to-br from-[#6366F1] to-[#4338CA] text-white shadow-[0_4px_14px_-4px_rgba(99,102,241,0.6)]',
+          )}
+          aria-hidden="true"
+        >
+          <Brain size={15} />
         </div>
         <div className="min-w-0">
-          <span className="font-display text-sm tracking-tight text-st-hi leading-none block">
+          <span className="block font-display text-[15px] leading-none tracking-tight text-st-hi">
             SmartTips
           </span>
           {user?.tenantName && (
-            <span className="font-mono text-[9.5px] text-st-dim truncate block mt-0.5 leading-none">
+            <span className="mt-0.5 block truncate font-mono text-[10px] leading-none text-st-dim">
               {user.tenantName}
             </span>
           )}
         </div>
       </div>
 
-      {/* Connected user card */}
+      {/* User profile card */}
       {user && (
-        <button
-          className={cn(
-            'mx-3 mb-4 flex items-center gap-3 rounded-md px-3 py-2.5',
-            'bg-st-card border border-st-border',
-            'text-left transition-colors hover:bg-st-raised',
-          )}
-        >
-          {/* Avatar with online indicator */}
-          <div className="relative shrink-0">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-gradient-to-br from-st-indigo to-[#4338CA] text-[12px] font-bold text-white font-mono shadow-sm">
-              {(user.name.trim().slice(0, 2) || '?').toUpperCase()}
+        <div className="relative px-3 pb-3">
+          <Link
+            href="/dashboard/settings/distribution"
+            onClick={onClose}
+            className={cn(
+              'group flex items-center gap-3 rounded-md border border-st-border bg-st-card px-3 py-2.5',
+              'outline-none transition-colors hover:bg-st-raised',
+              'focus-visible:ring-2 focus-visible:ring-st-indigo focus-visible:ring-offset-2 focus-visible:ring-offset-st-bg',
+            )}
+          >
+            <div className="relative shrink-0">
+              <div
+                className={cn(
+                  'flex h-9 w-9 items-center justify-center rounded-md',
+                  'bg-gradient-to-br from-[#6366F1] to-[#4338CA]',
+                  'font-mono text-[12px] font-bold text-white shadow-sm',
+                )}
+              >
+                {(user.name.trim().slice(0, 2) || '?').toUpperCase()}
+              </div>
+              <span
+                className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-st-card bg-st-emerald"
+                aria-label="En ligne"
+              />
             </div>
-            {/* Online green dot */}
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-st-emerald border-2 border-st-card" />
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-st-hi truncate font-sans">{user.name}</p>
-            <p className="text-[10px] text-st-dim truncate font-mono mt-0.5">
-              <span className="capitalize">{user.role.toLowerCase()}</span>
-              {user.tenantName ? (
-                <span style={{ color: 'var(--st-d-5)' }}> · {user.tenantName}</span>
-              ) : null}
-            </p>
-          </div>
-
-          <ChevronRight size={12} className="text-st-dim shrink-0" />
-        </button>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-sans text-xs font-medium text-st-hi">{user.name}</p>
+              <p className="mt-0.5 truncate font-mono text-[10px] text-st-dim">
+                <span className="capitalize">{user.role.toLowerCase()}</span>
+                {user.tenantName ? ` · ${user.tenantName}` : ''}
+              </p>
+            </div>
+            <ChevronRight
+              size={12}
+              className="shrink-0 text-st-dim transition-transform group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
+          </Link>
+        </div>
       )}
 
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-[14px] space-y-4">
-        {NAV.map((group) => (
-          <div key={group.label}>
-            <p className="mb-1 px-2 font-mono text-[9.5px] uppercase tracking-widest text-st-dim">
-              {group.label}
-            </p>
-            <div className="space-y-0.5">
-              {group.items.map((item) => (
-                <NavLink key={item.href} {...item} />
-              ))}
-            </div>
-          </div>
-        ))}
-      </nav>
-
-      {/* Model status */}
-      <div className="m-3 rounded-md border border-st-border bg-st-card p-3">
-        <div className="mb-1.5 flex items-center gap-2">
-          <Sparkles size={11} className="text-st-gold" />
-          <span className="font-mono text-[9.5px] uppercase tracking-widest text-st-gold">
-            Modèle ML
-          </span>
-        </div>
-        <p className="text-xs font-medium text-st-hi font-sans">En apprentissage</p>
-        <p className="text-[10.5px] text-st-sec font-sans">Mis à jour il y a 4 min</p>
+      {/* Theme toggle — tri-state Clair / Auto / Sombre */}
+      <div className="relative px-3 pb-3">
+        <ThemeToggle />
       </div>
 
-      {/* Logout */}
-      <button
-        onClick={() => logout()}
-        className="flex items-center gap-2.5 px-5 py-4 text-sm text-st-sec hover:text-st-hi transition-colors font-sans border-t border-st-border"
+      {/* Scrollable nav */}
+      <nav
+        className={cn(
+          'relative flex-1 overflow-y-auto overflow-x-hidden px-3 pb-3',
+          '[scrollbar-width:thin] [scrollbar-color:var(--st-stroke)_transparent]',
+        )}
       >
-        <LogOut size={14} />
+        <p className="mb-2 mt-1 px-1 font-mono text-[9.5px] uppercase tracking-widest text-st-dim">
+          Espaces
+        </p>
+        <div className="space-y-2">
+          {workspaceCards.map((card) => (
+            <SidebarCard
+              key={card.href}
+              {...card}
+              isActive={isItemActive(pathname, card.href)}
+              onNavigate={onClose}
+            />
+          ))}
+
+          <SidebarRoleBreakdown
+            rows={stats.roleBreakdown}
+            isActive={isItemActive(pathname, '/dashboard/categories')}
+            href="/dashboard/categories"
+            onNavigate={onClose}
+          />
+        </div>
+
+        <p className="mb-2 mt-5 px-1 font-mono text-[9.5px] uppercase tracking-widest text-st-dim">
+          Configuration
+        </p>
+        <ul className="space-y-1">
+          {CONFIGURATION.map((item) => {
+            const Icon = item.icon;
+            const active = isItemActive(pathname, item.href);
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  onClick={onClose}
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'group flex items-center gap-2.5 rounded-md border border-transparent px-2.5 py-2',
+                    'font-sans text-[12.5px] outline-none transition-colors',
+                    'focus-visible:ring-2 focus-visible:ring-st-indigo focus-visible:ring-offset-2 focus-visible:ring-offset-st-bg',
+                    active
+                      ? 'border-st-border bg-st-raised text-st-hi'
+                      : 'text-st-sec hover:border-st-border hover:bg-st-raised/60 hover:text-st-pri',
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'flex h-7 w-7 shrink-0 items-center justify-center rounded-sm',
+                      active
+                        ? 'bg-st-stroke text-st-hi'
+                        : 'bg-st-card text-st-dim group-hover:text-st-pri',
+                    )}
+                    aria-hidden="true"
+                  >
+                    <Icon width={13} height={13} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[12.5px] leading-tight">{item.label}</p>
+                    <p className="mt-0.5 truncate font-mono text-[9.5px] text-st-dim">
+                      {item.caption}
+                    </p>
+                  </div>
+                  <ChevronRight
+                    size={11}
+                    className="shrink-0 text-st-dim transition-transform group-hover:translate-x-0.5"
+                    aria-hidden="true"
+                  />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div className="mt-5">
+          <SidebarMLStatusCard
+            confidence={null}
+            impactLabel="Distribution équitable des pourboires"
+          />
+        </div>
+      </nav>
+
+      {/* Logout — pinned bottom */}
+      <button
+        type="button"
+        onClick={() => logout()}
+        className={cn(
+          'flex items-center gap-2.5 border-t border-st-border px-5 py-3.5',
+          'font-sans text-[12.5px] text-st-sec outline-none transition-colors',
+          'hover:bg-st-raised/50 hover:text-st-hi',
+          'focus-visible:ring-2 focus-visible:ring-st-indigo',
+        )}
+      >
+        <LogOut size={14} aria-hidden="true" />
         Déconnexion
       </button>
     </aside>

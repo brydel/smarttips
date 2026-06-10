@@ -64,7 +64,7 @@ export const EmployeeCard = memo(function EmployeeCard({
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       style={{
-        background: '#0F1422',
+        background: 'var(--st-card)',
         borderRadius: 12,
         padding: '16px',
         cursor: 'pointer',
@@ -108,14 +108,14 @@ export const EmployeeCard = memo(function EmployeeCard({
               width: 6,
               height: 6,
               borderRadius: '50%',
-              background: emp.active ? '#34D399' : '#3A4366',
+              background: emp.active ? '#34D399' : 'var(--st-muted)',
               flexShrink: 0,
             }}
           />
           <span
             style={{
               fontSize: 10.5,
-              color: emp.active ? '#34D399' : '#5A6485',
+              color: emp.active ? '#34D399' : 'var(--st-dim)',
               fontFamily: 'var(--st-font-mono, monospace)',
             }}
           >
@@ -137,7 +137,7 @@ export const EmployeeCard = memo(function EmployeeCard({
             style={{
               fontSize: 13.5,
               fontWeight: 600,
-              color: '#F4F6FB',
+              color: 'var(--st-hi)',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -177,14 +177,14 @@ export const EmployeeCard = memo(function EmployeeCard({
           display: 'flex',
           justifyContent: 'space-between',
           paddingTop: 10,
-          borderTop: '1px solid #1B2236',
+          borderTop: '1px solid var(--st-border)',
         }}
       >
         <div>
           <div
             style={{
               fontSize: 10,
-              color: '#5A6485',
+              color: 'var(--st-dim)',
               marginBottom: 2,
               fontFamily: 'var(--st-font-mono, monospace)',
             }}
@@ -192,7 +192,11 @@ export const EmployeeCard = memo(function EmployeeCard({
             TIPS SEM.
           </div>
           <div
-            style={{ fontSize: 13, color: '#8892B0', fontFamily: 'var(--st-font-mono, monospace)' }}
+            style={{
+              fontSize: 13,
+              color: 'var(--st-sec)',
+              fontFamily: 'var(--st-font-mono, monospace)',
+            }}
           >
             —
           </div>
@@ -201,7 +205,7 @@ export const EmployeeCard = memo(function EmployeeCard({
           <div
             style={{
               fontSize: 10,
-              color: '#5A6485',
+              color: 'var(--st-dim)',
               marginBottom: 2,
               fontFamily: 'var(--st-font-mono, monospace)',
             }}

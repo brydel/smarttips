@@ -81,20 +81,20 @@ const STATUS_LABEL: Record<ShiftStatus, string> = {
 };
 
 const STATUS_COLOR: Record<ShiftStatus, string> = {
-  PLANNED: '#8892B0',
+  PLANNED: 'var(--st-sec)',
   IN_PROGRESS: '#818CF8',
   CLOSED: '#34D399',
-  CANCELLED: '#5A6485',
+  CANCELLED: 'var(--st-dim)',
 };
 
 // ── Dropdown select style ─────────────────────────────────────────────────────
 
 const selectStyle: React.CSSProperties = {
-  background: '#0F1422',
-  border: '1px solid #252D45',
+  background: 'var(--st-card)',
+  border: '1px solid var(--st-stroke)',
   borderRadius: 8,
   padding: '7px 30px 7px 11px',
-  color: '#C5CCE0',
+  color: 'var(--st-pri)',
   fontFamily: 'var(--st-font-ui)',
   fontSize: 12.5,
   outline: 'none',
@@ -122,8 +122,8 @@ function ShiftCard({ shift, onClick }: ShiftCardProps) {
       className={cfg.cssClass}
       style={{
         width: '100%',
-        background: '#0F1422',
-        border: `1px solid ${isLive ? 'color-mix(in srgb, var(--type-c) 40%, transparent)' : '#1B2236'}`,
+        background: 'var(--st-card)',
+        border: `1px solid ${isLive ? 'color-mix(in srgb, var(--type-c) 40%, transparent)' : 'var(--st-border)'}`,
         borderLeft: '3px solid var(--type-c)',
         borderRadius: 10,
         padding: '12px 16px',
@@ -139,10 +139,10 @@ function ShiftCard({ shift, onClick }: ShiftCardProps) {
         opacity: isClosed ? 0.72 : 1,
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = '#141A2B';
+        (e.currentTarget as HTMLButtonElement).style.background = 'var(--st-raised)';
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = '#0F1422';
+        (e.currentTarget as HTMLButtonElement).style.background = 'var(--st-card)';
       }}
     >
       {/* Type icon */}
@@ -169,7 +169,7 @@ function ShiftCard({ shift, onClick }: ShiftCardProps) {
           <span
             style={{
               fontSize: 13.5,
-              color: '#F4F6FB',
+              color: 'var(--st-hi)',
               fontFamily: 'var(--st-font-ui)',
               fontWeight: 500,
             }}
@@ -209,7 +209,7 @@ function ShiftCard({ shift, onClick }: ShiftCardProps) {
             style={{
               fontFamily: 'var(--st-font-mono)',
               fontSize: 11.5,
-              color: '#8892B0',
+              color: 'var(--st-sec)',
               fontVariantNumeric: 'tabular-nums',
             }}
           >
@@ -220,11 +220,11 @@ function ShiftCard({ shift, onClick }: ShiftCardProps) {
               width: 2,
               height: 2,
               borderRadius: '50%',
-              background: '#3A4366',
+              background: 'var(--st-muted)',
               display: 'inline-block',
             }}
           />
-          <span style={{ fontSize: 11, color: '#5A6485', fontFamily: 'var(--st-font-ui)' }}>
+          <span style={{ fontSize: 11, color: 'var(--st-dim)', fontFamily: 'var(--st-font-ui)' }}>
             {shift.assignments.length} membre{shift.assignments.length !== 1 ? 's' : ''}
           </span>
           {shift.notes && (
@@ -234,14 +234,14 @@ function ShiftCard({ shift, onClick }: ShiftCardProps) {
                   width: 2,
                   height: 2,
                   borderRadius: '50%',
-                  background: '#3A4366',
+                  background: 'var(--st-muted)',
                   display: 'inline-block',
                 }}
               />
               <span
                 style={{
                   fontSize: 11,
-                  color: '#5A6485',
+                  color: 'var(--st-dim)',
                   fontFamily: 'var(--st-font-ui)',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -265,7 +265,7 @@ function ShiftCard({ shift, onClick }: ShiftCardProps) {
         height="13"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#3A4366"
+        stroke="var(--st-muted)"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -366,7 +366,7 @@ export default function ShiftsPage() {
         flexDirection: 'column',
         flex: 1,
         minHeight: 0,
-        background: '#0A0E1A',
+        background: 'var(--st-bg)',
       }}
     >
       <div style={{ flex: 1, overflow: 'auto', padding: '28px 32px 40px' }}>
@@ -385,7 +385,7 @@ export default function ShiftsPage() {
               className="font-display page-title-shifts"
               style={{
                 fontSize: 52,
-                color: '#F4F6FB',
+                color: 'var(--st-hi)',
                 margin: 0,
                 lineHeight: 1.0,
                 letterSpacing: '-0.01em',
@@ -395,7 +395,7 @@ export default function ShiftsPage() {
               <em
                 style={{
                   fontStyle: 'italic',
-                  color: '#5A6485',
+                  color: 'var(--st-dim)',
                   fontFamily: 'var(--st-font-display)',
                 }}
               >
@@ -407,11 +407,11 @@ export default function ShiftsPage() {
               style={{
                 marginTop: 10,
                 fontSize: 13,
-                color: '#8892B0',
+                color: 'var(--st-sec)',
                 fontFamily: 'var(--st-font-ui)',
               }}
             >
-              <span style={{ color: '#C5CCE0', fontWeight: 500 }}>{stats.total}</span> shift
+              <span style={{ color: 'var(--st-pri)', fontWeight: 500 }}>{stats.total}</span> shift
               {stats.total !== 1 ? 's' : ''} au total
               {stats.inProgress > 0 && (
                 <>
@@ -508,7 +508,7 @@ export default function ShiftsPage() {
               height="10"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#5A6485"
+              stroke="var(--st-dim)"
               strokeWidth="2.5"
               strokeLinecap="round"
               style={{
@@ -543,7 +543,7 @@ export default function ShiftsPage() {
               height="10"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#5A6485"
+              stroke="var(--st-dim)"
               strokeWidth="2.5"
               strokeLinecap="round"
               style={{
@@ -565,7 +565,7 @@ export default function ShiftsPage() {
               height="12"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#5A6485"
+              stroke="var(--st-dim)"
               strokeWidth="2"
               strokeLinecap="round"
               style={{
@@ -599,7 +599,7 @@ export default function ShiftsPage() {
             style={{
               fontFamily: 'var(--st-font-mono)',
               fontSize: 11,
-              color: '#5A6485',
+              color: 'var(--st-dim)',
               marginLeft: 'auto',
               whiteSpace: 'nowrap',
             }}
@@ -611,7 +611,7 @@ export default function ShiftsPage() {
         {/* ── Shift list ───────────────────────────────────────────────────── */}
         {isLoading ? (
           <div style={{ textAlign: 'center', padding: '48px 0' }}>
-            <p style={{ fontSize: 13, color: '#5A6485', fontFamily: 'var(--st-font-ui)' }}>
+            <p style={{ fontSize: 13, color: 'var(--st-dim)', fontFamily: 'var(--st-font-ui)' }}>
               Chargement des shifts…
             </p>
           </div>
@@ -634,8 +634,8 @@ export default function ShiftsPage() {
             style={{
               textAlign: 'center',
               padding: '64px 24px',
-              background: '#0F1422',
-              border: '1px dashed #252D45',
+              background: 'var(--st-card)',
+              border: '1px dashed var(--st-stroke)',
               borderRadius: 14,
             }}
           >
@@ -643,7 +643,7 @@ export default function ShiftsPage() {
             <p
               style={{
                 fontSize: 15,
-                color: '#F4F6FB',
+                color: 'var(--st-hi)',
                 fontFamily: 'var(--st-font-ui)',
                 marginBottom: 6,
               }}
@@ -653,7 +653,7 @@ export default function ShiftsPage() {
             <p
               style={{
                 fontSize: 12.5,
-                color: '#5A6485',
+                color: 'var(--st-dim)',
                 fontFamily: 'var(--st-font-ui)',
                 marginBottom: 20,
               }}
@@ -723,7 +723,7 @@ export default function ShiftsPage() {
                         textTransform: 'uppercase',
                         letterSpacing: '0.16em',
                         fontSize: 10.5,
-                        color: today ? '#818CF8' : '#5A6485',
+                        color: today ? '#818CF8' : 'var(--st-dim)',
                         fontWeight: 500,
                         whiteSpace: 'nowrap',
                       }}
@@ -734,12 +734,12 @@ export default function ShiftsPage() {
                         locale: fr,
                       }).toUpperCase()}
                     </span>
-                    <div style={{ flex: 1, height: 1, background: '#1B2236' }} />
+                    <div style={{ flex: 1, height: 1, background: 'var(--st-border)' }} />
                     <span
                       style={{
                         fontFamily: 'var(--st-font-mono)',
                         fontSize: 10,
-                        color: '#3A4366',
+                        color: 'var(--st-muted)',
                         whiteSpace: 'nowrap',
                       }}
                     >

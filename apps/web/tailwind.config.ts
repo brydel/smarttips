@@ -1,21 +1,36 @@
 import type { Config } from 'tailwindcss';
 
+/**
+ * Theme-aware tokens.
+ *
+ * Surface colours (st-bg → st-hi) are wired to CSS variables that swap based
+ * on `[data-theme="light"|"dark"]` on the <html> element — see globals.css.
+ * Accent colours stay fixed: indigo / emerald / gold are brand identity,
+ * not tied to light/dark.
+ *
+ * Side-effect: existing utilities (`bg-st-bg`, `text-st-hi`, …) keep working
+ * verbatim, no per-component refactor needed.
+ */
 const config: Config = {
   content: ['./src/**/*.{ts,tsx}'],
+  darkMode: ['class', '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
         st: {
-          bg: '#0A0E1A',
-          card: '#0F1422',
-          raised: '#141A2B',
-          border: '#1B2236',
-          stroke: '#252D45',
-          muted: '#3A4366',
-          dim: '#5A6485',
-          sec: '#8892B0',
-          pri: '#C5CCE0',
-          hi: '#F4F6FB',
+          // Surface scale — themable via CSS variables.
+          bg: 'var(--st-bg)',
+          card: 'var(--st-card)',
+          raised: 'var(--st-raised)',
+          border: 'var(--st-border)',
+          stroke: 'var(--st-stroke)',
+          muted: 'var(--st-muted)',
+          dim: 'var(--st-dim)',
+          sec: 'var(--st-sec)',
+          pri: 'var(--st-pri)',
+          hi: 'var(--st-hi)',
+
+          // Brand accents — fixed across themes.
           indigo: '#6366F1',
           'indigo-dim': '#4F46E5',
           'indigo-glow': '#818CF8',

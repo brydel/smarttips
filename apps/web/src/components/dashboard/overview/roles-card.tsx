@@ -30,13 +30,13 @@ export function RolesCard({ breakdown, liveTotal }: RolesCardProps) {
         <div>
           <span
             className="uppercase tracking-[0.16em] font-mono text-[10.5px] font-medium block mb-1"
-            style={{ color: 'var(--st-d-7)' }}
+            style={{ color: 'var(--st-sec)' }}
           >
             Répartition par rôle
           </span>
           <h3
             className="text-[18px] leading-none"
-            style={{ fontFamily: 'var(--font-instrument-serif)', color: 'var(--st-d-9)' }}
+            style={{ fontFamily: 'var(--font-instrument-serif)', color: 'var(--st-hi)' }}
           >
             Ce soir ·{' '}
             <span className="font-mono" style={{ fontFamily: 'var(--font-jetbrains-mono)' }}>
@@ -58,7 +58,7 @@ export function RolesCard({ breakdown, liveTotal }: RolesCardProps) {
         className="flex h-2 rounded-pill overflow-hidden mb-4"
         role="img"
         aria-label="Répartition des pourboires par rôle"
-        style={{ background: 'var(--st-d-3)' }}
+        style={{ background: 'var(--st-border)' }}
       >
         {rows.map((r) => (
           <div
@@ -86,16 +86,16 @@ export function RolesCard({ breakdown, liveTotal }: RolesCardProps) {
               style={{ background: r.color }}
               aria-hidden="true"
             />
-            <span className="text-[12.5px]" style={{ color: 'var(--st-d-8)' }}>
+            <span className="text-[12.5px]" style={{ color: 'var(--st-pri)' }}>
               {r.label}
             </span>
             <span
               className="font-mono font-medium tabular-nums text-[13px] text-right"
-              style={{ color: 'var(--st-d-9)' }}
+              style={{ color: 'var(--st-hi)' }}
             >
               {r.total > 0 ? `$${r.total.toFixed(0)}` : `$${(total * r.share).toFixed(0)}`}
             </span>
-            <span className="font-mono text-[11px] text-right" style={{ color: 'var(--st-d-6)' }}>
+            <span className="font-mono text-[11px] text-right" style={{ color: 'var(--st-dim)' }}>
               {(r.share * 100).toFixed(0)}%
             </span>
           </div>

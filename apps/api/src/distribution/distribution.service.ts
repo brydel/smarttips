@@ -2,22 +2,61 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ComputationMethod, OrderStatus, Prisma, ShiftStatus, TipPoolStatus } from '@prisma/client';
 
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  centsToDecimal,
+  decimalToJson,
+  moneyToJson,
+  roundMoney,
+  sumDecimals,
+  toCents,
+  toDecimal,
+} from './distribution-calculator/money';
 import { DistributionCalculatorService } from './distribution-calculator/distribution-calculator.service';
-import { DistributionInput, EmployeeShiftInput } from './distribution.types';
+import {
+  DistributionComputationResult,
+  DistributionInput,
+  DistributionResult,
+  EmployeeShiftInput,
+} from './distribution.types';
 import { mapDistributionConfigFromPrisma } from './distribution.mapper';
 import { DEFAULT_ROLE_COEFFICIENTS } from './distribution.types';
-import { toDecimal } from './distribution-calculator/money';
+import { DistributionMlClient, MlDistributionPredictResult } from './distribution-ml.client';
+
+interface SalesStats {
+  salesByEmployeeId: Map<string, Prisma.Decimal>;
+  ordersByEmployeeId: Map<string, number>;
+  totalSales: Prisma.Decimal;
+}
+
+interface MlShiftContext {
+  id: string;
+  date: Date;
+  shiftType: string;
+  startTime: Date;
+  endTime: Date;
+  actualEndTime: Date | null;
+}
+
+interface ComputedDistribution {
+  result: DistributionComputationResult;
+  computationMethod: ComputationMethod;
+  mlModelVersion?: number;
+}
 
 @Injectable()
 export class DistributionService {
+  private readonly logger = new Logger(DistributionService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly calculator: DistributionCalculatorService,
+    private readonly mlClient: DistributionMlClient,
   ) {}
 
   async distribute(tenantId: string, shiftId: string): Promise<void> {
@@ -30,6 +69,11 @@ export class DistributionService {
         },
         select: {
           id: true,
+          date: true,
+          shiftType: true,
+          startTime: true,
+          endTime: true,
+          actualEndTime: true,
           status: true,
           tipPool: {
             select: {
@@ -97,9 +141,9 @@ export class DistributionService {
 
       const config = await this.resolveConfig(tx, tenantId);
 
-      const salesByEmployeeId = await this.getSalesByEmployeeId(tx, tenantId, shiftId);
+      const salesStats = await this.getSalesStats(tx, tenantId, shiftId);
 
-      const employees = this.mapEmployeeInputs(shift.assignments, salesByEmployeeId);
+      const employees = this.mapEmployeeInputs(shift.assignments, salesStats.salesByEmployeeId);
 
       const input: DistributionInput = {
         tenantId,
@@ -111,7 +155,7 @@ export class DistributionService {
         computationMethod: ComputationMethod.RULES,
       };
 
-      const result = this.calculator.compute(input);
+      const computed = await this.computeDistribution(input, shift, salesStats);
 
       const updateResult = await tx.tipPool.updateMany({
         where: {
@@ -130,7 +174,7 @@ export class DistributionService {
       }
 
       await tx.tipDistribution.createMany({
-        data: result.results.map((distribution) => ({
+        data: computed.result.results.map((distribution) => ({
           tenantId,
           tipPoolId: shift.tipPool!.id,
           employeeId: distribution.employeeId,
@@ -139,10 +183,11 @@ export class DistributionService {
           featuresSnapshot: this.toJsonValue(
             this.buildFeaturesSnapshot(
               employees.find((employee) => employee.employeeId === distribution.employeeId),
+              computed,
             ),
           ),
           explanation: this.toJsonValue(distribution.explanation),
-          computationMethod: ComputationMethod.RULES,
+          computationMethod: computed.computationMethod,
         })),
       });
     });
@@ -201,6 +246,133 @@ export class DistributionService {
     return distributions;
   }
 
+  private async computeDistribution(
+    input: DistributionInput,
+    shift: MlShiftContext,
+    salesStats: SalesStats,
+  ): Promise<ComputedDistribution> {
+    if (this.mlClient.isConfigured()) {
+      try {
+        const mlResult = await this.mlClient.predictDistribution({
+          tenantId: input.tenantId,
+          shiftId: input.shiftId,
+          poolCents: toCents(input.totalAmount),
+          employees: this.buildMlEmployeeInputs(input, shift, salesStats),
+        });
+
+        if (mlResult) {
+          return this.buildMlComputation(input, salesStats, mlResult);
+        }
+      } catch (error) {
+        this.logger.warn('distribution_ml_fallback_to_rules', {
+          tenantId: input.tenantId,
+          shiftId: input.shiftId,
+          errorType: error instanceof Error ? error.name : typeof error,
+          safeMessage: error instanceof Error ? error.message : 'error.mlDistribution.unknown',
+        });
+      }
+    }
+
+    return {
+      result: this.calculator.compute(input),
+      computationMethod: ComputationMethod.RULES,
+    };
+  }
+
+  private buildMlEmployeeInputs(
+    input: DistributionInput,
+    shift: MlShiftContext,
+    salesStats: SalesStats,
+  ) {
+    const employeeCount = input.employees.length;
+    const endTime = shift.actualEndTime ?? shift.endTime;
+
+    return input.employees.map((employee) => ({
+      employeeId: employee.employeeId,
+      role: employee.role,
+      shiftType: shift.shiftType,
+      dayOfWeek: shift.date.getUTCDay(),
+      hourStart: shift.startTime.getUTCHours(),
+      hourEnd: endTime.getUTCHours(),
+      employeeCount,
+      salesTotalCents: toCents(salesStats.totalSales),
+      assignedSalesCents: toCents(employee.salesGenerated),
+      ordersCount: salesStats.ordersByEmployeeId.get(employee.employeeId) ?? 0,
+    }));
+  }
+
+  private buildMlComputation(
+    input: DistributionInput,
+    salesStats: SalesStats,
+    mlResult: MlDistributionPredictResult,
+  ): ComputedDistribution {
+    const allocationsByEmployeeId = new Map(
+      mlResult.allocations.map((row) => [row.employeeId, row]),
+    );
+    const averageSales =
+      input.employees.length > 0 ? salesStats.totalSales.div(input.employees.length) : toDecimal(0);
+
+    const results = input.employees.map((employee): DistributionResult => {
+      const allocation = allocationsByEmployeeId.get(employee.employeeId);
+
+      if (!allocation) {
+        throw new BadRequestException('error.distribution.mlAllocationMissingEmployee');
+      }
+
+      if (!Number.isInteger(allocation.tipsCents) || allocation.tipsCents < 0) {
+        throw new BadRequestException('error.distribution.mlAllocationInvalidAmount');
+      }
+
+      const amount = centsToDecimal(allocation.tipsCents);
+      const share = toDecimal(allocation.share).toDecimalPlaces(4);
+      const weight = toDecimal(allocation.weight).toDecimalPlaces(4);
+
+      return {
+        employeeId: employee.employeeId,
+        amount,
+        contributionScore: weight,
+        explanation: {
+          roleCoefficient: decimalToJson(
+            input.config.roleCoefficients[employee.role] ?? toDecimal(0),
+          ),
+          employeeCoefficient: decimalToJson(employee.coefficient),
+          hoursWorked: decimalToJson(employee.hoursWorked),
+          salesGenerated: moneyToJson(employee.salesGenerated),
+          shiftAvgSales: moneyToJson(averageSales),
+          salesBonus: '0.0000',
+          baseScore: decimalToJson(weight),
+          rawScore: decimalToJson(weight),
+          scoreShare: decimalToJson(share),
+          rawAmount: moneyToJson(amount),
+          capAmount: '0.00',
+          minAmount: '0.00',
+          capApplied: false,
+          minimumApplied: false,
+          roundingAdjustmentCents: 0,
+          finalAmount: moneyToJson(amount),
+        },
+      };
+    });
+
+    const distributedAmount = sumDecimals(results.map((result) => result.amount));
+    const remainderCents = toCents(roundMoney(input.totalAmount)) - toCents(distributedAmount);
+
+    if (remainderCents !== 0) {
+      throw new BadRequestException('error.distribution.mlAllocationPoolMismatch');
+    }
+
+    return {
+      result: {
+        totalAmount: roundMoney(input.totalAmount),
+        distributedAmount,
+        remainderCents,
+        results,
+      },
+      computationMethod: ComputationMethod.ML_ASSISTED,
+      mlModelVersion: mlResult.modelVersion,
+    };
+  }
+
   private async resolveConfig(tx: Prisma.TransactionClient, tenantId: string) {
     const config = await tx.distributionConfig.findUnique({
       where: {
@@ -230,11 +402,11 @@ export class DistributionService {
     };
   }
 
-  private async getSalesByEmployeeId(
+  private async getSalesStats(
     tx: Prisma.TransactionClient,
     tenantId: string,
     shiftId: string,
-  ): Promise<Map<string, Prisma.Decimal>> {
+  ): Promise<SalesStats> {
     const groupedSales = await tx.order.groupBy({
       by: ['serverId'],
       where: {
@@ -246,9 +418,22 @@ export class DistributionService {
       _sum: {
         totalAmount: true,
       },
+      _count: {
+        _all: true,
+      },
     });
 
-    return new Map(groupedSales.map((row) => [row.serverId, row._sum.totalAmount ?? toDecimal(0)]));
+    const salesByEmployeeId = new Map(
+      groupedSales.map((row) => [row.serverId, row._sum.totalAmount ?? toDecimal(0)]),
+    );
+    const ordersByEmployeeId = new Map(groupedSales.map((row) => [row.serverId, row._count._all]));
+    const totalSales = sumDecimals(groupedSales.map((row) => row._sum.totalAmount ?? toDecimal(0)));
+
+    return {
+      salesByEmployeeId,
+      ordersByEmployeeId,
+      totalSales,
+    };
   }
 
   private mapEmployeeInputs(
@@ -287,7 +472,10 @@ export class DistributionService {
     });
   }
 
-  private buildFeaturesSnapshot(employee: EmployeeShiftInput | undefined): Prisma.InputJsonValue {
+  private buildFeaturesSnapshot(
+    employee: EmployeeShiftInput | undefined,
+    computed: ComputedDistribution,
+  ): Prisma.InputJsonValue {
     if (!employee) {
       return {};
     }
@@ -297,6 +485,8 @@ export class DistributionService {
       hoursWorked: employee.hoursWorked.toString(),
       salesGenerated: employee.salesGenerated.toString(),
       coefficient: employee.coefficient.toString(),
+      computationMethod: computed.computationMethod,
+      mlModelVersion: computed.mlModelVersion ?? null,
     };
   }
 

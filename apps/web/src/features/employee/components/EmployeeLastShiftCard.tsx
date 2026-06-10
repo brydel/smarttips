@@ -28,7 +28,7 @@ export function EmployeeLastShiftCard({ lastShift, notImplemented }: EmployeeLas
             <span className="text-[12px] font-medium text-st-sec font-sans">Dernier shift</span>
           </div>
           <span className="text-[9.5px] font-mono uppercase tracking-wider text-st-dim border border-st-border rounded-pill px-1.5 py-0.5">
-            Bientôt
+            Après validation
           </span>
         </div>
         <p className="text-[12.5px] text-st-dim font-sans leading-relaxed">

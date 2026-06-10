@@ -49,9 +49,9 @@ function AvatarStack({ count, max = 3 }: { count: number; max?: number }) {
         <span
           className="w-6 h-6 rounded-full border-2 flex items-center justify-center font-mono text-[8px]"
           style={{
-            background: 'var(--st-d-3)',
+            background: 'var(--st-border)',
             borderColor: 'var(--st-card)',
-            color: 'var(--st-d-7)',
+            color: 'var(--st-sec)',
             marginLeft: -8,
           }}
         >
@@ -74,11 +74,11 @@ export function TomorrowStrip({ shifts, dateLabel = 'demain' }: TomorrowStripPro
         <div className="flex items-center gap-3 py-2 mb-3">
           <span
             className="uppercase tracking-[0.16em] font-mono text-[10.5px] font-medium whitespace-nowrap"
-            style={{ color: 'var(--st-d-7)' }}
+            style={{ color: 'var(--st-sec)' }}
           >
             {dateLabel}
           </span>
-          <div className="flex-1 h-px" style={{ background: 'var(--st-d-3)' }} />
+          <div className="flex-1 h-px" style={{ background: 'var(--st-border)' }} />
           <Link
             href="/dashboard/shifts"
             className="text-[11.5px] hover:opacity-80 transition-opacity whitespace-nowrap"
@@ -90,7 +90,7 @@ export function TomorrowStrip({ shifts, dateLabel = 'demain' }: TomorrowStripPro
         <Link
           href="/dashboard/shifts"
           className="flex items-center justify-center gap-2 rounded-[10px] border border-dashed border-st-border text-[12.5px] py-6 hover:border-st-muted hover:text-st-hi transition-colors"
-          style={{ color: 'var(--st-d-7)', textDecoration: 'none' }}
+          style={{ color: 'var(--st-sec)', textDecoration: 'none' }}
         >
           <Plus size={13} />
           Planifier un shift
@@ -105,11 +105,11 @@ export function TomorrowStrip({ shifts, dateLabel = 'demain' }: TomorrowStripPro
       <div className="flex items-center gap-3 py-2 mb-3">
         <span
           className="uppercase tracking-[0.16em] font-mono text-[10.5px] font-medium whitespace-nowrap"
-          style={{ color: 'var(--st-d-7)' }}
+          style={{ color: 'var(--st-sec)' }}
         >
           {dateLabel}
         </span>
-        <div className="flex-1 h-px" style={{ background: 'var(--st-d-3)' }} />
+        <div className="flex-1 h-px" style={{ background: 'var(--st-border)' }} />
         <Link
           href="/dashboard/shifts"
           className="text-[11.5px] hover:opacity-80 transition-opacity whitespace-nowrap"
@@ -161,7 +161,7 @@ export function TomorrowStrip({ shifts, dateLabel = 'demain' }: TomorrowStripPro
                 >
                   {SHIFT_TYPE_LABEL[s.type] ?? s.type}
                 </span>
-                <span className="font-mono text-[10.5px]" style={{ color: 'var(--st-d-6)' }}>
+                <span className="font-mono text-[10.5px]" style={{ color: 'var(--st-dim)' }}>
                   {s.startTime} → {s.endTime}
                 </span>
               </div>
@@ -169,8 +169,8 @@ export function TomorrowStrip({ shifts, dateLabel = 'demain' }: TomorrowStripPro
               {/* Avatar stack + staff count */}
               <div className="flex items-center gap-2.5 mb-2">
                 <AvatarStack count={s.staffCount} max={3} />
-                <span className="text-[12px]" style={{ color: 'var(--st-d-7)' }}>
-                  <span className="font-mono font-medium" style={{ color: 'var(--st-d-9)' }}>
+                <span className="text-[12px]" style={{ color: 'var(--st-sec)' }}>
+                  <span className="font-mono font-medium" style={{ color: 'var(--st-hi)' }}>
                     {s.staffCount}
                   </span>{' '}
                   employé{s.staffCount > 1 ? 's' : ''}
@@ -189,7 +189,7 @@ export function TomorrowStrip({ shifts, dateLabel = 'demain' }: TomorrowStripPro
               ) : s.notes ? (
                 <p
                   className="text-[11.5px] leading-[1.4] line-clamp-2"
-                  style={{ color: 'var(--st-d-7)' }}
+                  style={{ color: 'var(--st-sec)' }}
                 >
                   {s.notes}
                 </p>
@@ -202,7 +202,7 @@ export function TomorrowStrip({ shifts, dateLabel = 'demain' }: TomorrowStripPro
         <Link
           href="/dashboard/shifts"
           className="flex items-center justify-center gap-2 rounded-[10px] border border-dashed border-st-border text-[12.5px] p-3.5 min-h-[96px] hover:border-st-muted hover:text-st-hi transition-colors"
-          style={{ color: 'var(--st-d-7)', textDecoration: 'none' }}
+          style={{ color: 'var(--st-sec)', textDecoration: 'none' }}
         >
           <Plus size={13} />
           Ajouter un shift

@@ -1,5 +1,5 @@
 /**
- * Employee API — Personal space endpoints (BIS-23)
+ * Employee API — Personal space endpoints
  *
  * ╔══════════════════════════════════════════════════════════════════════════╗
  * ║  BACKEND ENDPOINTS NOT YET IMPLEMENTED                                  ║

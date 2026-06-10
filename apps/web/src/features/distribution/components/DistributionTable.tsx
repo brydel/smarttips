@@ -47,7 +47,7 @@ export function DistributionTable({
           fontSize: '9.5px',
           textTransform: 'uppercase',
           letterSpacing: '0.14em',
-          color: '#5A6485',
+          color: 'var(--st-dim)',
         }}
       >
         <span />
@@ -158,7 +158,7 @@ function DistributionRow({
             : 'border-st-border hover:border-st-muted',
         isDimmed && 'opacity-40',
       )}
-      style={{ background: 'var(--st-d-1, #0F1422)' }}
+      style={{ background: 'var(--st-card)' }}
       onMouseEnter={() => onHover(employee.role)}
       onMouseLeave={() => onHover(null)}
     >
@@ -313,9 +313,9 @@ function RoleAvatar({ name, color, icon }: RoleAvatarProps) {
     <div
       className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 text-[11px] font-medium relative"
       style={{
-        background: `color-mix(in srgb, ${color} 15%, #141A2B)`,
+        background: `color-mix(in srgb, ${color} 15%, var(--st-raised))`,
         color,
-        border: `1px solid color-mix(in srgb, ${color} 25%, #252D45)`,
+        border: `1px solid color-mix(in srgb, ${color} 25%, var(--st-stroke))`,
       }}
       aria-hidden="true"
       title={icon}

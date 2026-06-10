@@ -74,7 +74,7 @@ function AssignmentStatusChip({ status }: { status: AssignmentStatus }) {
   if (status === 'NO_SHOW') {
     return <span style={{ fontSize: 11, color: '#EF4444' }}>absent</span>;
   }
-  return <span style={{ fontSize: 11, color: '#5A6485' }}>planifié</span>;
+  return <span style={{ fontSize: 11, color: 'var(--st-dim)' }}>planifié</span>;
 }
 
 // ── Props ──────────────────────────────────────────────────────────────────────
@@ -206,11 +206,11 @@ export function AssignmentRow({
         gap: 14,
         alignItems: 'center',
         padding: '12px 14px',
-        borderBottom: '1px solid #1B2236',
+        borderBottom: '1px solid var(--st-border)',
         transition: 'background .12s ease',
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.background = '#141A2B';
+        (e.currentTarget as HTMLDivElement).style.background = 'var(--st-raised)';
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLDivElement).style.background = 'transparent';
@@ -225,10 +225,10 @@ export function AssignmentRow({
           size="sm"
         />
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 13, color: '#F4F6FB', fontFamily: 'var(--st-font-ui)' }}>
+          <div style={{ fontSize: 13, color: 'var(--st-hi)', fontFamily: 'var(--st-font-ui)' }}>
             {fullName}
           </div>
-          <div style={{ fontSize: 11, color: '#5A6485' }}>
+          <div style={{ fontSize: 11, color: 'var(--st-dim)' }}>
             {ROLE_LABEL[assignment.roleDuringShift]}
           </div>
         </div>
@@ -238,7 +238,7 @@ export function AssignmentRow({
       <span
         style={{
           fontSize: 12.5,
-          color: '#8892B0',
+          color: 'var(--st-sec)',
           fontFamily: 'var(--st-font-mono)',
           fontVariantNumeric: 'tabular-nums',
         }}
@@ -277,7 +277,7 @@ export function AssignmentRow({
           style={{
             flex: 1,
             height: 3,
-            background: '#252D45',
+            background: 'var(--st-stroke)',
             borderRadius: 2,
             position: 'relative',
             overflow: 'hidden',
@@ -308,7 +308,7 @@ export function AssignmentRow({
         style={{
           background: 'transparent',
           border: 0,
-          color: isLocked ? '#252D45' : '#5A6485',
+          color: isLocked ? 'var(--st-stroke)' : 'var(--st-dim)',
           padding: 6,
           borderRadius: 6,
           cursor: isLocked ? 'not-allowed' : 'pointer',
@@ -325,7 +325,9 @@ export function AssignmentRow({
         }}
         onMouseLeave={(e) => {
           (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-          (e.currentTarget as HTMLButtonElement).style.color = isLocked ? '#252D45' : '#5A6485';
+          (e.currentTarget as HTMLButtonElement).style.color = isLocked
+            ? 'var(--st-stroke)'
+            : 'var(--st-dim)';
         }}
         title={isLocked ? 'Shift clôturé' : `Retirer ${fullName} du shift`}
         aria-label={`Retirer ${fullName}`}

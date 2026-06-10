@@ -99,8 +99,8 @@ export function ShiftCalendar({ shifts, selectedDate, onSelectDate }: ShiftCalen
   return (
     <div
       style={{
-        background: '#0F1422',
-        border: '1px solid #1B2236',
+        background: 'var(--st-card)',
+        border: '1px solid var(--st-border)',
         borderRadius: 14,
         padding: '16px 18px',
         marginBottom: 18,
@@ -121,11 +121,11 @@ export function ShiftCalendar({ shifts, selectedDate, onSelectDate }: ShiftCalen
           onClick={() => setViewMonth((m) => subMonths(m, 1))}
           style={{
             background: 'transparent',
-            border: '1px solid #252D45',
+            border: '1px solid var(--st-stroke)',
             borderRadius: 8,
             width: 28,
             height: 28,
-            color: '#8892B0',
+            color: 'var(--st-sec)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -133,12 +133,12 @@ export function ShiftCalendar({ shifts, selectedDate, onSelectDate }: ShiftCalen
             flexShrink: 0,
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = '#141A2B';
-            (e.currentTarget as HTMLButtonElement).style.color = '#F4F6FB';
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--st-raised)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-hi)';
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-            (e.currentTarget as HTMLButtonElement).style.color = '#8892B0';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-sec)';
           }}
           aria-label="Mois précédent"
         >
@@ -158,7 +158,7 @@ export function ShiftCalendar({ shifts, selectedDate, onSelectDate }: ShiftCalen
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <h3
             className="font-display"
-            style={{ fontSize: 16, color: '#F4F6FB', margin: 0, lineHeight: 1 }}
+            style={{ fontSize: 16, color: 'var(--st-hi)', margin: 0, lineHeight: 1 }}
           >
             {monthTitleCase}
           </h3>
@@ -189,11 +189,11 @@ export function ShiftCalendar({ shifts, selectedDate, onSelectDate }: ShiftCalen
           onClick={() => setViewMonth((m) => addMonths(m, 1))}
           style={{
             background: 'transparent',
-            border: '1px solid #252D45',
+            border: '1px solid var(--st-stroke)',
             borderRadius: 8,
             width: 28,
             height: 28,
-            color: '#8892B0',
+            color: 'var(--st-sec)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -201,12 +201,12 @@ export function ShiftCalendar({ shifts, selectedDate, onSelectDate }: ShiftCalen
             flexShrink: 0,
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = '#141A2B';
-            (e.currentTarget as HTMLButtonElement).style.color = '#F4F6FB';
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--st-raised)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-hi)';
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-            (e.currentTarget as HTMLButtonElement).style.color = '#8892B0';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-sec)';
           }}
           aria-label="Mois suivant"
         >
@@ -235,7 +235,7 @@ export function ShiftCalendar({ shifts, selectedDate, onSelectDate }: ShiftCalen
               fontFamily: 'var(--st-font-mono)',
               textTransform: 'uppercase',
               letterSpacing: '0.12em',
-              color: i >= 5 ? '#3A4366' : '#5A6485',
+              color: i >= 5 ? 'var(--st-muted)' : 'var(--st-dim)',
               paddingBottom: 6,
             }}
           >
@@ -281,8 +281,8 @@ export function ShiftCalendar({ shifts, selectedDate, onSelectDate }: ShiftCalen
                       : day.isToday
                         ? '#818CF8'
                         : day.inMonth
-                          ? '#C5CCE0'
-                          : '#2D3654',
+                          ? 'var(--st-pri)'
+                          : 'var(--st-stroke)',
                     cursor: 'pointer',
                     transition: 'all .12s ease',
                     fontFamily: 'var(--st-font-mono)',
@@ -291,8 +291,8 @@ export function ShiftCalendar({ shifts, selectedDate, onSelectDate }: ShiftCalen
                   }}
                   onMouseEnter={(e) => {
                     if (!day.isSelected) {
-                      (e.currentTarget as HTMLButtonElement).style.background = '#141A2B';
-                      (e.currentTarget as HTMLButtonElement).style.color = '#F4F6FB';
+                      (e.currentTarget as HTMLButtonElement).style.background = 'var(--st-raised)';
+                      (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-hi)';
                     }
                   }}
                   onMouseLeave={(e) => {
@@ -303,8 +303,8 @@ export function ShiftCalendar({ shifts, selectedDate, onSelectDate }: ShiftCalen
                       (e.currentTarget as HTMLButtonElement).style.color = day.isToday
                         ? '#818CF8'
                         : day.inMonth
-                          ? '#C5CCE0'
-                          : '#2D3654';
+                          ? 'var(--st-pri)'
+                          : 'var(--st-stroke)';
                     }
                   }}
                   aria-label={`${format(day.date, 'd MMMM yyyy', { locale: fr })} — ${day.shifts.length} shift${day.shifts.length !== 1 ? 's' : ''}`}
@@ -336,7 +336,7 @@ export function ShiftCalendar({ shifts, selectedDate, onSelectDate }: ShiftCalen
                         <span
                           style={{
                             fontSize: 8,
-                            color: day.isSelected ? 'rgba(255,255,255,.7)' : '#5A6485',
+                            color: day.isSelected ? 'rgba(255,255,255,.7)' : 'var(--st-dim)',
                             fontFamily: 'var(--st-font-mono)',
                             lineHeight: 1,
                           }}
@@ -359,13 +359,13 @@ export function ShiftCalendar({ shifts, selectedDate, onSelectDate }: ShiftCalen
           style={{
             marginTop: 12,
             paddingTop: 10,
-            borderTop: '1px solid #1B2236',
+            borderTop: '1px solid var(--st-border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
         >
-          <span style={{ fontSize: 11, color: '#8892B0', fontFamily: 'var(--st-font-ui)' }}>
+          <span style={{ fontSize: 11, color: 'var(--st-sec)', fontFamily: 'var(--st-font-ui)' }}>
             {format(new Date(selectedDate), 'EEEE d MMMM yyyy', { locale: fr }).replace(/^./, (c) =>
               c.toUpperCase(),
             )}
@@ -376,7 +376,7 @@ export function ShiftCalendar({ shifts, selectedDate, onSelectDate }: ShiftCalen
             style={{
               background: 'transparent',
               border: 0,
-              color: '#5A6485',
+              color: 'var(--st-dim)',
               fontSize: 10.5,
               fontFamily: 'var(--st-font-mono)',
               cursor: 'pointer',
