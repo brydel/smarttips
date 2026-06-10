@@ -69,9 +69,15 @@ export function fmtShiftType(type: string): string {
 
 /** Format computation method label. */
 export function fmtComputationMethod(method: string): string {
-  if (method === 'RULES') return 'Règles pondérées';
-  if (method === 'ML') return 'IA assistée';
-  return method;
+  if (method === 'ML_ASSISTED') return 'ML assisté';
+  if (method === 'ML_FULL') return 'ML complet';
+  if (method === 'RULES') return 'Règles de secours';
+  if (method === 'MANUAL_OVERRIDE') return 'Ajustement manuel';
+  return method
+    .toLowerCase()
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
 }
 
 /** Format role label in French (fallback to raw string). */

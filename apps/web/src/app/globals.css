@@ -28,17 +28,17 @@
   --st-d-8: #C5CCE0;
   --st-d-9: #F4F6FB;
 
-  /* === Structure neutrals — LIGHT === */
-  --st-l-0: #FAF7F2;
-  --st-l-1: #F4EFE6;
-  --st-l-2: #ECE5D6;
-  --st-l-3: #DDD3BD;
-  --st-l-4: #BCB19A;
-  --st-l-5: #8B7F66;
-  --st-l-6: #5E5443;
-  --st-l-7: #3B342A;
-  --st-l-8: #1E1A14;
-  --st-l-9: #0A0805;
+  /* === Structure neutrals — LIGHT (clean neutral slate) === */
+  --st-l-0: #F8F9FA;
+  --st-l-1: #FFFFFF;
+  --st-l-2: #F1F5F9;
+  --st-l-3: #E2E8F0;
+  --st-l-4: #CBD5E1;
+  --st-l-5: #94A3B8;
+  --st-l-6: #64748B;
+  --st-l-7: #475569;
+  --st-l-8: #1E293B;
+  --st-l-9: #0F172A;
 
   /* === Accents (10% — isolated) === */
   --st-indigo: #6366F1;
@@ -81,6 +81,71 @@
   --st-shadow-glow-indigo: 0 0 0 1px rgba(99,102,241,.3), 0 8px 24px -8px rgba(99,102,241,.4);
   --st-shadow-glow-emerald: 0 0 0 1px rgba(16,185,129,.3), 0 8px 24px -8px rgba(16,185,129,.35);
   --st-shadow-glow-gold: 0 0 0 1px rgba(212,165,116,.3), 0 8px 24px -8px rgba(212,165,116,.35);
+  /* Focus ring offset color (must match --st-bg in each theme) */
+  --st-focus-offset: var(--st-bg);
+  /* Glass header — semi-transparent bg for sticky frosted headers */
+  --st-glass-bg: rgba(10,14,26,.88);
+
+  /* === Themed surface tokens ===
+     Default = dark (matches the SSR markup and the no-FOUC pre-hydration script).
+     The script sets [data-theme="light"|"dark"] on <html> before first paint. */
+  --st-bg: var(--st-d-0);
+  --st-card: var(--st-d-1);
+  --st-raised: var(--st-d-2);
+  --st-border: var(--st-d-3);
+  --st-stroke: var(--st-d-4);
+  --st-muted: var(--st-d-5);
+  --st-dim: var(--st-d-6);
+  --st-sec: var(--st-d-7);
+  --st-pri: var(--st-d-8);
+  --st-hi: var(--st-d-9);
+  color-scheme: dark;
+}
+
+/* Explicit dark theme — same as :root default, kept for symmetry & specificity. */
+[data-theme='dark'] {
+  --st-glass-bg: rgba(10,14,26,.88);
+  --st-bg: var(--st-d-0);
+  --st-card: var(--st-d-1);
+  --st-raised: var(--st-d-2);
+  --st-border: var(--st-d-3);
+  --st-stroke: var(--st-d-4);
+  --st-muted: var(--st-d-5);
+  --st-dim: var(--st-d-6);
+  --st-sec: var(--st-d-7);
+  --st-pri: var(--st-d-8);
+  --st-hi: var(--st-d-9);
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
+  --st-glass-bg: rgba(248,249,250,.92);
+  --st-bg: var(--st-l-0);
+  --st-card: var(--st-l-1);
+  --st-raised: var(--st-l-2);
+  --st-border: var(--st-l-3);
+  --st-stroke: var(--st-l-4);
+  --st-muted: var(--st-l-5);
+  --st-dim: var(--st-l-6);
+  --st-sec: var(--st-l-7);
+  --st-pri: var(--st-l-8);
+  --st-hi: var(--st-l-9);
+  color-scheme: light;
+  --st-shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04);
+  --st-shadow-md: 0 4px 16px -4px rgba(0,0,0,.12), 0 1px 4px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.05);
+  --st-shadow-lg: 0 20px 50px -16px rgba(0,0,0,.15), 0 6px 16px -8px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.05);
+}
+
+/* Sidebar tone-gradient cards: the dark gradient overlays look wrong on light backgrounds.
+   In light mode, just show a clean card surface with a very subtle accent tint via ring. */
+[data-theme='light'] .st-sidebar-tone-card {
+  background: var(--st-card) !important;
+}
+
+/* Progress bar tracks inside sidebar cards (bg-white/5 is invisible on light bg) */
+[data-theme='light'] .st-sidebar-tone-card .bg-white\/5,
+[data-theme='light'] .bg-white\/5 {
+  background: var(--st-border) !important;
 }
 
 html, body {
@@ -91,11 +156,20 @@ html, body {
 
 body {
   font-family: var(--st-font-ui);
-  background: var(--st-d-0);
-  color: var(--st-d-8);
+  background: var(--st-bg);
+  color: var(--st-pri);
   -webkit-font-smoothing: antialiased;
   font-feature-settings: 'cv11','ss01','ss03';
   letter-spacing: -0.005em;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
+}
+
+/* Disable theme transitions during hydration to avoid a colour flash. */
+.st-no-transition,
+.st-no-transition * {
+  transition: none !important;
 }
 
 /* ── Type primitives ── */
@@ -131,7 +205,7 @@ body {
 .st-photo {
   background-image: linear-gradient(135deg, rgba(255,255,255,.04) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.04) 50%, rgba(255,255,255,.04) 75%, transparent 75%, transparent);
   background-size: 14px 14px;
-  background-color: var(--st-d-2);
+  background-color: var(--st-raised);
   position: relative;
   overflow: hidden;
 }
@@ -147,10 +221,15 @@ body {
   background: linear-gradient(180deg, transparent, rgba(0,0,0,.55));
 }
 
+[data-theme='light'] .st-photo-brief {
+  color: rgba(0,0,0,.62);
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,.10));
+}
+
 /* ── Focus ring ── */
 .st-focus:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--st-d-0), 0 0 0 4px var(--st-indigo);
+  box-shadow: 0 0 0 2px var(--st-bg), 0 0 0 4px var(--st-indigo);
   border-color: var(--st-indigo) !important;
 }
 
@@ -187,11 +266,11 @@ body {
 
 .st-btn-ghost-dark {
   background: transparent;
-  color: var(--st-d-9);
-  border-color: var(--st-d-4);
+  color: var(--st-hi);
+  border-color: var(--st-stroke);
 }
 .st-btn-ghost-dark:hover {
-  background: var(--st-d-2);
+  background: var(--st-raised);
 }
 
 /* ── Chip / badge ── */
@@ -203,8 +282,8 @@ body {
   border-radius: var(--st-r-pill);
   font-size: 11.5px;
   font-weight: 500;
-  border: 1px solid var(--st-d-4);
-  color: var(--st-d-7);
+  border: 1px solid var(--st-stroke);
+  color: var(--st-sec);
 }
 
 .st-chip-gold {
@@ -221,21 +300,13 @@ body {
 
 /* ── Card ── */
 .st-card {
-  background: var(--st-d-1);
-  border: 1px solid var(--st-d-3);
+  background: var(--st-card);
+  border: 1px solid var(--st-border);
   border-radius: var(--st-r-lg);
 }
 
 /* ── Button variants ── */
-.st-btn-ghost-dark {
-  background: transparent;
-  color: var(--st-d-9);
-  border-color: var(--st-d-4);
-}
-.st-btn-ghost-dark:hover {
-  background: var(--st-d-2);
-}
-
+/* Always-light: used on marketing pages that have a light background regardless of user's theme */
 .st-btn-ghost-light {
   background: transparent;
   color: var(--st-l-8);
@@ -277,8 +348,8 @@ body {
 /* Restaurant ticket perforations */
 .shifts-ticket {
   position: relative;
-  background: #0F1422;
-  border: 1px solid #1B2236;
+  background: var(--st-card);
+  border: 1px solid var(--st-border);
   border-radius: 10px;
 }
 .shifts-ticket::before,
@@ -287,13 +358,13 @@ body {
   position: absolute;
   top: 50%;
   width: 12px; height: 12px;
-  background: #0A0E1A;
+  background: var(--st-bg);
   border-radius: 50%;
   transform: translateY(-50%);
   z-index: 1;
 }
-.shifts-ticket::before { left: -7px; border-right: 1px solid #1B2236; }
-.shifts-ticket::after  { right: -7px; border-left: 1px solid #1B2236; }
+.shifts-ticket::before { left: -7px; border-right: 1px solid var(--st-border); }
+.shifts-ticket::after  { right: -7px; border-left: 1px solid var(--st-border); }
 
 /* Scrub-style number input */
 .shifts-scrub {
@@ -337,13 +408,13 @@ body {
 /* Step rail dots for close-shift dialog */
 .shifts-step-dot {
   width: 6px; height: 6px; border-radius: 50%;
-  background: #252D45;
+  background: var(--st-stroke);
   transition: all .2s ease;
   flex-shrink: 0;
   display: inline-block;
 }
-.shifts-step-dot.active { background: #818CF8; width: 24px; border-radius: 3px; }
-.shifts-step-dot.done   { background: #10B981; }
+.shifts-step-dot.active { background: var(--st-indigo-glow); width: 24px; border-radius: 3px; }
+.shifts-step-dot.done   { background: var(--st-emerald); }
 
 /* ── Team page ─────────────────────────────────────────────── */
 
@@ -377,8 +448,8 @@ body {
   border-color: var(--role-c, #252D45);
   box-shadow: 0 12px 36px -16px color-mix(in oklch, var(--role-c, #252D45) 30%, transparent);
 }
-.team-card.selected { background: #141A2B !important; }
-.team-card.selected::before { border-color: #818CF8 !important; box-shadow: 0 0 0 1px #818CF8 !important; }
+.team-card.selected { background: var(--st-raised) !important; }
+.team-card.selected::before { border-color: var(--st-indigo-glow) !important; box-shadow: 0 0 0 1px var(--st-indigo-glow) !important; }
 
 /* Role color helpers */
 .team-role-server  { --role-c: #818CF8; --role-g: rgba(99,102,241,.10); }
@@ -413,8 +484,8 @@ body {
   padding: 7px 14px;
   border-radius: 9999px;
   background: transparent;
-  border: 1px solid #252D45;
-  color: #8892B0;
+  border: 1px solid var(--st-stroke);
+  color: var(--st-sec);
   font-size: 12px;
   font-family: var(--st-font-ui, Inter, sans-serif);
   cursor: pointer;
@@ -425,11 +496,11 @@ body {
   white-space: nowrap;
   line-height: 1;
 }
-.team-tab:hover { color: #F4F6FB; background: #141A2B; border-color: #3A4366; }
+.team-tab:hover { color: var(--st-hi); background: var(--st-raised); border-color: var(--st-muted); }
 .team-tab.active {
-  background: #141A2B;
-  color: #F4F6FB;
-  border-color: #3A4366;
+  background: var(--st-raised);
+  color: var(--st-hi);
+  border-color: var(--st-muted);
   font-weight: 500;
 }
 .team-tab .count {
@@ -437,11 +508,11 @@ body {
   font-size: 10.5px;
   padding: 1px 6px;
   border-radius: 9999px;
-  background: #1B2236;
-  color: #8892B0;
+  background: var(--st-border);
+  color: var(--st-sec);
   line-height: 18px;
 }
-.team-tab.active .count { background: #252D45; color: #F4F6FB; }
+.team-tab.active .count { background: var(--st-stroke); color: var(--st-hi); }
 
 /* Inline editable inputs in drawer */
 .team-editable {
@@ -450,14 +521,14 @@ body {
   border-radius: 6px;
   padding: 5px 8px;
   font-family: inherit;
-  color: #F4F6FB;
+  color: var(--st-hi);
   outline: none;
   width: 100%;
   transition: all .15s ease;
   font-size: 14px;
 }
-.team-editable:hover { background: #141A2B; }
-.team-editable:focus { background: #141A2B; border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,.18); }
+.team-editable:hover { background: var(--st-raised); }
+.team-editable:focus { background: var(--st-raised); border-color: var(--st-indigo); box-shadow: 0 0 0 3px rgba(99,102,241,.18); }
 
 /* On-duty pulse dot */
 @keyframes team-duty-pulse {
@@ -574,7 +645,7 @@ body {
   appearance: none;
   width: 100%;
   height: 4px;
-  background: #252D45; /* st-stroke */
+  background: var(--st-stroke);
   border-radius: 2px;
   outline: none;
   cursor: pointer;
@@ -584,26 +655,26 @@ body {
   appearance: none;
   width: 20px;
   height: 20px;
-  background: #818CF8; /* st-indigo-glow */
-  border: 2px solid #0A0E1A; /* st-bg */
+  background: var(--st-indigo-glow);
+  border: 2px solid var(--st-bg);
   border-radius: 50%;
   cursor: grab;
-  box-shadow: 0 0 0 1px #6366F1, 0 2px 8px rgba(99,102,241,.4);
+  box-shadow: 0 0 0 1px var(--st-indigo), 0 2px 8px rgba(99,102,241,.4);
   transition: transform .12s ease, box-shadow .12s ease;
 }
 .dist-slider::-webkit-slider-thumb:active {
   cursor: grabbing;
   transform: scale(1.15);
-  box-shadow: 0 0 0 1px #6366F1, 0 4px 12px rgba(99,102,241,.5);
+  box-shadow: 0 0 0 1px var(--st-indigo), 0 4px 12px rgba(99,102,241,.5);
 }
 .dist-slider::-moz-range-thumb {
   width: 20px;
   height: 20px;
-  background: #818CF8;
-  border: 2px solid #0A0E1A;
+  background: var(--st-indigo-glow);
+  border: 2px solid var(--st-bg);
   border-radius: 50%;
   cursor: grab;
-  box-shadow: 0 0 0 1px #6366F1;
+  box-shadow: 0 0 0 1px var(--st-indigo);
 }
 .dist-slider:disabled {
   opacity: 0.45;

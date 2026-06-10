@@ -81,8 +81,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="fr"
+      data-theme="dark"
       className={`${instrumentSerif.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
     >
+      <head>
+        {/*
+          Synchronous theme initializer — must run before paint to avoid FOUC.
+          Static file in /public, no user input, no dynamic interpolation.
+          The Next.js rule against sync scripts is intentionally overridden here:
+          deferring this script would cause a visible colour flash on every load.
+        */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script src="/theme-init.js" />
+      </head>
       <body>
         <Providers>{children}</Providers>
       </body>

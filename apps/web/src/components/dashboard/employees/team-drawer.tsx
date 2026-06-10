@@ -165,7 +165,12 @@ export function TeamDrawer({
       <div
         className="team-drawer-overlay"
         onClick={editMode ? undefined : onClose}
-        style={{ position: 'fixed', inset: 0, background: 'rgba(10,14,26,.55)', zIndex: 40 }}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'color-mix(in srgb, var(--st-bg) 55%, transparent)',
+          zIndex: 40,
+        }}
         aria-hidden="true"
       />
 
@@ -181,8 +186,8 @@ export function TeamDrawer({
           right: 0,
           height: '100vh',
           width: 460,
-          background: '#0F1422',
-          borderLeft: '1px solid #1B2236',
+          background: 'var(--st-card)',
+          borderLeft: '1px solid var(--st-border)',
           zIndex: 50,
           display: 'flex',
           flexDirection: 'column',
@@ -193,7 +198,7 @@ export function TeamDrawer({
         <div
           style={{
             background: `linear-gradient(135deg, ${activeMeta.tint}, transparent)`,
-            borderBottom: '1px solid #1B2236',
+            borderBottom: '1px solid var(--st-border)',
             padding: '20px 20px 16px',
             flexShrink: 0,
           }}
@@ -241,7 +246,12 @@ export function TeamDrawer({
                 ) : (
                   <h2
                     id="drawer-title"
-                    style={{ fontSize: 17, fontWeight: 700, color: '#F4F6FB', marginBottom: 5 }}
+                    style={{
+                      fontSize: 17,
+                      fontWeight: 700,
+                      color: 'var(--st-hi)',
+                      marginBottom: 5,
+                    }}
                   >
                     {emp.firstName} {emp.lastName}
                   </h2>
@@ -267,10 +277,10 @@ export function TeamDrawer({
                       width: 6,
                       height: 6,
                       borderRadius: '50%',
-                      background: emp.active ? '#34D399' : '#3A4366',
+                      background: emp.active ? '#34D399' : 'var(--st-muted)',
                     }}
                   />
-                  <span style={{ fontSize: 11, color: emp.active ? '#34D399' : '#5A6485' }}>
+                  <span style={{ fontSize: 11, color: emp.active ? '#34D399' : 'var(--st-dim)' }}>
                     {emp.active ? 'Actif' : 'Inactif'}
                   </span>
                 </div>
@@ -285,7 +295,7 @@ export function TeamDrawer({
               display: 'grid',
               gridTemplateColumns: 'repeat(4, 1fr)',
               gap: 1,
-              background: '#1B2236',
+              background: 'var(--st-border)',
               borderRadius: 8,
               overflow: 'hidden',
             }}
@@ -298,12 +308,12 @@ export function TeamDrawer({
             ].map((kpi) => (
               <div
                 key={kpi.label}
-                style={{ background: '#141A2B', padding: '10px 8px', textAlign: 'center' }}
+                style={{ background: 'var(--st-raised)', padding: '10px 8px', textAlign: 'center' }}
               >
                 <div
                   style={{
                     fontSize: 9,
-                    color: '#5A6485',
+                    color: 'var(--st-dim)',
                     fontFamily: 'var(--st-font-mono, monospace)',
                     marginBottom: 4,
                   }}
@@ -314,7 +324,7 @@ export function TeamDrawer({
                   style={{
                     fontSize: 14,
                     fontWeight: 600,
-                    color: kpi.highlight ? meta.color : '#F4F6FB',
+                    color: kpi.highlight ? meta.color : 'var(--st-hi)',
                     fontFamily: 'var(--st-font-mono, monospace)',
                   }}
                 >
@@ -332,14 +342,21 @@ export function TeamDrawer({
             <SectionLabel>TENDANCE TIPS (8 DERNIERS SERVICES)</SectionLabel>
             <div
               style={{
-                background: '#141A2B',
+                background: 'var(--st-raised)',
                 borderRadius: 10,
                 padding: '14px 16px',
-                border: '1px solid #1B2236',
+                border: '1px solid var(--st-border)',
               }}
             >
               <Sparkline data={sparkData} color={meta.color} width={380} height={48} />
-              <div style={{ marginTop: 6, fontSize: 10.5, color: '#5A6485', fontStyle: 'italic' }}>
+              <div
+                style={{
+                  marginTop: 6,
+                  fontSize: 10.5,
+                  color: 'var(--st-dim)',
+                  fontStyle: 'italic',
+                }}
+              >
                 Tendance estimée · données réelles disponibles à venir
               </div>
             </div>
@@ -350,9 +367,9 @@ export function TeamDrawer({
             <SectionLabel>CONTACT</SectionLabel>
             <div
               style={{
-                background: '#141A2B',
+                background: 'var(--st-raised)',
                 borderRadius: 10,
-                border: '1px solid #1B2236',
+                border: '1px solid var(--st-border)',
                 overflow: 'hidden',
               }}
             >
@@ -368,19 +385,19 @@ export function TeamDrawer({
                     aria-label="Email"
                   />
                 ) : (
-                  <span style={{ fontSize: 13, color: '#C5CCE0' }}>{emp.email ?? '—'}</span>
+                  <span style={{ fontSize: 13, color: 'var(--st-pri)' }}>{emp.email ?? '—'}</span>
                 )}
               </ContactRow>
               <ContactRow label="Téléphone">
-                <span style={{ fontSize: 13, color: '#8892B0' }}>—</span>
+                <span style={{ fontSize: 13, color: 'var(--st-sec)' }}>—</span>
               </ContactRow>
               <ContactRow label="Embauche" last>
                 <div>
-                  <span style={{ fontSize: 13, color: '#C5CCE0' }}>
+                  <span style={{ fontSize: 13, color: 'var(--st-pri)' }}>
                     {hireDateDisplay ? hireDateDisplay.label : '—'}
                   </span>
                   {hireDateDisplay && (
-                    <span style={{ fontSize: 11, color: '#5A6485', marginLeft: 8 }}>
+                    <span style={{ fontSize: 11, color: 'var(--st-dim)', marginLeft: 8 }}>
                       ({hireDateDisplay.months} mois)
                     </span>
                   )}
@@ -415,7 +432,7 @@ export function TeamDrawer({
                     style={{
                       fontSize: 18,
                       fontWeight: 700,
-                      color: '#F4F6FB',
+                      color: 'var(--st-hi)',
                       fontFamily: 'var(--st-font-mono, monospace)',
                     }}
                   >
@@ -462,7 +479,7 @@ export function TeamDrawer({
                 <div
                   style={{
                     fontSize: 10,
-                    color: '#5A6485',
+                    color: 'var(--st-dim)',
                     marginBottom: 6,
                     fontFamily: 'var(--st-font-mono, monospace)',
                   }}
@@ -480,11 +497,11 @@ export function TeamDrawer({
                         style={{
                           padding: '5px 10px',
                           borderRadius: 9999,
-                          border: `1px solid ${active ? rm.color : '#252D45'}`,
+                          border: `1px solid ${active ? rm.color : 'var(--st-stroke)'}`,
                           background: active
                             ? `color-mix(in oklch, ${rm.color} 14%, transparent)`
                             : 'transparent',
-                          color: active ? rm.color : '#8892B0',
+                          color: active ? rm.color : 'var(--st-sec)',
                           fontSize: 11.5,
                           cursor: 'pointer',
                           fontFamily: 'inherit',
@@ -505,13 +522,13 @@ export function TeamDrawer({
             <SectionLabel>NOTES</SectionLabel>
             <div
               style={{
-                background: '#141A2B',
+                background: 'var(--st-raised)',
                 borderRadius: 10,
-                border: '1px solid #1B2236',
+                border: '1px solid var(--st-border)',
                 padding: '12px 14px',
                 minHeight: 72,
                 fontSize: 13,
-                color: emp.notes ? '#C5CCE0' : '#3A4366',
+                color: emp.notes ? 'var(--st-pri)' : 'var(--st-muted)',
                 lineHeight: 1.6,
                 fontStyle: emp.notes ? 'normal' : 'italic',
               }}
@@ -525,12 +542,12 @@ export function TeamDrawer({
         {/* Footer */}
         <div
           style={{
-            borderTop: '1px solid #1B2236',
+            borderTop: '1px solid var(--st-border)',
             padding: '14px 20px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            background: '#0A0E1A',
+            background: 'var(--st-bg)',
             flexShrink: 0,
           }}
         >
@@ -584,7 +601,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     <div
       style={{
         fontSize: 11,
-        color: '#5A6485',
+        color: 'var(--st-dim)',
         marginBottom: 10,
         fontWeight: 600,
         letterSpacing: '0.05em',
@@ -611,10 +628,10 @@ function ContactRow({
         gridTemplateColumns: '90px 1fr',
         alignItems: 'center',
         padding: '10px 14px',
-        borderBottom: last ? 'none' : '1px solid #1B2236',
+        borderBottom: last ? 'none' : '1px solid var(--st-border)',
       }}
     >
-      <span style={{ fontSize: 11, color: '#5A6485' }}>{label}</span>
+      <span style={{ fontSize: 11, color: 'var(--st-dim)' }}>{label}</span>
       {children}
     </div>
   );
@@ -624,16 +641,16 @@ function KpiCard({ label, children }: { label: string; children: React.ReactNode
   return (
     <div
       style={{
-        background: '#141A2B',
+        background: 'var(--st-raised)',
         borderRadius: 10,
-        border: '1px solid #1B2236',
+        border: '1px solid var(--st-border)',
         padding: '12px 14px',
       }}
     >
       <div
         style={{
           fontSize: 10,
-          color: '#5A6485',
+          color: 'var(--st-dim)',
           marginBottom: 6,
           fontFamily: 'var(--st-font-mono, monospace)',
         }}
@@ -654,7 +671,7 @@ function CloseButton({ onClick }: { onClick: () => void }) {
         background: 'transparent',
         border: 'none',
         cursor: 'pointer',
-        color: '#5A6485',
+        color: 'var(--st-dim)',
         padding: 4,
         borderRadius: 6,
         display: 'flex',
@@ -662,10 +679,10 @@ function CloseButton({ onClick }: { onClick: () => void }) {
         transition: 'color .15s ease',
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.color = '#F4F6FB';
+        (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-hi)';
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.color = '#5A6485';
+        (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-dim)';
       }}
     >
       <X size={16} />
@@ -689,8 +706,8 @@ function GhostButton({
         padding: '7px 14px',
         borderRadius: 8,
         background: 'transparent',
-        border: '1px solid #252D45',
-        color: '#8892B0',
+        border: '1px solid var(--st-stroke)',
+        color: 'var(--st-sec)',
         fontSize: 13,
         cursor: 'pointer',
         fontFamily: 'inherit',
@@ -699,13 +716,13 @@ function GhostButton({
       }}
       onMouseEnter={(e) => {
         const b = e.currentTarget;
-        b.style.borderColor = '#3A4366';
-        b.style.color = '#F4F6FB';
+        b.style.borderColor = 'var(--st-muted)';
+        b.style.color = 'var(--st-hi)';
       }}
       onMouseLeave={(e) => {
         const b = e.currentTarget;
-        b.style.borderColor = '#252D45';
-        b.style.color = '#8892B0';
+        b.style.borderColor = 'var(--st-stroke)';
+        b.style.color = 'var(--st-sec)';
       }}
     >
       {children}

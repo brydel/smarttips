@@ -32,7 +32,7 @@ function PeriodPicker({ value, onChange }: PeriodPickerProps) {
   return (
     <div
       className="flex gap-0.5 p-0.5 rounded-[8px] border border-st-border"
-      style={{ background: 'var(--st-d-1)' }}
+      style={{ background: 'var(--st-card)' }}
       role="group"
       aria-label="Période"
     >
@@ -151,7 +151,10 @@ function ShiftRow({ record }: ShiftRowProps) {
       {expanded && (
         <div
           className="px-4 pb-4 border-t"
-          style={{ borderColor: 'rgba(99,102,241,.1)', background: 'rgba(15,20,34,.5)' }}
+          style={{
+            borderColor: 'rgba(99,102,241,.1)',
+            background: 'color-mix(in srgb, var(--st-card) 50%, transparent)',
+          }}
         >
           {/* Explanation sentence */}
           {explainText && (

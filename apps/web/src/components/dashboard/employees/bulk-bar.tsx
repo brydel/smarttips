@@ -20,8 +20,8 @@ export function BulkBar({ count, onDismiss, onArchive }: BulkBarProps) {
         bottom: 24,
         left: '50%',
         transform: 'translateX(-50%)',
-        background: '#141A2B',
-        border: '1px solid #252D45',
+        background: 'var(--st-raised)',
+        border: '1px solid var(--st-stroke)',
         borderRadius: 12,
         padding: '10px 16px',
         display: 'flex',
@@ -52,10 +52,12 @@ export function BulkBar({ count, onDismiss, onArchive }: BulkBarProps) {
         >
           {count}
         </span>
-        <span style={{ fontSize: 12.5, color: '#C5CCE0' }}>sélectionné{count > 1 ? 's' : ''}</span>
+        <span style={{ fontSize: 12.5, color: 'var(--st-pri)' }}>
+          sélectionné{count > 1 ? 's' : ''}
+        </span>
       </div>
 
-      <div style={{ width: 1, height: 20, background: '#252D45' }} />
+      <div style={{ width: 1, height: 20, background: 'var(--st-stroke)' }} />
 
       {/* Actions */}
       <button
@@ -66,8 +68,8 @@ export function BulkBar({ count, onDismiss, onArchive }: BulkBarProps) {
           padding: '5px 10px',
           borderRadius: 7,
           background: 'transparent',
-          border: '1px solid #252D45',
-          color: '#8892B0',
+          border: '1px solid var(--st-stroke)',
+          color: 'var(--st-sec)',
           fontSize: 12.5,
           cursor: 'pointer',
           fontFamily: 'inherit',
@@ -77,13 +79,13 @@ export function BulkBar({ count, onDismiss, onArchive }: BulkBarProps) {
         title="Fonctionnalité à venir"
         onMouseEnter={(e) => {
           const b = e.currentTarget;
-          b.style.color = '#F4F6FB';
-          b.style.borderColor = '#3A4366';
+          b.style.color = 'var(--st-hi)';
+          b.style.borderColor = 'var(--st-muted)';
         }}
         onMouseLeave={(e) => {
           const b = e.currentTarget;
-          b.style.color = '#8892B0';
-          b.style.borderColor = '#252D45';
+          b.style.color = 'var(--st-sec)';
+          b.style.borderColor = 'var(--st-stroke)';
         }}
       >
         <Users size={12} />
@@ -128,17 +130,17 @@ export function BulkBar({ count, onDismiss, onArchive }: BulkBarProps) {
           background: 'transparent',
           border: 'none',
           cursor: 'pointer',
-          color: '#5A6485',
+          color: 'var(--st-dim)',
           padding: 4,
           borderRadius: 6,
           transition: 'color .15s ease',
         }}
         aria-label="Annuler la sélection"
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.color = '#F4F6FB';
+          (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-hi)';
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.color = '#5A6485';
+          (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-dim)';
         }}
       >
         <X size={14} />

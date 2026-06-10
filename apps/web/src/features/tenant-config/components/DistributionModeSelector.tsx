@@ -84,7 +84,7 @@ export function DistributionModeSelector({ readOnly }: ModeSelectorProps) {
                 {isSelected && <CheckCircle2 size={16} className="text-st-indigo-glow" />}
                 {!m.available && (
                   <span className="inline-flex items-center px-1.5 py-0.5 rounded-pill text-[9.5px] font-medium font-mono bg-st-gold/10 text-st-gold border border-st-gold/30">
-                    Bientôt
+                    Non activé
                   </span>
                 )}
               </div>

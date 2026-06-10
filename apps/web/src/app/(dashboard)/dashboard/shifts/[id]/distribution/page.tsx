@@ -227,8 +227,8 @@ export default function ShiftDistributionPage() {
             className="rounded-lg p-5 sm:p-6 relative overflow-hidden"
             style={{
               background:
-                'linear-gradient(135deg, #0F1422, color-mix(in srgb, #D4A574 6%, #0F1422))',
-              border: '1px solid #252D45',
+                'linear-gradient(135deg, var(--st-card), color-mix(in srgb, #D4A574 6%, var(--st-card)))',
+              border: '1px solid var(--st-stroke)',
             }}
           >
             {/* Radial glow */}
@@ -249,7 +249,7 @@ export default function ShiftDistributionPage() {
                   </p>
                   <p className="font-display text-2xl sm:text-3xl text-st-hi leading-tight">
                     Répartition{' '}
-                    <em className="italic" style={{ color: '#8892B0' }}>
+                    <em className="italic" style={{ color: 'var(--st-sec)' }}>
                       de ce shift.
                     </em>
                   </p>
@@ -267,7 +267,7 @@ export default function ShiftDistributionPage() {
               {/* Stacked bar */}
               <div
                 className="h-3.5 rounded-pill overflow-hidden flex"
-                style={{ background: '#1B2236' }}
+                style={{ background: 'var(--st-border)' }}
               >
                 {roleAggregates.map((agg) => (
                   <div
@@ -371,7 +371,7 @@ export default function ShiftDistributionPage() {
               </p>
               <h2 className="font-display text-2xl sm:text-[28px] text-st-hi leading-tight">
                 Distribution{' '}
-                <em className="italic" style={{ color: '#8892B0' }}>
+                <em className="italic" style={{ color: 'var(--st-sec)' }}>
                   ligne par ligne.
                 </em>
               </h2>

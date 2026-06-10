@@ -53,18 +53,18 @@ const labelStyle: React.CSSProperties = {
   textTransform: 'uppercase',
   letterSpacing: '0.14em',
   fontSize: 10,
-  color: '#5A6485',
+  color: 'var(--st-dim)',
   fontWeight: 500,
   marginBottom: 6,
   display: 'block',
 };
 
 const inputStyle: React.CSSProperties = {
-  background: '#0F1422',
-  border: '1px solid #252D45',
+  background: 'var(--st-card)',
+  border: '1px solid var(--st-stroke)',
   borderRadius: 6,
   padding: '9px 11px',
-  color: '#F4F6FB',
+  color: 'var(--st-hi)',
   fontFamily: 'var(--st-font-ui)',
   fontSize: 13,
   outline: 'none',
@@ -185,8 +185,8 @@ export function CreateShiftDialog({
           width: 600,
           maxWidth: '100%',
           maxHeight: '90vh',
-          background: '#0F1422',
-          border: '1px solid #252D45',
+          background: 'var(--st-card)',
+          border: '1px solid var(--st-stroke)',
           borderRadius: 14,
           boxShadow: '0 24px 60px -20px rgba(0,0,0,.6)',
           display: 'flex',
@@ -198,7 +198,7 @@ export function CreateShiftDialog({
         <div
           style={{
             padding: '20px 24px 18px',
-            borderBottom: '1px solid #1B2236',
+            borderBottom: '1px solid var(--st-border)',
             display: 'flex',
             alignItems: 'flex-start',
             gap: 12,
@@ -209,7 +209,7 @@ export function CreateShiftDialog({
             <h2
               id="dialog-title"
               className="font-display"
-              style={{ fontSize: 24, color: '#F4F6FB', margin: 0, lineHeight: 1.15 }}
+              style={{ fontSize: 24, color: 'var(--st-hi)', margin: 0, lineHeight: 1.15 }}
             >
               Préparer un service
             </h2>
@@ -219,7 +219,7 @@ export function CreateShiftDialog({
             style={{
               background: 'transparent',
               border: 0,
-              color: '#8892B0',
+              color: 'var(--st-sec)',
               cursor: 'pointer',
               padding: 6,
               borderRadius: 6,
@@ -227,12 +227,12 @@ export function CreateShiftDialog({
               alignItems: 'center',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = '#141A2B';
-              (e.currentTarget as HTMLButtonElement).style.color = '#F4F6FB';
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--st-raised)';
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-hi)';
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-              (e.currentTarget as HTMLButtonElement).style.color = '#8892B0';
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-sec)';
             }}
             aria-label="Fermer"
           >
@@ -269,9 +269,9 @@ export function CreateShiftDialog({
                       style={{
                         padding: '14px 10px',
                         borderRadius: 10,
-                        background: isSelected ? 'var(--type-g)' : '#141A2B',
-                        border: `1px solid ${isSelected ? 'var(--type-c)' : '#252D45'}`,
-                        color: isSelected ? 'var(--type-c)' : '#8892B0',
+                        background: isSelected ? 'var(--type-g)' : 'var(--st-raised)',
+                        border: `1px solid ${isSelected ? 'var(--type-c)' : 'var(--st-stroke)'}`,
+                        color: isSelected ? 'var(--type-c)' : 'var(--st-sec)',
                         cursor: 'pointer',
                         textAlign: 'left',
                         display: 'flex',
@@ -285,7 +285,7 @@ export function CreateShiftDialog({
                         style={{
                           fontSize: 13,
                           fontWeight: 500,
-                          color: isSelected ? 'var(--type-c)' : '#F4F6FB',
+                          color: isSelected ? 'var(--type-c)' : 'var(--st-hi)',
                         }}
                       >
                         {cfg.label}
@@ -327,7 +327,11 @@ export function CreateShiftDialog({
                   style={{
                     ...inputStyle,
                     borderColor:
-                      focusedInput === 'date' ? '#6366F1' : errors.date ? '#EF4444' : '#252D45',
+                      focusedInput === 'date'
+                        ? '#6366F1'
+                        : errors.date
+                          ? '#EF4444'
+                          : 'var(--st-stroke)',
                     boxShadow: focusedInput === 'date' ? '0 0 0 3px rgba(99,102,241,.18)' : 'none',
                   }}
                   onFocus={() => setFocusedInput('date')}
@@ -351,7 +355,7 @@ export function CreateShiftDialog({
                         ? '#6366F1'
                         : errors.startTime
                           ? '#EF4444'
-                          : '#252D45',
+                          : 'var(--st-stroke)',
                     boxShadow: focusedInput === 'start' ? '0 0 0 3px rgba(99,102,241,.18)' : 'none',
                   }}
                   onFocus={() => setFocusedInput('start')}
@@ -371,7 +375,11 @@ export function CreateShiftDialog({
                   style={{
                     ...inputStyle,
                     borderColor:
-                      focusedInput === 'end' ? '#6366F1' : errors.endTime ? '#EF4444' : '#252D45',
+                      focusedInput === 'end'
+                        ? '#6366F1'
+                        : errors.endTime
+                          ? '#EF4444'
+                          : 'var(--st-stroke)',
                     boxShadow: focusedInput === 'end' ? '0 0 0 3px rgba(99,102,241,.18)' : 'none',
                   }}
                   onFocus={() => setFocusedInput('end')}
@@ -395,7 +403,7 @@ export function CreateShiftDialog({
                 ...inputStyle,
                 resize: 'vertical',
                 lineHeight: 1.5,
-                borderColor: focusedInput === 'notes' ? '#6366F1' : '#252D45',
+                borderColor: focusedInput === 'notes' ? '#6366F1' : 'var(--st-stroke)',
                 boxShadow: focusedInput === 'notes' ? '0 0 0 3px rgba(99,102,241,.18)' : 'none',
               }}
               onFocus={() => setFocusedInput('notes')}
@@ -410,9 +418,9 @@ export function CreateShiftDialog({
               style={{
                 marginTop: 16,
                 padding: 12,
-                background: '#141A2B',
+                background: 'var(--st-raised)',
                 borderRadius: 10,
-                border: '1px solid #1B2236',
+                border: '1px solid var(--st-border)',
                 display: 'flex',
                 gap: 10,
                 alignItems: 'center',
@@ -423,7 +431,7 @@ export function CreateShiftDialog({
                 height="14"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#8892B0"
+                stroke="var(--st-sec)"
                 strokeWidth="1.7"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -431,9 +439,9 @@ export function CreateShiftDialog({
                 <circle cx="12" cy="12" r="9" />
                 <path d="M12 7v5l3 2" />
               </svg>
-              <div style={{ fontSize: 12, color: '#8892B0' }}>
+              <div style={{ fontSize: 12, color: 'var(--st-sec)' }}>
                 Durée —{' '}
-                <span style={{ fontFamily: 'var(--st-font-mono)', color: '#F4F6FB' }}>
+                <span style={{ fontFamily: 'var(--st-font-mono)', color: 'var(--st-hi)' }}>
                   {durationLabel(watchedStart, watchedEnd)}
                 </span>
               </div>
@@ -445,14 +453,14 @@ export function CreateShiftDialog({
         <div
           style={{
             padding: '14px 20px',
-            borderTop: '1px solid #1B2236',
-            background: '#0A0E1A',
+            borderTop: '1px solid var(--st-border)',
+            background: 'var(--st-bg)',
             display: 'flex',
             alignItems: 'center',
             gap: 10,
           }}
         >
-          <span style={{ fontSize: 11.5, color: '#5A6485', flex: 1 }}>
+          <span style={{ fontSize: 11.5, color: 'var(--st-dim)', flex: 1 }}>
             Une fois créé, vous pourrez assigner l&apos;équipe.
           </span>
           <button
@@ -460,10 +468,10 @@ export function CreateShiftDialog({
             onClick={() => onOpenChange(false)}
             style={{
               background: 'transparent',
-              border: '1px solid #252D45',
+              border: '1px solid var(--st-stroke)',
               borderRadius: 10,
               padding: '7px 14px',
-              color: '#F4F6FB',
+              color: 'var(--st-hi)',
               fontSize: 12,
               fontFamily: 'var(--st-font-ui)',
               cursor: 'pointer',

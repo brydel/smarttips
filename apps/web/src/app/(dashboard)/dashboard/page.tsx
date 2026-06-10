@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, Bell, Plus, RefreshCcw } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { CheckCircle2, Circle, Plus, RefreshCcw, X } from 'lucide-react';
+import Link from 'next/link';
 import { cn } from '../../../lib/cn';
 import { useDashboardStats } from '../../../hooks/use-dashboard-stats';
 import { useAuth } from '../../../hooks/use-auth';
@@ -45,7 +46,7 @@ function PeriodPicker({
   return (
     <div
       className="flex gap-1 p-0.5 rounded-[10px] border border-st-border"
-      style={{ background: 'var(--st-d-1)' }}
+      style={{ background: 'var(--st-card)' }}
       role="group"
       aria-label="Période"
     >
@@ -59,7 +60,7 @@ function PeriodPicker({
             value === o.value ? 'border-st-border text-st-hi' : 'text-st-sec hover:text-st-hi',
           )}
           style={{
-            background: value === o.value ? 'var(--st-d-3)' : 'transparent',
+            background: value === o.value ? 'var(--st-border)' : 'transparent',
             fontFamily: 'inherit',
           }}
         >
@@ -82,17 +83,17 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
         <RefreshCcw size={20} style={{ color: 'var(--st-danger)' }} />
       </div>
       <div>
-        <p className="text-[14px] font-medium mb-1" style={{ color: 'var(--st-d-9)' }}>
+        <p className="text-[14px] font-medium mb-1" style={{ color: 'var(--st-hi)' }}>
           Impossible de charger le tableau de bord
         </p>
-        <p className="text-[12px]" style={{ color: 'var(--st-d-6)' }}>
+        <p className="text-[12px]" style={{ color: 'var(--st-dim)' }}>
           Vérifiez votre connexion et réessayez.
         </p>
       </div>
       <button
         onClick={onRetry}
         className="inline-flex items-center gap-2 px-4 py-2 rounded-[10px] text-[13px] font-medium transition-colors hover:bg-st-raised border border-st-border"
-        style={{ color: 'var(--st-d-9)' }}
+        style={{ color: 'var(--st-hi)' }}
       >
         <RefreshCcw size={13} />
         Réessayer
@@ -106,12 +107,13 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 function TopBar({ isFetching, tenantName }: { isFetching: boolean; tenantName?: string }) {
   return (
     <header
-      className="flex items-center gap-3.5 px-8 py-3.5 border-b border-st-border shrink-0 sticky top-0 z-40"
-      style={{ background: 'rgba(10,14,26,.88)', backdropFilter: 'blur(10px)' }}
+      className="flex items-center gap-3.5 px-4 sm:px-6 lg:px-8 py-3.5 border-b border-st-border shrink-0 sticky top-0 z-40"
+      style={{ background: 'var(--st-glass-bg)', backdropFilter: 'blur(10px)' }}
     >
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 text-[12.5px]">
-        <span style={{ color: 'var(--st-d-7)' }}>{tenantName ?? '—'}</span>
+      <div className="flex items-center gap-1.5 text-[12.5px] min-w-0">
+        <span className="truncate" style={{ color: 'var(--st-sec)' }}>
+          {tenantName ?? '—'}
+        </span>
         <svg
           width="12"
           height="12"
@@ -121,41 +123,19 @@ function TopBar({ isFetching, tenantName }: { isFetching: boolean; tenantName?: 
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ color: 'var(--st-d-6)' }}
+          style={{ color: 'var(--st-dim)' }}
           aria-hidden="true"
         >
           <path d="M9 18l6-6-6-6" />
         </svg>
-        <span style={{ color: 'var(--st-d-9)' }}>Vue d&apos;ensemble</span>
-      </div>
-
-      {/* Search */}
-      <div className="flex-1 max-w-md ml-5 relative hidden sm:block">
-        <Search
-          size={13}
-          className="absolute left-3 top-1/2 -translate-y-1/2"
-          style={{ color: 'var(--st-d-6)' }}
-          aria-hidden="true"
-        />
-        <input
-          placeholder="Rechercher employés, shifts, commandes…"
-          aria-label="Rechercher"
-          className="w-full pl-8 pr-12 py-2 rounded-[10px] border border-st-border text-[12.5px] bg-st-card text-st-hi placeholder:text-st-dim outline-none focus:border-st-muted transition-colors"
-          style={{ fontFamily: 'inherit' }}
-          readOnly
-        />
-        <span
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 font-mono text-[10px] border border-st-border px-1.5 py-0.5 rounded"
-          style={{ color: 'var(--st-d-6)' }}
-        >
-          ⌘K
+        <span className="shrink-0" style={{ color: 'var(--st-hi)' }}>
+          Vue d&apos;ensemble
         </span>
       </div>
 
-      {/* Live indicator */}
       <div
-        className="ml-auto flex items-center gap-1.5 text-[11.5px] font-mono"
-        style={{ color: 'var(--st-d-6)' }}
+        className="ml-auto hidden sm:flex items-center gap-1.5 text-[11.5px] font-mono"
+        style={{ color: 'var(--st-dim)' }}
         aria-live="polite"
         aria-atomic="true"
       >
@@ -169,27 +149,99 @@ function TopBar({ isFetching, tenantName }: { isFetching: boolean; tenantName?: 
         {isFetching ? 'Mise à jour…' : 'API · OK'}
       </div>
 
-      {/* Actions */}
-      <button
-        className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-[6px] text-[12px] font-medium border border-st-border hover:bg-st-raised transition-colors"
-        style={{ color: 'var(--st-d-9)', fontFamily: 'inherit' }}
+      <Link
+        href="/dashboard/distributions"
+        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[6px] text-[12px] font-medium border border-st-border hover:bg-st-raised transition-colors shrink-0"
+        style={{ color: 'var(--st-hi)', fontFamily: 'inherit' }}
       >
         <Plus size={12} />
-        Lancer distribution
-      </button>
-      <button
-        className="relative p-2 rounded-md hover:bg-st-raised transition-colors"
-        style={{ color: 'var(--st-d-7)', background: 'transparent', border: 0 }}
-        aria-label="Notifications"
-      >
-        <Bell size={14} />
-        <span
-          className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full"
-          style={{ background: 'var(--st-gold)' }}
-          aria-hidden="true"
-        />
-      </button>
+        <span className="hidden sm:inline">Lancer distribution</span>
+        <span className="sm:hidden">Distribuer</span>
+      </Link>
     </header>
+  );
+}
+
+// ── Onboarding ───────────────────────────────────────────────────────────────────
+
+type DemoChecklistItem = {
+  label: string;
+  description: string;
+  href: string;
+  complete: boolean;
+};
+
+function DemoOnboardingChecklist({ items }: { items: DemoChecklistItem[] }) {
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    setDismissed(window.localStorage.getItem('smarttips-demo-checklist-dismissed') === '1');
+  }, []);
+
+  if (dismissed) return null;
+
+  const completed = items.filter((item) => item.complete).length;
+  const progress = Math.round((completed / items.length) * 100);
+
+  return (
+    <section className="mb-5 rounded-lg border border-st-border bg-st-card p-4 sm:p-5">
+      <div className="flex items-start gap-4">
+        <div className="min-w-0 flex-1">
+          <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-st-dim">
+            Parcours de démo
+          </p>
+          <h2 className="mt-1 font-display text-[22px] leading-tight text-st-hi">
+            Préparer une distribution complète.
+          </h2>
+          <p className="mt-1.5 max-w-2xl text-[12.5px] leading-relaxed text-st-sec">
+            Suivez le chemin manager: équipe, règles, shifts, calcul de distribution, puis exports.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            window.localStorage.setItem('smarttips-demo-checklist-dismissed', '1');
+            setDismissed(true);
+          }}
+          className="rounded-md p-1.5 text-st-dim transition-colors hover:bg-st-raised hover:text-st-hi"
+          aria-label="Masquer le parcours de démo"
+        >
+          <X size={15} />
+        </button>
+      </div>
+
+      <div className="mt-4 flex items-center gap-3">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-st-border">
+          <div
+            className="h-full rounded-full bg-st-emerald transition-all"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <span className="font-mono text-[11px] text-st-sec">
+          {completed}/{items.length}
+        </span>
+      </div>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+        {items.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="group rounded-md border border-st-border bg-st-raised/40 p-3 transition-colors hover:border-st-muted hover:bg-st-raised"
+          >
+            <div className="flex items-center gap-2">
+              {item.complete ? (
+                <CheckCircle2 size={14} className="text-st-emerald-glow" />
+              ) : (
+                <Circle size={14} className="text-st-dim" />
+              )}
+              <span className="text-[12.5px] font-medium text-st-hi">{item.label}</span>
+            </div>
+            <p className="mt-1.5 text-[11.5px] leading-relaxed text-st-sec">{item.description}</p>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -220,6 +272,44 @@ export default function DashboardPage() {
   });
 
   const greeting = getGreeting(user?.name);
+  const onboardingItems = useMemo<DemoChecklistItem[]>(() => {
+    const hasTeamSignal = Boolean(data?.topEmployees?.length || data?.roleBreakdown?.length);
+    const hasShiftSignal = Boolean(data?.liveShift || data?.tomorrowShifts?.length);
+    const hasDistributionSignal = Boolean((data?.tipsTotal ?? 0) > 0);
+
+    return [
+      {
+        label: 'Équipe',
+        description: 'Inviter ou créer les employés qui participent aux shifts.',
+        href: '/dashboard/employees',
+        complete: hasTeamSignal,
+      },
+      {
+        label: 'Règles',
+        description: 'Vérifier les coefficients et garde-fous de distribution.',
+        href: '/dashboard/settings/distribution',
+        complete: false,
+      },
+      {
+        label: 'Shifts',
+        description: 'Créer ou revoir le service à distribuer.',
+        href: '/dashboard/shifts',
+        complete: hasShiftSignal,
+      },
+      {
+        label: 'Distribution',
+        description: 'Ouvrir les shifts clôturés et lancer le calcul.',
+        href: '/dashboard/distributions',
+        complete: hasDistributionSignal,
+      },
+      {
+        label: 'Exports',
+        description: 'Télécharger payroll, tip pool ou audit CSV.',
+        href: '/dashboard/reports',
+        complete: hasDistributionSignal,
+      },
+    ];
+  }, [data]);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -228,14 +318,16 @@ export default function DashboardPage() {
       {/* Scrollable content */}
       <div
         className="flex-1 overflow-auto"
-        style={{ background: 'var(--st-d-0)', padding: '24px 32px 56px' }}
+        style={{ background: 'var(--st-bg)', padding: '24px 32px 56px' }}
       >
+        <DemoOnboardingChecklist items={onboardingItems} />
+
         {/* Page headline + period picker */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
           <div>
             <p
               className="uppercase tracking-[0.16em] font-mono text-[10.5px] font-medium mb-1.5"
-              style={{ color: 'var(--st-d-7)' }}
+              style={{ color: 'var(--st-sec)' }}
             >
               {new Date().toLocaleDateString('fr-FR', {
                 weekday: 'long',
@@ -248,10 +340,10 @@ export default function DashboardPage() {
             </p>
             <h1
               className="text-[28px] sm:text-[34px] lg:text-[38px] leading-[1.05] tracking-[-0.02em]"
-              style={{ fontFamily: 'var(--font-instrument-serif)', color: 'var(--st-d-9)' }}
+              style={{ fontFamily: 'var(--font-instrument-serif)', color: 'var(--st-hi)' }}
             >
               {greeting}{' '}
-              <em style={{ color: 'var(--st-d-7)', fontStyle: 'italic' }}>
+              <em style={{ color: 'var(--st-sec)', fontStyle: 'italic' }}>
                 {data?.liveShift && user?.tenantName
                   ? `Tout roule au ${user.tenantName}.`
                   : 'Bonne journée.'}

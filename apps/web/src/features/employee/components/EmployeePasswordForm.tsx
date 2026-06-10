@@ -3,20 +3,6 @@
 import { Lock } from 'lucide-react';
 import { Badge } from '../../../components/ui/badge';
 
-/**
- * Password change form.
- *
- * Disabled because PATCH /me/password is not yet implemented in the backend.
- * When the endpoint is added:
- *   1. Remove `disabled` attributes and "Bientôt disponible" badge
- *   2. Add react-hook-form + zod validation:
- *      - currentPassword: required
- *      - newPassword: min 8 chars, required
- *      - confirmPassword: must match newPassword
- *   3. Wire `onSubmit` to `useMutation(updateMyPassword)`
- *   4. Add show/hide toggles for each password field
- *   5. Clear fields on success and show toast
- */
 export function EmployeePasswordForm() {
   return (
     <div className="bg-st-card border border-st-border rounded-xl overflow-hidden">
@@ -33,7 +19,7 @@ export function EmployeePasswordForm() {
             Sécurité · Mot de passe
           </span>
         </div>
-        <Badge tone="neutral">Bientôt disponible</Badge>
+        <Badge tone="neutral">Lecture seule</Badge>
       </div>
 
       {/* Form */}
@@ -46,7 +32,7 @@ export function EmployeePasswordForm() {
 
         <div className="mt-5 pt-4 border-t border-st-border flex items-center justify-between gap-3 flex-wrap">
           <p className="text-[11.5px] text-st-dim font-sans leading-relaxed">
-            La modification du mot de passe sera disponible dans une prochaine version.
+            La modification du mot de passe est gérée par votre gestionnaire pour le moment.
           </p>
           <button
             type="button"

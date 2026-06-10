@@ -26,7 +26,7 @@ const labelStyle: React.CSSProperties = {
   textTransform: 'uppercase',
   letterSpacing: '0.14em',
   fontSize: 10,
-  color: '#5A6485',
+  color: 'var(--st-dim)',
   fontWeight: 500,
   marginBottom: 6,
   display: 'block',
@@ -169,8 +169,8 @@ export function AddAssignmentDialog({
           width: 560,
           maxWidth: '100%',
           maxHeight: '88vh',
-          background: '#0F1422',
-          border: '1px solid #252D45',
+          background: 'var(--st-card)',
+          border: '1px solid var(--st-stroke)',
           borderRadius: 14,
           boxShadow: '0 24px 60px -20px rgba(0,0,0,.6)',
           display: 'flex',
@@ -182,7 +182,7 @@ export function AddAssignmentDialog({
         <div
           style={{
             padding: '20px 24px 18px',
-            borderBottom: '1px solid #1B2236',
+            borderBottom: '1px solid var(--st-border)',
             display: 'flex',
             alignItems: 'flex-start',
             gap: 12,
@@ -193,7 +193,7 @@ export function AddAssignmentDialog({
             <h2
               id="dialog-title"
               className="font-display"
-              style={{ fontSize: 22, color: '#F4F6FB', margin: 0, lineHeight: 1.15 }}
+              style={{ fontSize: 22, color: 'var(--st-hi)', margin: 0, lineHeight: 1.15 }}
             >
               Ajouter un membre
             </h2>
@@ -203,7 +203,7 @@ export function AddAssignmentDialog({
             style={{
               background: 'transparent',
               border: 0,
-              color: '#8892B0',
+              color: 'var(--st-sec)',
               cursor: 'pointer',
               padding: 6,
               borderRadius: 6,
@@ -211,12 +211,12 @@ export function AddAssignmentDialog({
               alignItems: 'center',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = '#141A2B';
-              (e.currentTarget as HTMLButtonElement).style.color = '#F4F6FB';
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--st-raised)';
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-hi)';
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-              (e.currentTarget as HTMLButtonElement).style.color = '#8892B0';
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-sec)';
             }}
             aria-label="Fermer"
           >
@@ -234,7 +234,7 @@ export function AddAssignmentDialog({
                 height="13"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#5A6485"
+                stroke="var(--st-dim)"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -256,11 +256,11 @@ export function AddAssignmentDialog({
                 onChange={(e) => setSearch(e.target.value)}
                 style={{
                   width: '100%',
-                  background: '#141A2B',
-                  border: '1px solid #252D45',
+                  background: 'var(--st-raised)',
+                  border: '1px solid var(--st-stroke)',
                   borderRadius: 8,
                   padding: '8px 10px 8px 32px',
-                  color: '#F4F6FB',
+                  color: 'var(--st-hi)',
                   fontFamily: 'var(--st-font-ui)',
                   fontSize: 13,
                   outline: 'none',
@@ -277,7 +277,7 @@ export function AddAssignmentDialog({
               overflow: 'auto',
               minHeight: 140,
               maxHeight: 200,
-              borderBottom: '1px solid #1B2236',
+              borderBottom: '1px solid var(--st-border)',
             }}
           >
             {filteredEmployees.length === 0 ? (
@@ -285,7 +285,7 @@ export function AddAssignmentDialog({
                 style={{
                   padding: '24px 20px',
                   textAlign: 'center',
-                  color: '#5A6485',
+                  color: 'var(--st-dim)',
                   fontSize: 13,
                   fontFamily: 'var(--st-font-ui)',
                 }}
@@ -306,7 +306,7 @@ export function AddAssignmentDialog({
                       width: '100%',
                       background: isSelected ? 'rgba(99,102,241,.10)' : 'transparent',
                       border: 0,
-                      borderBottom: '1px solid #1B2236',
+                      borderBottom: '1px solid var(--st-border)',
                       padding: '10px 20px',
                       display: 'flex',
                       alignItems: 'center',
@@ -317,7 +317,8 @@ export function AddAssignmentDialog({
                     }}
                     onMouseEnter={(e) => {
                       if (!isSelected)
-                        (e.currentTarget as HTMLButtonElement).style.background = '#141A2B';
+                        (e.currentTarget as HTMLButtonElement).style.background =
+                          'var(--st-raised)';
                     }}
                     onMouseLeave={(e) => {
                       if (!isSelected)
@@ -334,14 +335,16 @@ export function AddAssignmentDialog({
                       <div
                         style={{
                           fontSize: 13,
-                          color: '#F4F6FB',
+                          color: 'var(--st-hi)',
                           fontFamily: 'var(--st-font-ui)',
                           fontWeight: 500,
                         }}
                       >
                         {emp.firstName} {emp.lastName}
                       </div>
-                      <div style={{ fontSize: 11, color: '#5A6485' }}>{ROLE_LABEL[emp.role]}</div>
+                      <div style={{ fontSize: 11, color: 'var(--st-dim)' }}>
+                        {ROLE_LABEL[emp.role]}
+                      </div>
                     </div>
                     {isSelected && (
                       <svg
@@ -377,9 +380,9 @@ export function AddAssignmentDialog({
                     width: 32,
                     height: 32,
                     borderRadius: 8,
-                    background: '#141A2B',
-                    border: '1px solid #252D45',
-                    color: hours <= 0.25 ? '#252D45' : '#8892B0',
+                    background: 'var(--st-raised)',
+                    border: '1px solid var(--st-stroke)',
+                    color: hours <= 0.25 ? 'var(--st-stroke)' : 'var(--st-sec)',
                     cursor: hours <= 0.25 ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -404,21 +407,21 @@ export function AddAssignmentDialog({
                   style={{
                     flex: 1,
                     height: 32,
-                    background: '#0F1422',
-                    border: '1px solid #252D45',
+                    background: 'var(--st-card)',
+                    border: '1px solid var(--st-stroke)',
                     borderRadius: 8,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontFamily: 'var(--st-font-mono)',
                     fontSize: 15,
-                    color: '#F4F6FB',
+                    color: 'var(--st-hi)',
                     fontWeight: 600,
                     letterSpacing: '-0.02em',
                   }}
                 >
                   {hours.toFixed(2)}
-                  <span style={{ fontSize: 11, color: '#5A6485', marginLeft: 4 }}>h</span>
+                  <span style={{ fontSize: 11, color: 'var(--st-dim)', marginLeft: 4 }}>h</span>
                 </div>
                 <button
                   type="button"
@@ -428,9 +431,9 @@ export function AddAssignmentDialog({
                     width: 32,
                     height: 32,
                     borderRadius: 8,
-                    background: '#141A2B',
-                    border: '1px solid #252D45',
-                    color: hours >= 24 ? '#252D45' : '#8892B0',
+                    background: 'var(--st-raised)',
+                    border: '1px solid var(--st-stroke)',
+                    color: hours >= 24 ? 'var(--st-stroke)' : 'var(--st-sec)',
                     cursor: hours >= 24 ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -469,9 +472,9 @@ export function AddAssignmentDialog({
                       style={{
                         padding: '5px 10px',
                         borderRadius: 8,
-                        background: active ? 'rgba(99,102,241,.15)' : '#141A2B',
-                        border: `1px solid ${active ? '#6366F1' : '#252D45'}`,
-                        color: active ? '#818CF8' : '#8892B0',
+                        background: active ? 'rgba(99,102,241,.15)' : 'var(--st-raised)',
+                        border: `1px solid ${active ? '#6366F1' : 'var(--st-stroke)'}`,
+                        color: active ? '#818CF8' : 'var(--st-sec)',
                         fontSize: 11.5,
                         fontFamily: 'var(--st-font-ui)',
                         cursor: isLocked ? 'not-allowed' : 'pointer',
@@ -491,19 +494,19 @@ export function AddAssignmentDialog({
         <div
           style={{
             padding: '12px 20px',
-            borderTop: '1px solid #1B2236',
-            background: '#0A0E1A',
+            borderTop: '1px solid var(--st-border)',
+            background: 'var(--st-bg)',
             display: 'flex',
             alignItems: 'center',
             gap: 10,
           }}
         >
           {isLocked ? (
-            <span style={{ fontSize: 11.5, color: '#5A6485', flex: 1 }}>
+            <span style={{ fontSize: 11.5, color: 'var(--st-dim)', flex: 1 }}>
               Shift {shiftStatus === 'CLOSED' ? 'clôturé' : 'annulé'} — modification impossible.
             </span>
           ) : (
-            <span style={{ fontSize: 11.5, color: '#5A6485', flex: 1 }}>
+            <span style={{ fontSize: 11.5, color: 'var(--st-dim)', flex: 1 }}>
               {selectedEmployee
                 ? `${selectedEmployee.firstName} ${selectedEmployee.lastName} sélectionné(e)`
                 : `${availableEmployees.length} employé${availableEmployees.length !== 1 ? 's' : ''} disponible${availableEmployees.length !== 1 ? 's' : ''}`}
@@ -514,10 +517,10 @@ export function AddAssignmentDialog({
             onClick={() => onOpenChange(false)}
             style={{
               background: 'transparent',
-              border: '1px solid #252D45',
+              border: '1px solid var(--st-stroke)',
               borderRadius: 10,
               padding: '7px 14px',
-              color: '#F4F6FB',
+              color: 'var(--st-hi)',
               fontSize: 12,
               fontFamily: 'var(--st-font-ui)',
               cursor: 'pointer',

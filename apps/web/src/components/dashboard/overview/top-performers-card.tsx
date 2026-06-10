@@ -35,10 +35,10 @@ export function TopPerformersCard({ employees }: TopPerformersCardProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Users size={13} style={{ color: 'var(--st-d-7)' }} />
+          <Users size={13} style={{ color: 'var(--st-sec)' }} />
           <span
             className="uppercase tracking-[0.16em] font-mono text-[10.5px] font-medium"
-            style={{ color: 'var(--st-d-7)' }}
+            style={{ color: 'var(--st-sec)' }}
           >
             Meilleures performances
           </span>
@@ -54,11 +54,11 @@ export function TopPerformersCard({ employees }: TopPerformersCardProps) {
 
       {isEmpty ? (
         <div className="flex flex-col items-center justify-center gap-2 py-6 text-center">
-          <TrendingUp size={20} style={{ color: 'var(--st-d-5)' }} aria-hidden="true" />
-          <p className="text-[13px] font-medium" style={{ color: 'var(--st-d-8)' }}>
+          <TrendingUp size={20} style={{ color: 'var(--st-muted)' }} aria-hidden="true" />
+          <p className="text-[13px] font-medium" style={{ color: 'var(--st-pri)' }}>
             Pas encore de données
           </p>
-          <p className="text-[11.5px]" style={{ color: 'var(--st-d-6)' }}>
+          <p className="text-[11.5px]" style={{ color: 'var(--st-dim)' }}>
             Les performances s&apos;affichent dès qu&apos;il y a des commandes sur la période.
           </p>
         </div>
@@ -77,7 +77,7 @@ export function TopPerformersCard({ employees }: TopPerformersCardProps) {
               href="/dashboard/employees"
               className="flex items-center gap-3 px-1 py-2.5 rounded-md hover:bg-st-raised transition-colors"
               style={{
-                borderBottom: i < rows.length - 1 ? '1px solid var(--st-d-3)' : 'none',
+                borderBottom: i < rows.length - 1 ? '1px solid var(--st-border)' : 'none',
                 textDecoration: 'none',
                 color: 'inherit',
               }}
@@ -85,7 +85,7 @@ export function TopPerformersCard({ employees }: TopPerformersCardProps) {
               {/* Rank */}
               <span
                 className="font-mono text-[12px] w-5 text-center shrink-0"
-                style={{ color: 'var(--st-d-6)', fontVariantNumeric: 'tabular-nums' }}
+                style={{ color: 'var(--st-dim)', fontVariantNumeric: 'tabular-nums' }}
               >
                 {i + 1}
               </span>
@@ -101,10 +101,10 @@ export function TopPerformersCard({ employees }: TopPerformersCardProps) {
 
               {/* Name + role */}
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] truncate" style={{ color: 'var(--st-d-9)' }}>
+                <p className="text-[13px] truncate" style={{ color: 'var(--st-hi)' }}>
                   {e.firstName} {e.lastName}
                 </p>
-                <p className="text-[11px] capitalize" style={{ color: 'var(--st-d-6)' }}>
+                <p className="text-[11px] capitalize" style={{ color: 'var(--st-dim)' }}>
                   {ROLE_LABEL[e.role] ?? e.role} · {e.hoursWorked.toFixed(0)}h
                 </p>
               </div>
@@ -112,7 +112,7 @@ export function TopPerformersCard({ employees }: TopPerformersCardProps) {
               {/* Tips */}
               <span
                 className="font-mono font-medium tabular-nums text-[14px] shrink-0"
-                style={{ color: 'var(--st-d-9)' }}
+                style={{ color: 'var(--st-hi)' }}
               >
                 ${e.tipsEstimated.toFixed(0)}
               </span>

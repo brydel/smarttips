@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { Toaster } from 'sonner';
 import { AuthProvider } from '../contexts/auth.context';
+import { ThemeProvider } from '../contexts/theme.context';
 
 function makeQueryClient(): QueryClient {
   return new QueryClient({
@@ -34,19 +35,21 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>{children}</AuthProvider>
-      <Toaster
-        position="bottom-right"
-        toastOptions={{
-          style: {
-            background: 'var(--st-d-1)',
-            border: '1px solid var(--st-d-3)',
-            color: 'var(--st-d-9)',
-            fontFamily: 'var(--st-font-ui)',
-            fontSize: '13.5px',
-          },
-        }}
-      />
+      <ThemeProvider>
+        <AuthProvider>{children}</AuthProvider>
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              background: 'var(--st-card)',
+              border: '1px solid var(--st-border)',
+              color: 'var(--st-hi)',
+              fontFamily: 'var(--st-font-ui)',
+              fontSize: '13.5px',
+            },
+          }}
+        />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

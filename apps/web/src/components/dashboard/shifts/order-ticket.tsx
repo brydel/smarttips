@@ -8,7 +8,7 @@ const STATUS_CFG: Record<OrderStatus, { label: string; color: string }> = {
   OPEN: { label: 'Ouvert', color: '#818CF8' },
   SENT: { label: 'Envoyé', color: '#D4A574' },
   PAID: { label: 'Encaissé', color: '#34D399' },
-  VOIDED: { label: 'Annulé', color: '#5A6485' },
+  VOIDED: { label: 'Annulé', color: 'var(--st-dim)' },
 };
 
 // ── Props ──────────────────────────────────────────────────────────────────────
@@ -38,7 +38,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
           justifyContent: 'space-between',
           marginBottom: 10,
           paddingBottom: 10,
-          borderBottom: '1px dashed #1B2236',
+          borderBottom: '1px dashed var(--st-border)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -47,7 +47,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
               fontFamily: 'var(--st-font-mono)',
               fontVariantNumeric: 'tabular-nums',
               fontSize: 12.5,
-              color: '#F4F6FB',
+              color: 'var(--st-hi)',
               fontWeight: 600,
             }}
           >
@@ -58,7 +58,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
               width: 3,
               height: 3,
               borderRadius: '50%',
-              background: '#3A4366',
+              background: 'var(--st-muted)',
               display: 'inline-block',
             }}
           />
@@ -68,7 +68,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
               alignItems: 'center',
               gap: 5,
               fontSize: 11.5,
-              color: '#8892B0',
+              color: 'var(--st-sec)',
             }}
           >
             <svg
@@ -119,7 +119,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
           >
             {(order.server.firstName?.[0] ?? '') + (order.server.lastName?.[0] ?? '')}
           </div>
-          <span style={{ fontSize: 11.5, color: '#8892B0' }}>
+          <span style={{ fontSize: 11.5, color: 'var(--st-sec)' }}>
             {order.server.firstName} {order.server.lastName}
           </span>
         </div>
@@ -136,19 +136,19 @@ export function OrderTicket({ order }: OrderTicketProps) {
               <span
                 style={{
                   fontFamily: 'var(--st-font-mono)',
-                  color: '#5A6485',
+                  color: 'var(--st-dim)',
                   minWidth: 22,
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
                 ×{item.quantity}
               </span>
-              <span style={{ flex: 1, color: '#C5CCE0' }}>{item.menuItem?.name ?? '—'}</span>
+              <span style={{ flex: 1, color: 'var(--st-pri)' }}>{item.menuItem?.name ?? '—'}</span>
               <span
                 style={{
                   fontFamily: 'var(--st-font-mono)',
                   fontVariantNumeric: 'tabular-nums',
-                  color: '#8892B0',
+                  color: 'var(--st-sec)',
                   fontSize: 11.5,
                 }}
               >
@@ -166,7 +166,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
           alignItems: 'baseline',
           justifyContent: 'space-between',
           paddingTop: 10,
-          borderTop: '1px dashed #1B2236',
+          borderTop: '1px dashed var(--st-border)',
         }}
       >
         <span
@@ -176,7 +176,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
             letterSpacing: '0.16em',
             fontSize: 9.5,
             fontWeight: 500,
-            color: '#8892B0',
+            color: 'var(--st-sec)',
           }}
         >
           {itemCount} item{itemCount !== 1 ? 's' : ''}
@@ -187,7 +187,7 @@ export function OrderTicket({ order }: OrderTicketProps) {
             fontVariantNumeric: 'tabular-nums',
             letterSpacing: '-0.02em',
             fontSize: 16,
-            color: '#F4F6FB',
+            color: 'var(--st-hi)',
             fontWeight: 500,
           }}
         >

@@ -1,10 +1,5 @@
 'use client';
 
-// BIS-43: When restaurant-tables endpoint is available, replace the table number
-// text input with a Select that fetches from GET /api/v1/restaurant-tables.
-// For now, tableId is not used — the create order button is DISABLED
-// with a tooltip "En attente de BIS-43 — tables non disponibles".
-
 import { useEffect, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import { lockScroll, unlockScroll } from '../../../lib/scroll-lock';
@@ -19,18 +14,18 @@ const labelStyle: React.CSSProperties = {
   textTransform: 'uppercase',
   letterSpacing: '0.14em',
   fontSize: 10,
-  color: '#5A6485',
+  color: 'var(--st-dim)',
   fontWeight: 500,
   marginBottom: 5,
   display: 'block',
 };
 
 const inputStyle: React.CSSProperties = {
-  background: '#141A2B',
-  border: '1px solid #252D45',
+  background: 'var(--st-raised)',
+  border: '1px solid var(--st-stroke)',
   borderRadius: 6,
   padding: '8px 10px',
-  color: '#5A6485',
+  color: 'var(--st-dim)',
   fontFamily: 'var(--st-font-ui)',
   fontSize: 13,
   outline: 'none',
@@ -149,8 +144,8 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
           width: 640,
           maxWidth: '100%',
           maxHeight: '90vh',
-          background: '#0F1422',
-          border: '1px solid #252D45',
+          background: 'var(--st-card)',
+          border: '1px solid var(--st-stroke)',
           borderRadius: 14,
           boxShadow: '0 24px 60px -20px rgba(0,0,0,.6)',
           display: 'flex',
@@ -162,7 +157,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
         <div
           style={{
             padding: '18px 24px 16px',
-            borderBottom: '1px solid #1B2236',
+            borderBottom: '1px solid var(--st-border)',
             display: 'flex',
             alignItems: 'flex-start',
             gap: 12,
@@ -173,7 +168,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
             <h2
               id="dialog-title"
               className="font-display"
-              style={{ fontSize: 22, color: '#F4F6FB', margin: 0, lineHeight: 1.15 }}
+              style={{ fontSize: 22, color: 'var(--st-hi)', margin: 0, lineHeight: 1.15 }}
             >
               Nouvelle commande
             </h2>
@@ -183,7 +178,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
             style={{
               background: 'transparent',
               border: 0,
-              color: '#8892B0',
+              color: 'var(--st-sec)',
               cursor: 'pointer',
               padding: 6,
               borderRadius: 6,
@@ -191,12 +186,12 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
               alignItems: 'center',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = '#141A2B';
-              (e.currentTarget as HTMLButtonElement).style.color = '#F4F6FB';
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--st-raised)';
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-hi)';
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-              (e.currentTarget as HTMLButtonElement).style.color = '#8892B0';
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-sec)';
             }}
             aria-label="Fermer"
           >
@@ -206,7 +201,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
 
         {/* Body */}
         <div style={{ flex: 1, overflow: 'auto', padding: '18px 24px' }}>
-          {/* BIS-43 warning */}
+          {/* Order availability notice */}
           <div
             style={{
               display: 'flex',
@@ -236,16 +231,18 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
             <p
               style={{
                 fontSize: 12,
-                color: '#C5CCE0',
+                color: 'var(--st-pri)',
                 fontFamily: 'var(--st-font-ui)',
                 lineHeight: 1.6,
                 margin: 0,
               }}
             >
               <span style={{ fontWeight: 600, color: '#F59E0B' }}>
-                La gestion des tables n&apos;est pas encore disponible (BIS-43).
+                Les articles de menu et les tables doivent être configurés avant de créer une
+                commande.
               </span>{' '}
-              La création de commandes est temporairement désactivée.
+              La création de commandes est temporairement désactivée pour éviter une saisie
+              incomplète.
             </p>
           </div>
 
@@ -274,17 +271,18 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
 
           <div style={{ marginBottom: 16 }}>
             <label style={labelStyle}>Numéro de table</label>
-            <input type="text" placeholder="En attente de BIS-43…" disabled style={inputStyle} />
+            <input type="text" placeholder="Table à sélectionner" disabled style={inputStyle} />
             <span
               style={{
                 fontSize: 10.5,
-                color: '#5A6485',
+                color: 'var(--st-dim)',
                 fontFamily: 'var(--st-font-ui)',
                 marginTop: 4,
                 display: 'block',
               }}
             >
-              La sélection de table sera disponible via BIS-43.
+              Configurez les tables et les articles du menu avant d&apos;ouvrir la saisie de
+              commande.
             </span>
           </div>
 
@@ -297,7 +295,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                 height="12"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#5A6485"
+                stroke="var(--st-dim)"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -323,8 +321,8 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
               style={{
                 maxHeight: 176,
                 overflow: 'auto',
-                background: '#141A2B',
-                border: '1px solid #252D45',
+                background: 'var(--st-raised)',
+                border: '1px solid var(--st-stroke)',
                 borderRadius: 8,
               }}
             >
@@ -333,12 +331,12 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                   style={{
                     padding: '16px',
                     textAlign: 'center',
-                    color: '#5A6485',
+                    color: 'var(--st-dim)',
                     fontSize: 12,
                     fontFamily: 'var(--st-font-ui)',
                   }}
                 >
-                  Aucun article trouvé
+                  Aucun article de menu disponible pour le moment.
                 </div>
               ) : (
                 filteredItems.slice(0, 40).map((item) => (
@@ -348,7 +346,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                       display: 'flex',
                       alignItems: 'center',
                       padding: '8px 12px',
-                      borderBottom: '1px solid #1B2236',
+                      borderBottom: '1px solid var(--st-border)',
                       opacity: 0.5,
                       cursor: 'not-allowed',
                     }}
@@ -357,20 +355,22 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                       <div
                         style={{
                           fontSize: 12.5,
-                          color: '#F4F6FB',
+                          color: 'var(--st-hi)',
                           fontFamily: 'var(--st-font-ui)',
                           marginBottom: 1,
                         }}
                       >
                         {item.name}
                       </div>
-                      <div style={{ fontSize: 10.5, color: '#5A6485' }}>{item.category.name}</div>
+                      <div style={{ fontSize: 10.5, color: 'var(--st-dim)' }}>
+                        {item.category.name}
+                      </div>
                     </div>
                     <span
                       style={{
                         fontFamily: 'var(--st-font-mono)',
                         fontSize: 11.5,
-                        color: '#8892B0',
+                        color: 'var(--st-sec)',
                         marginRight: 10,
                         fontVariantNumeric: 'tabular-nums',
                       }}
@@ -382,7 +382,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                         width: 24,
                         height: 24,
                         borderRadius: 6,
-                        background: '#252D45',
+                        background: 'var(--st-stroke)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -393,7 +393,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                         height="10"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="#5A6485"
+                        stroke="var(--st-dim)"
                         strokeWidth="2.5"
                         strokeLinecap="round"
                       >
@@ -410,7 +410,13 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
           {selectedItems.length > 0 && (
             <div>
               <label style={labelStyle}>Articles sélectionnés ({selectedItems.length})</label>
-              <div style={{ background: '#141A2B', border: '1px solid #252D45', borderRadius: 8 }}>
+              <div
+                style={{
+                  background: 'var(--st-raised)',
+                  border: '1px solid var(--st-stroke)',
+                  borderRadius: 8,
+                }}
+              >
                 {selectedItems.map((item) => (
                   <div
                     key={item.menuItemId}
@@ -419,14 +425,14 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                       alignItems: 'center',
                       gap: 10,
                       padding: '8px 12px',
-                      borderBottom: '1px solid #1B2236',
+                      borderBottom: '1px solid var(--st-border)',
                     }}
                   >
                     <span
                       style={{
                         flex: 1,
                         fontSize: 12.5,
-                        color: '#F4F6FB',
+                        color: 'var(--st-hi)',
                         fontFamily: 'var(--st-font-ui)',
                       }}
                     >
@@ -436,7 +442,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                       style={{
                         fontFamily: 'var(--st-font-mono)',
                         fontSize: 11.5,
-                        color: '#8892B0',
+                        color: 'var(--st-sec)',
                       }}
                     >
                       {item.price.toFixed(2)} $
@@ -450,9 +456,9 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                           width: 20,
                           height: 20,
                           borderRadius: 4,
-                          background: '#252D45',
+                          background: 'var(--st-stroke)',
                           border: 0,
-                          color: '#5A6485',
+                          color: 'var(--st-dim)',
                           cursor: 'not-allowed',
                           display: 'flex',
                           alignItems: 'center',
@@ -475,7 +481,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                         style={{
                           fontFamily: 'var(--st-font-mono)',
                           fontSize: 11.5,
-                          color: '#F4F6FB',
+                          color: 'var(--st-hi)',
                           minWidth: 18,
                           textAlign: 'center',
                         }}
@@ -490,9 +496,9 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                           width: 20,
                           height: 20,
                           borderRadius: 4,
-                          background: '#252D45',
+                          background: 'var(--st-stroke)',
                           border: 0,
-                          color: '#5A6485',
+                          color: 'var(--st-dim)',
                           cursor: 'not-allowed',
                           display: 'flex',
                           alignItems: 'center',
@@ -516,7 +522,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                       style={{
                         fontFamily: 'var(--st-font-mono)',
                         fontSize: 12,
-                        color: '#F4F6FB',
+                        color: 'var(--st-hi)',
                         minWidth: 56,
                         textAlign: 'right',
                         fontVariantNumeric: 'tabular-nums',
@@ -529,7 +535,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                       onClick={() => removeItem(item.menuItemId)}
                       disabled
                       style={{
-                        color: '#5A6485',
+                        color: 'var(--st-dim)',
                         background: 'none',
                         border: 0,
                         cursor: 'not-allowed',
@@ -551,7 +557,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                   <span
                     style={{
                       fontSize: 11,
-                      color: '#8892B0',
+                      color: 'var(--st-sec)',
                       fontFamily: 'var(--st-font-mono)',
                       textTransform: 'uppercase',
                       letterSpacing: '0.12em',
@@ -563,7 +569,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
                     style={{
                       fontFamily: 'var(--st-font-mono)',
                       fontSize: 14,
-                      color: '#F4F6FB',
+                      color: 'var(--st-hi)',
                       fontWeight: 600,
                     }}
                   >
@@ -579,27 +585,32 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
         <div
           style={{
             padding: '12px 20px',
-            borderTop: '1px solid #1B2236',
-            background: '#0A0E1A',
+            borderTop: '1px solid var(--st-border)',
+            background: 'var(--st-bg)',
             display: 'flex',
             alignItems: 'center',
             gap: 10,
           }}
         >
           <span
-            style={{ flex: 1, fontSize: 11.5, color: '#5A6485', fontFamily: 'var(--st-font-ui)' }}
+            style={{
+              flex: 1,
+              fontSize: 11.5,
+              color: 'var(--st-dim)',
+              fontFamily: 'var(--st-font-ui)',
+            }}
           >
-            Disponible après la livraison de BIS-43.
+            La commande pourra être créée lorsque le menu et les tables seront prêts.
           </span>
           <button
             type="button"
             onClick={() => onOpenChange(false)}
             style={{
               background: 'transparent',
-              border: '1px solid #252D45',
+              border: '1px solid var(--st-stroke)',
               borderRadius: 10,
               padding: '7px 14px',
-              color: '#F4F6FB',
+              color: 'var(--st-hi)',
               fontSize: 12,
               fontFamily: 'var(--st-font-ui)',
               cursor: 'pointer',
@@ -610,7 +621,7 @@ export function CreateOrderDialog({ open, onOpenChange, shift }: CreateOrderDial
           <button
             type="button"
             disabled
-            title="En attente de BIS-43 — tables non disponibles"
+            title="Les tables et articles de menu doivent être prêts avant de créer une commande"
             style={{
               background: '#4F46E5',
               border: '1px solid transparent',

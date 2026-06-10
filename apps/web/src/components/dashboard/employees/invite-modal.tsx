@@ -305,7 +305,7 @@ export function InviteModal({ open, onClose, existingEmployee }: InviteModalProp
         style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(10,14,26,.65)',
+          background: 'color-mix(in srgb, var(--st-bg) 65%, transparent)',
           zIndex: 60,
         }}
         aria-hidden="true"
@@ -324,9 +324,9 @@ export function InviteModal({ open, onClose, existingEmployee }: InviteModalProp
           width: phase.kind === 'success' && mode === 'qr' ? 440 : 520,
           maxWidth: 'calc(100vw - 32px)',
           maxHeight: 'calc(100vh - 48px)',
-          background: '#0F1422',
+          background: 'var(--st-card)',
           borderRadius: 16,
-          border: '1px solid #1B2236',
+          border: '1px solid var(--st-border)',
           zIndex: 70,
           display: 'flex',
           flexDirection: 'column',
@@ -336,7 +336,11 @@ export function InviteModal({ open, onClose, existingEmployee }: InviteModalProp
       >
         {/* Header */}
         <div
-          style={{ padding: '20px 20px 16px', borderBottom: '1px solid #1B2236', flexShrink: 0 }}
+          style={{
+            padding: '20px 20px 16px',
+            borderBottom: '1px solid var(--st-border)',
+            flexShrink: 0,
+          }}
         >
           <div
             style={{
@@ -348,7 +352,7 @@ export function InviteModal({ open, onClose, existingEmployee }: InviteModalProp
           >
             <h2
               id="invite-title"
-              style={{ fontSize: 16, fontWeight: 700, color: '#F4F6FB', margin: 0 }}
+              style={{ fontSize: 16, fontWeight: 700, color: 'var(--st-hi)', margin: 0 }}
             >
               {title}
             </h2>
@@ -360,7 +364,7 @@ export function InviteModal({ open, onClose, existingEmployee }: InviteModalProp
                 background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
-                color: '#5A6485',
+                color: 'var(--st-dim)',
                 padding: 4,
                 borderRadius: 6,
                 display: 'flex',
@@ -394,7 +398,7 @@ export function InviteModal({ open, onClose, existingEmployee }: InviteModalProp
               <p
                 style={{
                   fontSize: 10,
-                  color: '#5A6485',
+                  color: 'var(--st-dim)',
                   margin: '0 0 6px',
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
@@ -466,12 +470,12 @@ export function InviteModal({ open, onClose, existingEmployee }: InviteModalProp
                   width: 48,
                   height: 48,
                   borderRadius: '50%',
-                  border: '3px solid #1B2236',
+                  border: '3px solid var(--st-border)',
                   borderTopColor: '#6366F1',
                   animation: 'spin 1s linear infinite',
                 }}
               />
-              <p style={{ fontSize: 14, color: '#8892B0', margin: 0 }}>
+              <p style={{ fontSize: 14, color: 'var(--st-sec)', margin: 0 }}>
                 {isExistingMode ? "Envoi de l'invitation…" : 'Création et invitation en cours…'}
               </p>
               <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -523,12 +527,12 @@ export function InviteModal({ open, onClose, existingEmployee }: InviteModalProp
                   <p style={{ fontSize: 13, fontWeight: 600, color: '#EAB308', margin: '0 0 4px' }}>
                     Employé créé, invitation en erreur
                   </p>
-                  <p style={{ fontSize: 12, color: '#8892B0', margin: 0, lineHeight: 1.5 }}>
+                  <p style={{ fontSize: 12, color: 'var(--st-sec)', margin: 0, lineHeight: 1.5 }}>
                     {phase.error}
                   </p>
                 </div>
               </div>
-              <p style={{ fontSize: 12, color: '#5A6485', margin: 0 }}>
+              <p style={{ fontSize: 12, color: 'var(--st-dim)', margin: 0 }}>
                 L&apos;employ&eacute; a bien &eacute;t&eacute; cr&eacute;&eacute; dans votre
                 &eacute;quipe. Vous pouvez r&eacute;essayer l&apos;envoi du lien d&apos;invitation.
               </p>
@@ -604,12 +608,12 @@ export function InviteModal({ open, onClose, existingEmployee }: InviteModalProp
         {/* Footer */}
         <div
           style={{
-            borderTop: '1px solid #1B2236',
+            borderTop: '1px solid var(--st-border)',
             padding: '14px 20px',
             display: 'flex',
             justifyContent: 'flex-end',
             gap: 8,
-            background: '#0A0E1A',
+            background: 'var(--st-bg)',
             flexShrink: 0,
           }}
         >
@@ -622,8 +626,8 @@ export function InviteModal({ open, onClose, existingEmployee }: InviteModalProp
                 padding: '7px 16px',
                 borderRadius: 8,
                 background: 'transparent',
-                border: '1px solid #252D45',
-                color: '#8892B0',
+                border: '1px solid var(--st-stroke)',
+                color: 'var(--st-sec)',
                 fontSize: 13,
                 cursor: 'pointer',
                 fontFamily: 'inherit',
@@ -640,8 +644,8 @@ export function InviteModal({ open, onClose, existingEmployee }: InviteModalProp
                   padding: '7px 14px',
                   borderRadius: 8,
                   background: 'transparent',
-                  border: '1px solid #252D45',
-                  color: '#8892B0',
+                  border: '1px solid var(--st-stroke)',
+                  color: 'var(--st-sec)',
                   fontSize: 13,
                   cursor: 'pointer',
                   fontFamily: 'inherit',
@@ -700,12 +704,14 @@ function ExistingEmployeeForm({
         style={{
           padding: '10px 14px',
           borderRadius: 10,
-          background: '#141A2B',
-          border: '1px solid #1B2236',
+          background: 'var(--st-raised)',
+          border: '1px solid var(--st-border)',
         }}
       >
-        <p style={{ fontSize: 12, color: '#5A6485', margin: '0 0 2px' }}>Employé sélectionné</p>
-        <p style={{ fontSize: 14, fontWeight: 600, color: '#F4F6FB', margin: 0 }}>
+        <p style={{ fontSize: 12, color: 'var(--st-dim)', margin: '0 0 2px' }}>
+          Employé sélectionné
+        </p>
+        <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--st-hi)', margin: 0 }}>
           {employee.firstName} {employee.lastName}
         </p>
       </div>
@@ -719,7 +725,7 @@ function ExistingEmployeeForm({
           placeholder="employe@restaurant.com"
           maxLength={254}
           style={{
-            border: `1px solid ${emailError ? 'rgba(239,68,68,.5)' : '#1B2236'}`,
+            border: `1px solid ${emailError ? 'rgba(239,68,68,.5)' : 'var(--st-border)'}`,
             borderRadius: 8,
           }}
           aria-required="true"
@@ -737,7 +743,7 @@ function ExistingEmployeeForm({
         }}
       >
         <Sparkles size={14} style={{ color: '#818CF8', flexShrink: 0, marginTop: 1 }} />
-        <p style={{ fontSize: 12, color: '#8892B0', margin: 0, lineHeight: 1.5 }}>
+        <p style={{ fontSize: 12, color: 'var(--st-sec)', margin: 0, lineHeight: 1.5 }}>
           Un magic link valable 7 jours sera envoyé à cet email pour créer le compte.
         </p>
       </div>
@@ -771,7 +777,7 @@ function NewEmployeeForm({
             placeholder="Camille"
             maxLength={100}
             style={{
-              border: `1px solid ${errors.firstName ? 'rgba(239,68,68,.5)' : '#1B2236'}`,
+              border: `1px solid ${errors.firstName ? 'rgba(239,68,68,.5)' : 'var(--st-border)'}`,
               borderRadius: 8,
             }}
             aria-required="true"
@@ -785,7 +791,7 @@ function NewEmployeeForm({
             placeholder="Pereira"
             maxLength={100}
             style={{
-              border: `1px solid ${errors.lastName ? 'rgba(239,68,68,.5)' : '#1B2236'}`,
+              border: `1px solid ${errors.lastName ? 'rgba(239,68,68,.5)' : 'var(--st-border)'}`,
               borderRadius: 8,
             }}
             aria-required="true"
@@ -803,7 +809,7 @@ function NewEmployeeForm({
           placeholder="camille@restaurant.com"
           maxLength={254}
           style={{
-            border: `1px solid ${errors.email ? 'rgba(239,68,68,.5)' : '#1B2236'}`,
+            border: `1px solid ${errors.email ? 'rgba(239,68,68,.5)' : 'var(--st-border)'}`,
             borderRadius: 8,
           }}
           aria-required="true"
@@ -820,8 +826,8 @@ function NewEmployeeForm({
               width: '100%',
               padding: '5px 8px',
               borderRadius: 8,
-              background: '#141A2B',
-              border: `1px solid ${errors.role ? 'rgba(239,68,68,.5)' : '#1B2236'}`,
+              background: 'var(--st-raised)',
+              border: `1px solid ${errors.role ? 'rgba(239,68,68,.5)' : 'var(--st-border)'}`,
               color: ROLE_CONFIG[form.role].color,
               fontSize: 13,
               cursor: 'pointer',
@@ -831,7 +837,11 @@ function NewEmployeeForm({
             aria-required="true"
           >
             {ROLE_ORDER.map((r) => (
-              <option key={r} value={r} style={{ color: '#F4F6FB', background: '#141A2B' }}>
+              <option
+                key={r}
+                value={r}
+                style={{ color: 'var(--st-hi)', background: 'var(--st-raised)' }}
+              >
                 {ROLE_CONFIG[r].label}
               </option>
             ))}
@@ -848,7 +858,7 @@ function NewEmployeeForm({
             onChange={(e) => set('hourlyWage', parseFloat(e.target.value) || 0)}
             placeholder="16.50"
             style={{
-              border: `1px solid ${errors.hourlyWage ? 'rgba(239,68,68,.5)' : '#1B2236'}`,
+              border: `1px solid ${errors.hourlyWage ? 'rgba(239,68,68,.5)' : 'var(--st-border)'}`,
               borderRadius: 8,
             }}
             aria-required="true"
@@ -872,7 +882,7 @@ function NewEmployeeForm({
             }}
             placeholder="1.00"
             style={{
-              border: `1px solid ${errors.coefficient ? 'rgba(239,68,68,.5)' : '#1B2236'}`,
+              border: `1px solid ${errors.coefficient ? 'rgba(239,68,68,.5)' : 'var(--st-border)'}`,
               borderRadius: 8,
             }}
             aria-describedby="coeff-hint"
@@ -885,7 +895,7 @@ function NewEmployeeForm({
             value={form.hireDate}
             onChange={(e) => set('hireDate', e.target.value)}
             style={{
-              border: `1px solid ${errors.hireDate ? 'rgba(239,68,68,.5)' : '#1B2236'}`,
+              border: `1px solid ${errors.hireDate ? 'rgba(239,68,68,.5)' : 'var(--st-border)'}`,
               borderRadius: 8,
               colorScheme: 'dark',
             }}
@@ -896,10 +906,10 @@ function NewEmployeeForm({
 
       <p
         id="coeff-hint"
-        style={{ fontSize: 11, color: '#5A6485', margin: '-4px 0 0', lineHeight: 1.5 }}
+        style={{ fontSize: 11, color: 'var(--st-dim)', margin: '-4px 0 0', lineHeight: 1.5 }}
       >
         Le multiplicateur ajuste la part de pourboires.{' '}
-        <span style={{ color: '#8892B0' }}>1.00 = standard, 1.20 = +20 %.</span>
+        <span style={{ color: 'var(--st-sec)' }}>1.00 = standard, 1.20 = +20 %.</span>
       </p>
 
       <div
@@ -914,7 +924,7 @@ function NewEmployeeForm({
         }}
       >
         <Sparkles size={14} style={{ color: '#818CF8', flexShrink: 0, marginTop: 1 }} />
-        <p style={{ fontSize: 12, color: '#8892B0', margin: 0, lineHeight: 1.5 }}>
+        <p style={{ fontSize: 12, color: 'var(--st-sec)', margin: 0, lineHeight: 1.5 }}>
           {mode === 'qr'
             ? "L'employé sera créé, un email d'invitation sera envoyé et un QR code vous sera affiché pour un accès immédiat sur place."
             : "Un email d'invitation sera envoyé pour activer le compte. L'employé pourra configurer son profil depuis le lien reçu."}
@@ -969,7 +979,7 @@ function SuccessEmailView({
           <p style={{ fontSize: 12, color: '#34D399', margin: 0, fontWeight: 600 }}>
             Invitation envoyée à {email} ✓
           </p>
-          <p style={{ fontSize: 11, color: '#5A6485', margin: '4px 0 0' }}>
+          <p style={{ fontSize: 11, color: 'var(--st-dim)', margin: '4px 0 0' }}>
             Lien valide jusqu&apos;au {expireDate}
           </p>
         </div>
@@ -982,10 +992,10 @@ function SuccessEmailView({
             flex: 1,
             padding: '7px 10px',
             borderRadius: 8,
-            background: '#141A2B',
-            border: '1px solid #1B2236',
+            background: 'var(--st-raised)',
+            border: '1px solid var(--st-border)',
             fontSize: 11,
-            color: '#5A6485',
+            color: 'var(--st-dim)',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -1029,8 +1039,8 @@ function SuccessEmailView({
           padding: '7px 12px',
           borderRadius: 8,
           background: 'transparent',
-          border: '1px solid #252D45',
-          color: '#8892B0',
+          border: '1px solid var(--st-stroke)',
+          color: 'var(--st-sec)',
           fontSize: 12,
           cursor: 'pointer',
           fontFamily: 'inherit',
@@ -1084,7 +1094,7 @@ function SuccessQrView({
         <p style={{ fontSize: 13, color: '#34D399', margin: 0 }}>Email envoyé à {email}</p>
       </div>
 
-      <p style={{ fontSize: 12, color: '#8892B0', margin: 0, textAlign: 'center' }}>
+      <p style={{ fontSize: 12, color: 'var(--st-sec)', margin: 0, textAlign: 'center' }}>
         Faites scanner ce QR code par l&apos;employ&eacute; sur place
       </p>
 
@@ -1100,7 +1110,7 @@ function SuccessQrView({
         <QRCodeSVG value={inviteUrl} size={200} />
       </div>
 
-      <p style={{ fontSize: 11, color: '#5A6485', margin: 0 }}>
+      <p style={{ fontSize: 11, color: 'var(--st-dim)', margin: 0 }}>
         Valide jusqu&apos;au {expireDate} &middot; usage unique
       </p>
 
@@ -1146,7 +1156,7 @@ function Field({
         style={{
           display: 'block',
           fontSize: 11,
-          color: '#5A6485',
+          color: 'var(--st-dim)',
           marginBottom: 5,
           fontWeight: 500,
         }}

@@ -51,7 +51,7 @@ const labelStyle: React.CSSProperties = {
   textTransform: 'uppercase',
   letterSpacing: '0.14em',
   fontSize: 10,
-  color: '#5A6485',
+  color: 'var(--st-dim)',
   fontWeight: 500,
 };
 
@@ -103,10 +103,10 @@ export default function ShiftDetailPage() {
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#0A0E1A',
+          background: 'var(--st-bg)',
         }}
       >
-        <p style={{ fontSize: 13, color: '#5A6485', fontFamily: 'var(--st-font-ui)' }}>
+        <p style={{ fontSize: 13, color: 'var(--st-dim)', fontFamily: 'var(--st-font-ui)' }}>
           Chargement du shift…
         </p>
       </div>
@@ -123,7 +123,7 @@ export default function ShiftDetailPage() {
           alignItems: 'center',
           justifyContent: 'center',
           gap: 12,
-          background: '#0A0E1A',
+          background: 'var(--st-bg)',
         }}
       >
         <svg
@@ -131,14 +131,14 @@ export default function ShiftDetailPage() {
           height="32"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#3A4366"
+          stroke="var(--st-muted)"
           strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
         </svg>
-        <p style={{ fontSize: 13, color: '#8892B0', fontFamily: 'var(--st-font-ui)' }}>
+        <p style={{ fontSize: 13, color: 'var(--st-sec)', fontFamily: 'var(--st-font-ui)' }}>
           Shift introuvable ou erreur de chargement.
         </p>
         <button
@@ -146,10 +146,10 @@ export default function ShiftDetailPage() {
           onClick={() => router.push('/dashboard/shifts')}
           style={{
             background: 'transparent',
-            border: '1px solid #252D45',
+            border: '1px solid var(--st-stroke)',
             borderRadius: 8,
             padding: '7px 14px',
-            color: '#8892B0',
+            color: 'var(--st-sec)',
             fontSize: 12,
             fontFamily: 'var(--st-font-ui)',
             cursor: 'pointer',
@@ -189,7 +189,7 @@ export default function ShiftDetailPage() {
         flexDirection: 'column',
         flex: 1,
         minHeight: 0,
-        background: '#0A0E1A',
+        background: 'var(--st-bg)',
       }}
     >
       {/* Scroll container */}
@@ -202,7 +202,7 @@ export default function ShiftDetailPage() {
             background: 'transparent',
             border: 0,
             padding: '0 0 16px 0',
-            color: '#5A6485',
+            color: 'var(--st-dim)',
             fontSize: 12,
             fontFamily: 'var(--st-font-ui)',
             cursor: 'pointer',
@@ -212,10 +212,10 @@ export default function ShiftDetailPage() {
             transition: 'color .12s ease',
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.color = '#8892B0';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-sec)';
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.color = '#5A6485';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--st-dim)';
           }}
         >
           <svg
@@ -235,8 +235,8 @@ export default function ShiftDetailPage() {
         {/* Shift header card */}
         <div
           style={{
-            background: '#0F1422',
-            border: `1px solid ${shift.status === 'IN_PROGRESS' ? 'var(--type-c)' : '#1B2236'}`,
+            background: 'var(--st-card)',
+            border: `1px solid ${shift.status === 'IN_PROGRESS' ? 'var(--type-c)' : 'var(--st-border)'}`,
             borderRadius: 14,
             padding: '20px 24px',
             marginBottom: 22,
@@ -284,7 +284,7 @@ export default function ShiftDetailPage() {
               </div>
               <h1
                 className="font-display"
-                style={{ fontSize: 28, color: '#F4F6FB', margin: '0 0 8px', lineHeight: 1.1 }}
+                style={{ fontSize: 28, color: 'var(--st-hi)', margin: '0 0 8px', lineHeight: 1.1 }}
               >
                 {formatDate(shift.date)}
               </h1>
@@ -296,7 +296,7 @@ export default function ShiftDetailPage() {
                     height="12"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#5A6485"
+                    stroke="var(--st-dim)"
                     strokeWidth="1.8"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -308,7 +308,7 @@ export default function ShiftDetailPage() {
                     style={{
                       fontFamily: 'var(--st-font-mono)',
                       fontSize: 13,
-                      color: '#8892B0',
+                      color: 'var(--st-sec)',
                       fontVariantNumeric: 'tabular-nums',
                     }}
                   >
@@ -316,7 +316,11 @@ export default function ShiftDetailPage() {
                   </span>
                   {shift.actualEndTime && (
                     <span
-                      style={{ fontSize: 11, color: '#5A6485', fontFamily: 'var(--st-font-ui)' }}
+                      style={{
+                        fontSize: 11,
+                        color: 'var(--st-dim)',
+                        fontFamily: 'var(--st-font-ui)',
+                      }}
                     >
                       · fin réelle {formatTime(shift.actualEndTime)}
                     </span>
@@ -329,7 +333,7 @@ export default function ShiftDetailPage() {
                     height="12"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#5A6485"
+                    stroke="var(--st-dim)"
                     strokeWidth="1.8"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -338,7 +342,13 @@ export default function ShiftDetailPage() {
                     <circle cx="9" cy="7" r="4" />
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
-                  <span style={{ fontSize: 12, color: '#8892B0', fontFamily: 'var(--st-font-ui)' }}>
+                  <span
+                    style={{
+                      fontSize: 12,
+                      color: 'var(--st-sec)',
+                      fontFamily: 'var(--st-font-ui)',
+                    }}
+                  >
                     {shift.assignments.length} membre{shift.assignments.length !== 1 ? 's' : ''}
                   </span>
                 </div>
@@ -350,7 +360,7 @@ export default function ShiftDetailPage() {
                       height="12"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="#5A6485"
+                      stroke="var(--st-dim)"
                       strokeWidth="1.8"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -358,7 +368,11 @@ export default function ShiftDetailPage() {
                       <path d="M4 7h16M4 7v12M20 7v12M8 7v4M16 7v4M4 11h16" />
                     </svg>
                     <span
-                      style={{ fontSize: 12, color: '#8892B0', fontFamily: 'var(--st-font-ui)' }}
+                      style={{
+                        fontSize: 12,
+                        color: 'var(--st-sec)',
+                        fontFamily: 'var(--st-font-ui)',
+                      }}
                     >
                       {orders.length} commande{orders.length !== 1 ? 's' : ''}
                     </span>
@@ -370,7 +384,7 @@ export default function ShiftDetailPage() {
                   style={{
                     marginTop: 10,
                     fontSize: 12.5,
-                    color: '#8892B0',
+                    color: 'var(--st-sec)',
                     fontFamily: 'var(--st-font-ui)',
                     lineHeight: 1.5,
                     maxWidth: 480,
@@ -389,10 +403,10 @@ export default function ShiftDetailPage() {
                 disabled={isLocked}
                 style={{
                   background: isLocked ? 'transparent' : '#6366F1',
-                  border: isLocked ? '1px solid #252D45' : '1px solid transparent',
+                  border: isLocked ? '1px solid var(--st-stroke)' : '1px solid transparent',
                   borderRadius: 10,
                   padding: '8px 16px',
-                  color: isLocked ? '#3A4366' : 'white',
+                  color: isLocked ? 'var(--st-muted)' : 'white',
                   fontSize: 12,
                   fontFamily: 'var(--st-font-ui)',
                   cursor: isLocked ? 'not-allowed' : 'pointer',
@@ -425,10 +439,10 @@ export default function ShiftDetailPage() {
                 title="En attente de BIS-43 — tables non disponibles"
                 style={{
                   background: 'transparent',
-                  border: '1px solid #252D45',
+                  border: '1px solid var(--st-stroke)',
                   borderRadius: 10,
                   padding: '8px 16px',
-                  color: '#3A4366',
+                  color: 'var(--st-muted)',
                   fontSize: 12,
                   fontFamily: 'var(--st-font-ui)',
                   cursor: 'not-allowed',
@@ -510,7 +524,7 @@ export default function ShiftDetailPage() {
         {shift.status === 'CLOSED' && tipPool && (
           <div
             style={{
-              background: '#0F1422',
+              background: 'var(--st-card)',
               border: '1px solid rgba(52,211,153,.2)',
               borderRadius: 12,
               padding: '14px 20px',
@@ -556,7 +570,7 @@ export default function ShiftDetailPage() {
                   style={{
                     fontFamily: 'var(--st-font-mono)',
                     fontSize: 20,
-                    color: '#F4F6FB',
+                    color: 'var(--st-hi)',
                     fontWeight: 600,
                     fontVariantNumeric: 'tabular-nums',
                   }}
@@ -572,21 +586,21 @@ export default function ShiftDetailPage() {
                   {Number(tipPool.cashAmount).toFixed(2)} $
                 </span>
               </div>
-              <div style={{ width: 1, background: '#1B2236' }} />
+              <div style={{ width: 1, background: 'var(--st-border)' }} />
               <div style={{ textAlign: 'center' }}>
                 <div style={{ ...labelStyle, marginBottom: 2, color: '#818CF8' }}>Carte</div>
                 <span style={{ fontFamily: 'var(--st-font-mono)', fontSize: 14, color: '#818CF8' }}>
                   {Number(tipPool.cardAmount).toFixed(2)} $
                 </span>
               </div>
-              <div style={{ width: 1, background: '#1B2236' }} />
+              <div style={{ width: 1, background: 'var(--st-border)' }} />
               <div style={{ textAlign: 'center' }}>
                 <div style={{ ...labelStyle, marginBottom: 2 }}>Statut</div>
                 <span
                   style={{
                     fontFamily: 'var(--st-font-mono)',
                     fontSize: 11,
-                    color: '#8892B0',
+                    color: 'var(--st-sec)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.1em',
                   }}
@@ -603,8 +617,8 @@ export default function ShiftDetailPage() {
           {/* LEFT: Team panel */}
           <div
             style={{
-              background: '#0F1422',
-              border: '1px solid #1B2236',
+              background: 'var(--st-card)',
+              border: '1px solid var(--st-border)',
               borderRadius: 12,
               overflow: 'hidden',
             }}
@@ -613,7 +627,7 @@ export default function ShiftDetailPage() {
             <div
               style={{
                 padding: '14px 16px',
-                borderBottom: '1px solid #1B2236',
+                borderBottom: '1px solid var(--st-border)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -625,7 +639,7 @@ export default function ShiftDetailPage() {
                   height="13"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#5A6485"
+                  stroke="var(--st-dim)"
                   strokeWidth="1.8"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -637,7 +651,7 @@ export default function ShiftDetailPage() {
                 <span
                   style={{
                     fontSize: 13,
-                    color: '#F4F6FB',
+                    color: 'var(--st-hi)',
                     fontFamily: 'var(--st-font-ui)',
                     fontWeight: 500,
                   }}
@@ -648,9 +662,9 @@ export default function ShiftDetailPage() {
                   style={{
                     fontFamily: 'var(--st-font-mono)',
                     fontSize: 11,
-                    color: '#5A6485',
-                    background: '#141A2B',
-                    border: '1px solid #252D45',
+                    color: 'var(--st-dim)',
+                    background: 'var(--st-raised)',
+                    border: '1px solid var(--st-stroke)',
                     borderRadius: 6,
                     padding: '1px 7px',
                     fontVariantNumeric: 'tabular-nums',
@@ -664,11 +678,11 @@ export default function ShiftDetailPage() {
                 onClick={() => setAddAssignmentOpen(true)}
                 disabled={isLocked}
                 style={{
-                  background: isLocked ? 'transparent' : '#141A2B',
-                  border: '1px solid #252D45',
+                  background: isLocked ? 'transparent' : 'var(--st-raised)',
+                  border: '1px solid var(--st-stroke)',
                   borderRadius: 8,
                   padding: '5px 10px',
-                  color: isLocked ? '#252D45' : '#8892B0',
+                  color: isLocked ? 'var(--st-stroke)' : 'var(--st-sec)',
                   fontSize: 11.5,
                   fontFamily: 'var(--st-font-ui)',
                   cursor: isLocked ? 'not-allowed' : 'pointer',
@@ -703,7 +717,7 @@ export default function ShiftDetailPage() {
                   gridTemplateColumns: '1.6fr 80px 1fr 110px 28px',
                   gap: 14,
                   padding: '8px 14px',
-                  borderBottom: '1px solid #1B2236',
+                  borderBottom: '1px solid var(--st-border)',
                 }}
               >
                 {['Employé', 'Planifié', 'Réalisé', 'Statut', ''].map((h, i) => (
@@ -720,7 +734,7 @@ export default function ShiftDetailPage() {
                 <p
                   style={{
                     fontSize: 13,
-                    color: '#5A6485',
+                    color: 'var(--st-dim)',
                     fontFamily: 'var(--st-font-ui)',
                     marginBottom: 12,
                   }}
@@ -733,10 +747,10 @@ export default function ShiftDetailPage() {
                     onClick={() => setAddAssignmentOpen(true)}
                     style={{
                       background: 'transparent',
-                      border: '1px solid #252D45',
+                      border: '1px solid var(--st-stroke)',
                       borderRadius: 8,
                       padding: '6px 14px',
-                      color: '#8892B0',
+                      color: 'var(--st-sec)',
                       fontSize: 12,
                       fontFamily: 'var(--st-font-ui)',
                       cursor: 'pointer',
@@ -770,8 +784,8 @@ export default function ShiftDetailPage() {
           {/* RIGHT: Orders panel */}
           <div
             style={{
-              background: '#0F1422',
-              border: '1px solid #1B2236',
+              background: 'var(--st-card)',
+              border: '1px solid var(--st-border)',
               borderRadius: 12,
               overflow: 'hidden',
             }}
@@ -780,7 +794,7 @@ export default function ShiftDetailPage() {
             <div
               style={{
                 padding: '14px 16px',
-                borderBottom: '1px solid #1B2236',
+                borderBottom: '1px solid var(--st-border)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -792,7 +806,7 @@ export default function ShiftDetailPage() {
                   height="13"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#5A6485"
+                  stroke="var(--st-dim)"
                   strokeWidth="1.8"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -802,7 +816,7 @@ export default function ShiftDetailPage() {
                 <span
                   style={{
                     fontSize: 13,
-                    color: '#F4F6FB',
+                    color: 'var(--st-hi)',
                     fontFamily: 'var(--st-font-ui)',
                     fontWeight: 500,
                   }}
@@ -813,9 +827,9 @@ export default function ShiftDetailPage() {
                   style={{
                     fontFamily: 'var(--st-font-mono)',
                     fontSize: 11,
-                    color: '#5A6485',
-                    background: '#141A2B',
-                    border: '1px solid #252D45',
+                    color: 'var(--st-dim)',
+                    background: 'var(--st-raised)',
+                    border: '1px solid var(--st-stroke)',
                     borderRadius: 6,
                     padding: '1px 7px',
                     fontVariantNumeric: 'tabular-nums',
@@ -843,13 +857,17 @@ export default function ShiftDetailPage() {
             {/* Orders list */}
             {ordersLoading ? (
               <div style={{ padding: '24px', textAlign: 'center' }}>
-                <p style={{ fontSize: 12, color: '#5A6485', fontFamily: 'var(--st-font-ui)' }}>
+                <p
+                  style={{ fontSize: 12, color: 'var(--st-dim)', fontFamily: 'var(--st-font-ui)' }}
+                >
                   Chargement…
                 </p>
               </div>
             ) : orders.length === 0 ? (
               <div style={{ padding: '32px 20px', textAlign: 'center' }}>
-                <p style={{ fontSize: 13, color: '#5A6485', fontFamily: 'var(--st-font-ui)' }}>
+                <p
+                  style={{ fontSize: 13, color: 'var(--st-dim)', fontFamily: 'var(--st-font-ui)' }}
+                >
                   Aucune commande
                 </p>
               </div>

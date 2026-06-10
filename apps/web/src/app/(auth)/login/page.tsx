@@ -118,7 +118,7 @@ function LoginForm() {
                 <span className="text-st-emerald-glow text-[8px] leading-none">●</span>
                 {timeChip || 'Services opérationnels'}
               </span>
-              <span className="text-[11.5px] text-st-dim">Le service commence bientôt</span>
+              <span className="text-[11.5px] text-st-dim">Service prêt</span>
             </div>
 
             {/* Headline */}
