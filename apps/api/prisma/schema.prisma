@@ -218,7 +218,36 @@ enum AuditAction {
   INTEGRATION_SYNC_JOB_CREATED
   INTEGRATION_HEALTH_EVENT_RECORDED
 
+  ACTION_ITEM_CREATED
+  ACTION_ITEM_RESOLVED
+  ACTION_ITEM_DISMISSED
+
   @@map("audit_action")
+}
+
+enum ActionItemType {
+  DISTRIBUTION_MISSING
+  DISTRIBUTION_PENDING_APPROVAL
+  SHIFT_CLOSE_OVERDUE
+  SHIFT_UNASSIGNED
+
+  @@map("action_item_type")
+}
+
+enum ActionItemSeverity {
+  INFO
+  WARNING
+  CRITICAL
+
+  @@map("action_item_severity")
+}
+
+enum ActionItemStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+
+  @@map("action_item_status")
 }
 
 enum ExportFormat {
@@ -460,6 +489,7 @@ model Tenant {
   mlPredictions      MLPrediction[]
   fairnessAudits     FairnessAudit[]
   auditLogs          AuditLog[]
+  actionItems        ActionItem[]
   payrollExports     PayrollExport[]
   usageMetrics       UsageMetric[]
   employeeInvitations EmployeeInvitation[]
@@ -515,6 +545,7 @@ model User {
   integrationAccountsConnected IntegrationAccount[] @relation("IntegrationAccountConnectedBy")
   integrationAccountsDisconnected IntegrationAccount[] @relation("IntegrationAccountDisconnectedBy")
   integrationSyncJobsRequested IntegrationSyncJob[] @relation("IntegrationSyncJobRequestedBy")
+  actionItemsResolved        ActionItem[]           @relation("ActionItemResolvedBy")
 
   @@unique([tenantId, email], name: "unique_user_email_per_tenant")
   @@index([tenantId])
@@ -786,6 +817,7 @@ model Shift {
   tipPool          TipPool?
   mlTrainingEvents MLTrainingEvent[]
   mlPredictions    MLPrediction[]
+  actionItems      ActionItem[]
 
   @@unique([tenantId, date, shiftType], name: "one_shift_per_type_per_day")
   @@index([tenantId])
@@ -1150,6 +1182,43 @@ model AuditLog {
   @@index([tenantId, userId])
   @@index([requestId])
   @@map("audit_logs")
+}
+
+/// Manager Action Inbox item (BIS-54).
+/// Rows are derived from existing tenant data by rule-based detectors.
+/// dedupeKey (`${type}:${entityId}`) makes detector runs idempotent per tenant.
+/// Payload must contain minimal evidence only: ids, dates, counts, non-sensitive labels.
+model ActionItem {
+  id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String             @map("tenant_id") @db.Uuid
+  type           ActionItemType
+  severity       ActionItemSeverity
+  status         ActionItemStatus   @default(OPEN)
+  title          String             @db.VarChar(200)
+  entityType     String             @map("entity_type") @db.VarChar(100)
+  entityId       String             @map("entity_id") @db.Uuid
+  shiftId        String?            @map("shift_id") @db.Uuid
+  payload        Json?
+  dedupeKey      String             @map("dedupe_key") @db.VarChar(200)
+  resolutionNote String?            @map("resolution_note") @db.VarChar(500)
+  resolvedAt     DateTime?          @map("resolved_at") @db.Timestamptz(6)
+  resolvedById   String?            @map("resolved_by") @db.Uuid
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  shift      Shift? @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  resolvedBy User?  @relation("ActionItemResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, dedupeKey], name: "unique_action_item_dedupe_per_tenant")
+  @@index([tenantId])
+  @@index([tenantId, status, severity])
+  @@index([tenantId, type])
+  @@index([tenantId, shiftId])
+  @@index([tenantId, status, createdAt])
+  @@index([shiftId])
+  @@index([resolvedById])
+  @@map("action_items")
 }
 
 model PayrollExport {

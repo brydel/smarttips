@@ -36,3 +36,6 @@ export const EMPLOYEE_PROFILE_KEY = 'employee-profile' as const;
 
 // ── Invitations ──────────────────────────────────────────────────────
 export const INVITATIONS_KEY = 'invitations' as const;
+
+// ── Action inbox (manager) ───────────────────────────────────────────
+export const ACTION_INBOX_KEY = 'action-inbox' as const;
