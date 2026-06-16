@@ -45,7 +45,7 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "pdfmake": "^0.3.9",
-    "pino-http": "^10.3.0",
+    "pino-http": "^11.0.0",
     "resend": "^6.12.4",
     "undici": "^6.25.0",
     "uuid": "^14.0.0",
